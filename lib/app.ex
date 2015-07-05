@@ -1,4 +1,4 @@
-defmodule Propcheck do
+defmodule PropCheck.App do
   use Application
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html

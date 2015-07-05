@@ -15,7 +15,7 @@ defmodule Propcheck.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [applications: [:logger],
-     mod: {Propcheck, []}]
+     mod: {PropCheck.App, []}]
   end
 
   # Dependencies can be Hex packages:
@@ -28,6 +28,8 @@ defmodule Propcheck.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [
+      {:proper, git: "../../erlang/proper/proper"}
+    ]
   end
 end
