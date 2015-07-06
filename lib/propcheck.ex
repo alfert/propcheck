@@ -11,25 +11,25 @@ defmodule PropCheck do
     
     defmacro implies(pre, prop) do
         quote do
-            :proper.implies(unquote(pre), Proper.delay(unquote(prop)))
+            :proper.implies(unquote(pre), PropCheck.delay(unquote(prop)))
         end
     end
 
     defmacro whenfail(action, prop) do
         quote do
-            :proper.whenfail(Proper.delay(unquote(action)), Proper.delay(unquote(prop)))
+            :proper.whenfail(PropCheck.delay(unquote(action)), PropCheck.delay(unquote(prop)))
         end
     end
 
     defmacro trapexit(prop) do
         quote do
-            :proper.trapexit(Proper.delay(unquote(prop)))
+            :proper.trapexit(PropCheck.delay(unquote(prop)))
         end
     end
 
     defmacro timeout(limit, prop) do
         quote do
-            :proper.timeout(unquote(limit), Proper.delay(unquote(prop)))
+            :proper.timeout(unquote(limit), PropCheck.delay(unquote(prop)))
         end
     end
 
@@ -49,7 +49,7 @@ defmodule PropCheck do
 
     defmacro lazy(x) do
         quote do
-            :proper_types.lazy(Proper.delay(unquote(x)))
+            :proper_types.lazy(PropCheck.delay(unquote(x)))
         end
     end
 
@@ -76,7 +76,7 @@ defmodule PropCheck do
 
     defmacro shrink(gen, alt_gens) do
         quote do
-            :proper_types.shrinkwith(Proper.delay(unquote(gen)), Proper.delay(unquote(alt_gens)))
+            :proper_types.shrinkwith(PropCheck.delay(unquote(gen)), PropCheck.delay(unquote(alt_gens)))
         end
     end
 
@@ -88,18 +88,18 @@ defmodule PropCheck do
 
     def run(target), do: run(target, [report: true, output: true])
     def run(target, opts) do
-       Proper.Result.start_link
+       PropCheck.Result.start_link
        on_output =
          fn(msg, args) ->
-            Proper.Result.message(msg, args)
+            PropCheck.Result.message(msg, args)
             opts[:output] && :io.format(msg, args)
             :ok
          end
        module(target, [:long_result, {:on_output, on_output}])
-       {tests, errors} = Proper.Result.status
+       {tests, errors} = PropCheck.Result.status
        passes = length(tests)
        failures = length(errors)
-       Proper.Result.stop
+       PropCheck.Result.stop
        if opts[:report] do
          IO.puts "#{inspect passes} properties, #{inspect failures} failures."
        end
