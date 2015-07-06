@@ -1,8 +1,8 @@
 defmodule PropCheck.Properties do
     defmacro __using__(_) do
         quote do
-            import Proper
-            import Proper.Properties
+            import PropCheck
+            import PropCheck.Properties
             import :proper_types, except: [lazy: 1, to_binary: 1, function: 2]
         end
     end
