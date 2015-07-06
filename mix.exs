@@ -5,6 +5,7 @@ defmodule Propcheck.Mixfile do
     [app: :propcheck,
      version: "0.0.1",
      elixir: "~> 1.0",
+     elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps]
@@ -17,6 +18,11 @@ defmodule Propcheck.Mixfile do
     [applications: [:logger],
      mod: {PropCheck.App, []}]
   end
+
+  # Specifies which paths to compile per environment
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_),     do: ["lib"]
+
 
   # Dependencies can be Hex packages:
   #
