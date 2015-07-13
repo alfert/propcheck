@@ -35,7 +35,9 @@ defmodule Propcheck.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:proper, git: "../../erlang/proper/proper"}
+      # {:proper, git: "../../erlang/proper/proper"}
+      {:proper, github: "manopapad/proper", ref: "fa58f8" } # from 26.05.2015
+      # {:proper, "~> 1.1.0"}
     ]
   end
 end
