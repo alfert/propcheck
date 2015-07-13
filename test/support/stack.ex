@@ -21,7 +21,8 @@ defmodule PropCheck.Test.Stack do
 	def size(s), do: length s
 
 	# Generator for properties of Stacks
-	defp stack(type), do: list(type)
+	def stack(type), do: list(type)
+	# def stack(_), do: :proper_types.native_type(__MODULE__, 'stack(T) :: [T].')
 
 	property "pop(push) = original" do
 		forall {s, x} in {stack(integer), integer} do
