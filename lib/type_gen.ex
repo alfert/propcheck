@@ -80,16 +80,12 @@ defmodule PropCheck.TypeGen do
 			unquote(name)()
 		end
 	end
-	def type_header([{name, _, vars}, _rhs]) when is_atom(name) do
-		quote do 
-			unquote(name)(
-			unquote(vars |> Enum.map(fn({n, _, _}) -> Atom.to_string(n) end) |> Enum.join )
-			)
-		end
+	def type_header([{name, _, vars} = head, _rhs]) when is_atom(name) do
+		head
 	end
 	
 	@doc "Generates a simple body for the type generator function"
-	# TODO: build up an environment of paramters to stop the recursion, if they are used
+	# TODO: build up an environment of parameters to stop the recursion, if they are used
 	def type_body([_lhs, rhs]), do: type_body(rhs)
 	def type_body({:port, _, _}), do: throw "unsupported type port"
 	def type_body({:pid, _, _}), do: throw "unsupported type pid"
