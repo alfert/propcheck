@@ -18,4 +18,11 @@ defmodule PropCheck.Properties do
             def unquote(prop_name)(), unquote(opts)
         end
     end
+
+    def print_mod_as_erlang(mod) when is_atom(mod) do
+        {m, beam, file} = :code.get_object_code(mod)
+        {:ok, {_, [{:abstract_code, {_, ac}}]}} = :beam_lib.chunks(beam, [:abstract_code])
+        ac |> Enum.map(&:erl_pp.form/1) |> List.flatten |> IO.puts
+    end
+    
 end
