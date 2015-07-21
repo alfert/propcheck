@@ -97,9 +97,19 @@ defmodule PropCheck.TypeGen do
 	def type_body({:non_neg_integer, _, _}) do quote do integer(0, :inf) end end
 	def type_body({:pos_integer, _, _}) do quote do integer(1, :inf) end end
 	def type_body({:.., _, [left, right]}) do quote do integer(unquote(left), unquote(right)) end end
+	def type_body({:{}, _, tuple_vars}) do quote do tuple(unquote(tuple_vars)) end end
 	def type_body({:list, _, nil}) do quote do list(any) end end
-	def type_body({:list, _, [type]}) do quote do list(unquote(type_body(type))) end end
-	def type_body([type]) do quote do list(unquote(type_body(type))) end end
+	def type_body({:list, _, [type]}) do 
+		param = type_body type
+		quote do 
+			:proper_types.list(unquote param) 
+		end 
+	end
+	def type_body([type]) do 
+		quote do 
+			:proper_types.list(unquote(type_body(type))) 
+		end 
+	end
 	def type_body(body) do 
 		body_s = "#{inspect body}"
 		quote do 
