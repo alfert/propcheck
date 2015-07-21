@@ -13,4 +13,6 @@ defmodule PropCheck.Test.Types do
 	@type safe_stack(t) :: {pos_integer, list(t)}
 
 	@opaque tree(t) :: :leaf | {:node, t, tree(t), tree(t)}
+
+	@type pair(fst,snd) :: {:pair, fst, snd}
 end
