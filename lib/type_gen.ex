@@ -96,6 +96,7 @@ defmodule PropCheck.TypeGen do
 	def type_body({:integer, _, _}) do quote do integer(:inf, :inf) end end
 	def type_body({:non_neg_integer, _, _}) do quote do integer(0, :inf) end end
 	def type_body({:pos_integer, _, _}) do quote do integer(1, :inf) end end
+	def type_body({:neg_integer, _, _}) do quote do integer(:inf, -1) end end
 	def type_body({:.., _, [left, right]}) do quote do integer(unquote(left), unquote(right)) end end
 	def type_body({:{}, _, tuple_vars}) do quote do tuple(unquote(tuple_vars)) end end
 	def type_body({:list, _, nil}) do quote do list(any) end end
