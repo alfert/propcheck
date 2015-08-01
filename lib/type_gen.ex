@@ -47,11 +47,10 @@ defmodule PropCheck.TypeGen do
 		end
 	end
 	
-	def print_types({kind, {:::, _, [lhs, rhs]}, nil, _env}) when kind in [:type, :opaque, :typep] do
+	def print_types({kind, {:::, _, [lhs, rhs]=t }, nil, _env}) when kind in [:type, :opaque, :typep] do
 		IO.puts "Type definition for #{inspect lhs} ::= #{inspect rhs}"
 	end
-	def print_types(types) when is_list(types) do
-		IO.puts "Types: Got a list with #{length(types)} elements"
+
 	@doc "Generates a `type_debug body(name, args)` containing the type definition before compilation. "
 	def generate_type_debug_fun({kind, {:::, _, [{name, _, args}, _rhs]} = t, nil, _env} = typedef) do
 		a = if args == nil, do: 0, else: length(args)
