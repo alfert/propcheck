@@ -31,9 +31,9 @@ defmodule PropCheck.TypeGen do
 			|> List.flatten
 		types
 			|> Enum.each &PropCheck.TypeGen.print_types/1
-		types 
-			|> Enum.map &convert_type/1
-		# []	
+		(types |> Enum.map &convert_type/1)
+		++
+		(types |> Enum.map &generate_type_debug_fun/1)
 	end
 
 	def defined_types(mod) do
