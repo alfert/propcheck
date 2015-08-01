@@ -11,11 +11,11 @@ defmodule PropCheck.Test.TypeTest do
 	test "create the typedef" do
 		typedef = PropCheck.Test.Types.__type_debug__(:tree, 1) 
 			|> PropCheck.Type.parse_type
-		assert typedef = %PropCheck.Type{}
+		assert %PropCheck.Type{} = typedef
 
 		%PropCheck.Type{name: n, kind: k, params: ps} = typedef
 		assert :tree == n
-		assert :type == k
+		assert :opaque == k
 		assert [:t] == ps
 	end
 	
