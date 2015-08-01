@@ -36,6 +36,10 @@ defmodule PropCheck.TypeGen do
 		(types |> Enum.map &generate_type_debug_fun/1)
 	end
 
+	@doc """
+	Retrieves all types defined in the module `mod` which can be already a beam
+	file or is an open module, i.e. it is currently worked on in the Elixir compiler.
+	"""
 	def defined_types(mod) do
 		if Module.open? mod do
 			IO.puts "Module #{mod} is open"
@@ -43,7 +47,8 @@ defmodule PropCheck.TypeGen do
 				|> Enum.map &(Module.get_attribute(mod,&1)) 
 		else
 			IO.puts "Module #{mod} is closed"
-			[beam: Kernel.Typespec.beam_types(mod), attr: mod.__info__()]
+			[beam: Kernel.Typespec.beam_types(mod), attr: mod.__info__(:attributes)]
+			Kernel.Typespec.beam_types(mod)
 		end
 	end
 	
@@ -62,7 +67,7 @@ defmodule PropCheck.TypeGen do
 			end
 		end
 	end
-	
+
 	@doc "Generates a function for a type definition"
 	def convert_type({:typep, {:::, _, typedef}, nil, _env}) do
 		header = type_header(typedef)
@@ -95,6 +100,7 @@ defmodule PropCheck.TypeGen do
 	
 	@doc "Generates a simple body for the type generator function"
 	# TODO: build up an environment of parameters to stop the recursion, if they are used
+	#       otherwise a nested recursion like safe_stack does not work properly.
 	def type_body([_lhs, rhs]), do: type_body(rhs)
 	def type_body({:port, _, _}), do: throw "unsupported type port"
 	def type_body({:pid, _, _}), do: throw "unsupported type pid"
@@ -120,11 +126,26 @@ defmodule PropCheck.TypeGen do
 			:proper_types.list(unquote(type_body(type))) 
 		end 
 	end
+	# this doesn't work ==> go for proper recursive types, including :{}, :|, :list, :map
+	#
+	# this tuple detection also detects type variables and all not yet implemented type generators
+	# therefore we need to detect these other situations properly, otherwise recursive definitions
+	# do not work. 
+	# IDEA: separate function for parameterized types types, such that access to type variables
+	# properly identified (pair(f,s) is encoded as :{}, where my_int_tuple is a {..}!)
+	def type_body(ts) when is_tuple(ts) do 
+		IO.puts "found a tuple type: #{inspect ts}"
+		types = ts |> :erlang.tuple_to_list 
+			|> Enum.map &(type_body &1)
+		quote do tuple(unquote(types)) end 
+	end
 	def type_body(body) do 
 		body_s = "#{inspect body}"
 		quote do 
 			throw "catch all: no generator available for " <> unquote(body_s) 
 		end 
 	end
+
+
 
 end
