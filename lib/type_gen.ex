@@ -52,6 +52,16 @@ defmodule PropCheck.TypeGen do
 	end
 	def print_types(types) when is_list(types) do
 		IO.puts "Types: Got a list with #{length(types)} elements"
+	@doc "Generates a `type_debug body(name, args)` containing the type definition before compilation. "
+	def generate_type_debug_fun({kind, {:::, _, [{name, _, args}, _rhs]} = t, nil, _env} = typedef) do
+		a = if args == nil, do: 0, else: length(args)
+		t = Macro.escape (typedef)
+		quote do
+			def __type_debug__(unquote(name), unquote(a)) do
+				# {unquote(kind), unquote(t)}
+				unquote(t)
+			end
+		end
 	end
 	
 	@doc "Generates a function for a type definition"
