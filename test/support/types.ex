@@ -15,4 +15,7 @@ defmodule PropCheck.Test.Types do
 	@opaque tree(t) :: :leaf | {:node, t, tree(t), tree(t)}
 
 	@type pair(fst,snd) :: {:pair, fst, snd}
+	@type my_int_tuple :: {integer, integer}
+
+	@type my_map :: %{atom => integer}
 end
