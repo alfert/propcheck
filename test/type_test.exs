@@ -18,7 +18,7 @@ defmodule PropCheck.Test.TypeTest do
 		assert :opaque == k
 		assert [:t] == ps
 
-		IO.inspect e
+		# IO.inspect e
 		%TypeExpr{constructor: :union, args: u_args} = e
 		# Problem: node(t) must be a :ref and not be a :literal
 		cs = u_args |> Enum.map fn %TypeExpr{constructor: c} -> c end
@@ -32,7 +32,7 @@ defmodule PropCheck.Test.TypeTest do
 		assert %PropCheck.Type{} = typedef
 
 		%PropCheck.Type{expr: e} = typedef
-		pre = IO.inspect TypeExpr.preorder e
+		pre = TypeExpr.preorder e # |> IO.inspect
 
 		constructors = (pre |> Enum.map fn %TypeExpr{constructor: c} -> c end)
 		assert [:union, :literal, :tuple, :literal, :var, :ref, :ref] == constructors
