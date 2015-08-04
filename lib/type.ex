@@ -83,6 +83,12 @@ defmodule PropCheck.Type do
 		ps = sub |> Enum.map fn s -> parse_body s, params end
 		%TypeExpr{constructor: :ref, args: [type, ps]}
 	end
+	def parse_body(body, params) when is_tuple(body) do
+		args = body 
+			|> Tuple.to_list 
+			|> Enum.map fn child -> parse_body(child, params) end
+		%TypeExpr{constructor: :tuple, args: args}
+	end
 	def parse_body(body, _params) when not(is_tuple(body)) do
 		%TypeExpr{constructor: :literal, args: [body]}
 	end
