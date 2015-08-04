@@ -29,6 +29,14 @@ defmodule PropCheck.Type do
 		defstruct constructor: :none,
 			args: [] # elements of union, tuple, list or map; or the referenced type or the literal value
 	
+		def preorder(%__MODULE__{args: []} = t), do: [t]
+		def preorder(%__MODULE__{args: a} = t) when not is_list(a), do: [t]
+		def preorder(%__MODULE__{args: a} = t), do: 
+			[t | (a |> Enum.map fn ta -> preorder(ta) end) |> List.flatten] 
+		# this looks strange, but this is an arg value which is not a type expr. 
+		# this is ignored in the pre-order, its value is contained in the type expr above.
+		def preorder(value), do: []
+
 		defimpl Inspect, for: __MODULE__ do
 			import Inspect.Algebra
 

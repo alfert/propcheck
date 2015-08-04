@@ -24,8 +24,18 @@ defmodule PropCheck.Test.TypeTest do
 		cs = u_args |> Enum.map fn %TypeExpr{constructor: c} -> c end
 		assert cs |> Enum.any? &(&1 == :literal) # this is the :leaf part
 		assert cs |> Enum.any? &(&1 == :tuple) # this is the node part
-		
-		
 	end 
 	
+	test "preorder of the tree" do
+		typedef = PropCheck.Test.Types.__type_debug__(:tree, 1) 
+			|> PropCheck.Type.parse_type
+		assert %PropCheck.Type{} = typedef
+
+		%PropCheck.Type{expr: e} = typedef
+		pre = IO.inspect TypeExpr.preorder e
+
+		constructors = (pre |> Enum.map fn %TypeExpr{constructor: c} -> c end)
+		assert [:union, :literal, :tuple, :literal, :var, :ref, :ref] == constructors
+	end
+
 end
