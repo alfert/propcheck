@@ -7,6 +7,10 @@ defmodule PropCheck.Type do
 	@type env :: %{mfa: __MODULE__.t}
 	@type kind_t :: :type | :opaque | :typep | :none
 
+	@predefined_types [:atom, :integer, :pos_number, :neg_number, :non_neg_number, :boolean, :byte, 
+		:char, :number, :char_list, :any, :term, :io_list, :io_data, :module, :mfa, :arity, :port,
+		:node, :timeout, :node, :fun, :binary, :bitstring]
+
 	defstruct name: :none,
 		params: [],
 		kind: :none,
@@ -36,9 +40,32 @@ defmodule PropCheck.Type do
 			nil -> []
 			l -> l |> Enum.map fn({n, _, _}) -> n end
 		end
-		%__MODULE__{name: name, params: params, kind: kind, expr: body}
+		%__MODULE__{name: name, params: params, kind: kind, expr: parse_body(body, params)}
 	end
 	
+	def parse_body({:|, _, children}, params) do
+		args = children |> Enum.map fn(child) -> parse_body(child, params) end
+		%TypeExpr{constructor: :union, args: args}
+	end
+	def parse_body({:{}, _, children}, params) do
+		args = children |> Enum.map fn(child) -> parse_body(child, params) end
+		%TypeExpr{constructor: :tuple, args: args}
+	end
+	def parse_body({type, _, nil}, _params) when type in @predefined_types do
+		%TypeExpr{constructor: :ref, args: [type]}
+	end
+	def parse_body({var, _, nil}, params) when is_atom(var) do
+		true = params |> Enum.member? var
+		%TypeExpr{constructor: :var, args: [var]}
+	end
+	def parse_body({type, _, sub}, params) when is_atom(type) do
+		%TypeExpr{constructor: :ref, args: [sub]}
+	end
+	def parse_body(body, _params) when not(is_tuple(body)) do
+		%TypeExpr{constructor: :literal, args: [body]}
+	end
+	
+
 	@doc "Calculates the list of referenced types"
 	def referenced_types({type_gen, _, l}, params) 
 	when is_list(l) and type_gen in [:.., :{}, :list] do 
@@ -47,7 +74,6 @@ defmodule PropCheck.Type do
 	def referenced_types({:list, _, nil}, params) do [] end
 	def referenced_types(body, params) do
 		[]
-	end
-	
+	end	
 
 end
