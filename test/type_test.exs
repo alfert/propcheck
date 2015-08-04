@@ -51,4 +51,18 @@ defmodule PropCheck.Test.TypeTest do
 		assert [:tuple, :ref, :ref] == constructors
 	end
 
+	test "native lists" do
+		typedef = PropCheck.Test.Types.__type_debug__(:my_list, 1) 
+			|> PropCheck.Type.parse_type
+		assert %PropCheck.Type{} = typedef
+
+		%PropCheck.Type{expr: e, params: [:t]} = typedef
+
+		IO.inspect e
+		constructors = e 
+			|> TypeExpr.preorder 
+			|> Enum.map fn %TypeExpr{constructor: c} -> c end
+		assert [:list, :var] == constructors
+	end
+
 end
