@@ -28,6 +28,17 @@ defmodule PropCheck.Type do
 		@type constructor_t :: :union | :tuple | :list | :map | :ref | :literal | :var | :none
 		defstruct constructor: :none,
 			args: [] # elements of union, tuple, list or map; or the referenced type or the literal value
+	
+		defimpl Inspect, for: __MODULE__ do
+			import Inspect.Algebra
+
+			def inspect(%{constructor: c, args: a}, opts) do
+				surround("%#{TypeExpr}{", 
+					glue(concat("constructor: ", to_doc(c, opts)),
+						concat("args: ", to_doc(a, opts))),
+					"}")
+			end
+		end
 	end
 
 
