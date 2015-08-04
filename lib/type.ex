@@ -72,7 +72,8 @@ defmodule PropCheck.Type do
 		%TypeExpr{constructor: :var, args: [var]}
 	end
 	def parse_body({type, _, sub}, params) when is_atom(type) do
-		%TypeExpr{constructor: :ref, args: [sub]}
+		ps = sub |> Enum.map fn s -> parse_body s, params end
+		%TypeExpr{constructor: :ref, args: [type, ps]}
 	end
 	def parse_body(body, _params) when not(is_tuple(body)) do
 		%TypeExpr{constructor: :literal, args: [body]}
