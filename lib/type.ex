@@ -57,11 +57,11 @@ defmodule PropCheck.Type do
 	end
 	
 	def parse_body({:|, _, children}, params) do
-		args = children |> Enum.map fn(child) -> parse_body(child, params) end
+		args = children |> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :union, args: args}
 	end
 	def parse_body({:{}, _, children}, params) do
-		args = children |> Enum.map fn(child) -> parse_body(child, params) end
+		args = children |> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :tuple, args: args}
 	end
 	def parse_body({type, _, nil}, _params) when type in @predefined_types do
