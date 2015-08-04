@@ -16,6 +16,16 @@ defmodule PropCheck.Type do
 	@type t :: %__MODULE__{name: atom, params: [atom], kind: kind_t, 
 		expr: Macro.t, uses: [atom | mfa]}
 
+	defmodule TypeExpr do
+		@typedoc """
+		Various type constructors, `:ref` denote a reference to an existing type or 
+		parameter, `:literal` means a literal value, in many cases, this will be an atom value.
+		"""	
+		@type constructor_t :: :union | :tuple | :list | :map | :ref | :literal | :var | :none
+		defstruct constructor: :none,
+			args: [] # elements of union, tuple, list or map; or the referenced type or the literal value
+	end
+
 
 	@doc "Takes a type specification as an Elixir AST and returns the type def."
 	@spec parse_type({kind_t, Macro.t, nil, any}) :: t
