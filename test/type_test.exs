@@ -13,10 +13,12 @@ defmodule PropCheck.Test.TypeTest do
 			|> PropCheck.Type.parse_type
 		assert %PropCheck.Type{} = typedef
 
-		%PropCheck.Type{name: n, kind: k, params: ps} = typedef
+		%PropCheck.Type{name: n, kind: k, params: ps, expr: e} = typedef
 		assert :tree == n
 		assert :opaque == k
 		assert [:t] == ps
+
+		IO.inspect e
 	end
 	
 end
