@@ -33,10 +33,12 @@ defmodule PropCheck.Type do
 			import Inspect.Algebra
 
 			def inspect(%{constructor: c, args: a}, opts) do
-				surround("%#{TypeExpr}{", 
-					glue(concat("constructor: ", to_doc(c, opts)),
-						concat("args: ", to_doc(a, opts))),
-					"}")
+				surround_many("%#{TypeExpr}{", 
+					[constructor: c, args: a],
+					"}",
+					%Inspect.Opts{limit: :infinity},
+					fn {f, v}, o -> group glue(concat(Atom.to_string(f), ":"), to_doc(v, opts)) end
+				)
 			end
 		end
 	end
