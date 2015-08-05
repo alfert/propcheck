@@ -17,5 +17,7 @@ defmodule PropCheck.Test.Types do
 	@type pair(fst,snd) :: {:pair, fst, snd}
 	@type my_int_tuple :: {integer, integer}
 
-	@type my_map :: %{atom => integer}
+	@type my_map :: %{atom => integer, integer => boolean}
+
+	@type my_struct :: %Types{name: atom, args: [atom]}
 end
