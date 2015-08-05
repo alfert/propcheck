@@ -7,7 +7,7 @@ defmodule PropCheck.Type do
 	@type env :: %{mfa: __MODULE__.t}
 	@type kind_t :: :type | :opaque | :typep | :none
 
-	@predefined_types [:atom, :integer, :pos_number, :neg_number, :non_neg_number, :boolean, :byte, 
+	@predefined_types [:atom, :integer, :pos_integer, :neg_integer, :non_neg_integer, :boolean, :byte, 
 		:char, :number, :char_list, :any, :term, :io_list, :io_data, :module, :mfa, :arity, :port,
 		:node, :timeout, :node, :fun, :binary, :bitstring]
 
