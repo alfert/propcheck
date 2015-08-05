@@ -19,5 +19,6 @@ defmodule PropCheck.Test.Types do
 
 	@type my_map :: %{atom => integer, integer => boolean}
 
-	@type my_struct :: %Types{name: atom, args: [atom]}
+	defstruct name: :unknown, args: [] 
+	@type my_struct :: %{name: atom, args: [atom]}
 end
