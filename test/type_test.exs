@@ -58,11 +58,25 @@ defmodule PropCheck.Test.TypeTest do
 
 		%PropCheck.Type{expr: e, params: [:t]} = typedef
 
-		IO.inspect e
+		# IO.inspect e
 		constructors = e 
 			|> TypeExpr.preorder 
 			|> Enum.map fn %TypeExpr{constructor: c} -> c end
 		assert [:list, :var] == constructors
+	end
+
+	test "explicit lists" do
+		typedef = PropCheck.Test.Types.__type_debug__(:safe_stack, 1) 
+			|> PropCheck.Type.parse_type
+		assert %PropCheck.Type{} = typedef
+
+		%PropCheck.Type{expr: e, params: [:t]} = typedef
+
+		IO.inspect e
+		constructors = e 
+			|> TypeExpr.preorder 
+			|> Enum.map fn %TypeExpr{constructor: c} -> c end
+		assert [:tuple, :ref, :list, :var] == constructors
 	end
 
 end

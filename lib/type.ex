@@ -79,6 +79,11 @@ defmodule PropCheck.Type do
 		true = params |> Enum.member? var
 		%TypeExpr{constructor: :var, args: [var]}
 	end
+	# handle list(t) different because list is predefined type
+	def parse_body({:list, _, [subtype]}, params) do
+		p = parse_body subtype, params
+		%TypeExpr{constructor: :list, args: [p]}
+	end
 	def parse_body({type, _, sub}, params) when is_atom(type) do
 		ps = sub |> Enum.map fn s -> parse_body s, params end
 		%TypeExpr{constructor: :ref, args: [type, ps]}
