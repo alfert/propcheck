@@ -21,4 +21,8 @@ defmodule PropCheck.Test.Types do
 
 	defstruct name: :unknown, args: [] 
 	@type my_struct :: %{name: atom, args: [atom]}
+
+	@type any_fun :: (... -> any)
+	@type side_effect :: (() -> any)
+	@type call_back :: (atom, boolean -> [atom])
 end
