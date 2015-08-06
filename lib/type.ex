@@ -25,7 +25,7 @@ defmodule PropCheck.Type do
 		Various type constructors, `:ref` denote a reference to an existing type or 
 		parameter, `:literal` means a literal value, in many cases, this will be an atom value.
 		"""	
-		@type constructor_t :: :union | :tuple | :list | :map | :ref | :literal | :var | :none
+		@type constructor_t :: :union | :tuple | :list | :map | :ref | :range | :literal | :var | :none
 		defstruct constructor: :none,
 			args: [] # elements of union, tuple, list or map; or the referenced type or the literal value
 	
@@ -75,6 +75,10 @@ defmodule PropCheck.Type do
 	def parse_body({:%{}, _, children}, params) do
 		args = children |> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :map, args: args}
+	end
+	def parse_body({:.., _, children}, params) do
+		args = children |> Enum.map fn child -> parse_body(child, params) end
+		%TypeExpr{constructor: :range, args: args}
 	end
 	def parse_body({type, _, nil}, _params) when type in @predefined_types do
 		%TypeExpr{constructor: :ref, args: [type]}
