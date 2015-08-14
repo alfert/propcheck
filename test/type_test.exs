@@ -38,6 +38,22 @@ defmodule PropCheck.Test.TypeTest do
 		assert [:union, :literal, :tuple, :literal, :var, :ref, :ref] == constructors
 	end
 
+	test "simple types" do
+		typedef = PropCheck.Test.Types.__type_debug__(:my_numbers, 0) 
+			|> PropCheck.Type.parse_type
+		assert %PropCheck.Type{} = typedef
+
+		%PropCheck.Type{expr: e, params: []} = typedef
+		
+		IO.inspect typedef
+
+		constructors = e 
+			|> TypeExpr.preorder 
+			|> Enum.map fn %TypeExpr{constructor: c} -> c end
+		assert [:ref] == constructors
+		assert %TypeExpr{constructor: :ref, args: [:integer]} = e
+	end
+
 	test "native tuples" do
 		typedef = PropCheck.Test.Types.__type_debug__(:my_int_tuple, 0) 
 			|> PropCheck.Type.parse_type
@@ -141,7 +157,7 @@ defmodule PropCheck.Test.TypeTest do
 		assert %PropCheck.Type{} = typedef
 
 		%PropCheck.Type{expr: e, params: []} = typedef
-		IO.inspect e
+		# IO.inspect e
 
 		constructors = e 
 			|> TypeExpr.preorder 
