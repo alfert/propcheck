@@ -11,6 +11,7 @@ defmodule PropCheck.Test.Types do
 
 	@type my_list(t) :: [t]
 	@type safe_stack(t) :: {pos_integer, list(t)}
+	@type my_non_empty_list(t) :: [t, ...]
 
 	@opaque tree(t) :: :leaf | {:node, t, tree(t), tree(t)}
 

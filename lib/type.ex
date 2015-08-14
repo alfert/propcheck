@@ -87,7 +87,7 @@ defmodule PropCheck.Type do
 		args = children |> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :fun, args: args}
 	end
-	# "..." is any arity of a function. 
+	# "..." is any arity of a function or a non-empty list. 
 	def parse_body({:..., _, nil}, _params) do
 		%TypeExpr{constructor: :literal, args: [:...]}
 	end

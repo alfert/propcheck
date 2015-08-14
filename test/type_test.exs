@@ -45,7 +45,7 @@ defmodule PropCheck.Test.TypeTest do
 
 		%PropCheck.Type{expr: e, params: []} = typedef
 		
-		IO.inspect typedef
+		# IO.inspect typedef
 
 		constructors = e 
 			|> TypeExpr.preorder 
@@ -93,6 +93,20 @@ defmodule PropCheck.Test.TypeTest do
 			|> TypeExpr.preorder 
 			|> Enum.map fn %TypeExpr{constructor: c} -> c end
 		assert [:tuple, :ref, :list, :var] == constructors
+	end
+
+	test "nonempty lists" do
+		typedef = PropCheck.Test.Types.__type_debug__(:my_non_empty_list, 1) 
+			|> PropCheck.Type.parse_type
+		assert %PropCheck.Type{} = typedef
+
+		%PropCheck.Type{expr: e, params: [:t]} = typedef
+
+		IO.inspect e
+		constructors = e 
+			|> TypeExpr.preorder 
+			|> Enum.map fn %TypeExpr{constructor: c} -> c end
+		assert [:list, :var, :literal] == constructors
 	end
 
 	test "maps" do
