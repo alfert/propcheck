@@ -36,7 +36,7 @@ defmodule PropCheck.Type do
 			[t | (a |> Enum.map fn ta -> preorder(ta) end) |> List.flatten] 
 		# this looks strange, but this is an arg value which is not a type expr. 
 		# this is ignored in the pre-order, its value is contained in the type expr above.
-		def preorder(value), do: []
+		def preorder(_value), do: []
 
 		defimpl Inspect, for: __MODULE__ do
 			import Inspect.Algebra
@@ -46,7 +46,7 @@ defmodule PropCheck.Type do
 					[constructor: c, args: a],
 					"}",
 					%Inspect.Opts{limit: :infinity},
-					fn {f, v}, o -> group glue(concat(Atom.to_string(f), ":"), to_doc(v, opts)) end
+					fn {f, v}, _o -> group glue(concat(Atom.to_string(f), ":"), to_doc(v, opts)) end
 				)
 			end
 		end
@@ -55,14 +55,14 @@ defmodule PropCheck.Type do
 
 	@doc "Takes a type specification as an Elixir AST and returns the type def."
 	@spec parse_type({kind_t, Macro.t, nil, any}) :: t
-	def parse_type({kind, {:::, _, [header, body] = typedef}, nil, _env}) 
+	def parse_type({kind, {:::, _, [header, body] = _typedef}, nil, _env}) 
 	when kind in [:type, :opaque, :typep] do
 		{name, _, ps} = header
 		params = case ps do
 			nil -> []
 			l -> l |> Enum.map fn({n, _, _}) -> n end
 		end
-		IO.puts "Type body is: #{inspect body}"
+		# IO.puts "Type body is: #{inspect body}"
 		%__MODULE__{name: name, params: params, kind: kind, expr: parse_body(body, params)}
 	end
 	
@@ -87,7 +87,8 @@ defmodule PropCheck.Type do
 		args = children |> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :fun, args: args}
 	end
-	def parse_body({:..., _, nil}, params) do
+	# "..." is any arity of a function. 
+	def parse_body({:..., _, nil}, _params) do
 		%TypeExpr{constructor: :literal, args: [:...]}
 	end
 	def parse_body({type, _, nil}, _params) when type in @predefined_types do
