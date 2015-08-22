@@ -18,18 +18,22 @@ defmodule PropCheck.Type do
 		uses: []
 
 	@type t :: %__MODULE__{name: atom, params: [atom], kind: kind_t, 
-		expr: Macro.t, uses: [atom | mfa]}
+		expr: TypeExpr.t, uses: [atom | mfa]}
 
 	defmodule TypeExpr do
 		@typedoc """
 		Various type constructors, `:ref` denote a reference to an existing type or 
 		parameter, `:literal` means a literal value, in many cases, this will be an atom value.
+
+		Nonempty lists are encoded like a list, but have a second type parameter, which is the
+		literal `:...`. 
 		"""	
 		@type constructor_t :: :union | :tuple | :list | :map | :ref | :range | :fun |
 			:literal | :var | :none
 		defstruct constructor: :none,
 			args: [] # elements of union, tuple, list or map; or the referenced type or the literal value
 	
+		@type t :: %__MODULE__{constructor: constructor_t, args: [Macro.t | t]}
 		def preorder(%__MODULE__{args: []} = t), do: [t]
 		def preorder(%__MODULE__{args: a} = t) when not is_list(a), do: [t]
 		def preorder(%__MODULE__{args: a} = t), do: 
@@ -66,6 +70,7 @@ defmodule PropCheck.Type do
 		%__MODULE__{name: name, params: params, kind: kind, expr: parse_body(body, params)}
 	end
 	
+	@spec parse_body(Macro.t, [atom]) :: t
 	def parse_body({:|, _, children}, params) do
 		args = children |> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :union, args: args}
