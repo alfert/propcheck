@@ -34,6 +34,8 @@ defmodule PropCheck.TypeGen do
 		(types |> Enum.map &convert_type/1)
 		++
 		(types |> Enum.map &generate_type_debug_fun/1)
+		++
+		[(types |> generate_all_types_debug_fun)]
 	end
 
 	@doc """
@@ -59,7 +61,7 @@ defmodule PropCheck.TypeGen do
 	@doc "Generates a `type_debug body(name, args)` containing the type definition before compilation. "
 	def generate_type_debug_fun({kind, {:::, _, [{name, _, args}, _rhs]} = t, nil, _env} = typedef) do
 		a = if args == nil, do: 0, else: length(args)
-		t = Macro.escape (typedef)
+		t = Macro.escape(typedef)
 		quote do
 			def __type_debug__(unquote(name), unquote(a)) do
 				# {unquote(kind), unquote(t)}
@@ -67,6 +69,14 @@ defmodule PropCheck.TypeGen do
 			end
 		end
 	end
+
+	def generate_all_types_debug_fun(types) do
+		ts = Macro.escape(types)
+		quote do
+			def __type_debug__(), do: unquote(ts) 
+		end
+	end
+	
 
 	@doc "Generates a function for a type definition"
 	def convert_type({:typep, {:::, _, typedef}, nil, _env}) do
