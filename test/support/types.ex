@@ -26,4 +26,9 @@ defmodule PropCheck.Test.Types do
 	@type any_fun :: (... -> any)
 	@type side_effect :: (() -> any)
 	@type call_back :: (atom, boolean -> [atom])
+
+	# @type empty_bits :: <<>>
+	# @type my_3_bits :: << _ :: 3 >>
+	# @type any_bits :: << _ :: 1,  _ :: _ * 8 >>
+	# @tpye my_bitstring_of_bytes :: << _ :: _ * 8 >>
 end
