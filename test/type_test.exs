@@ -177,6 +177,17 @@ defmodule PropCheck.Test.TypeTest do
 			|> TypeExpr.preorder 
 			|> Enum.map fn %TypeExpr{constructor: c} -> c end
 		assert [:fun, :list, :literal, :ref] == constructors
+	end
 
+	test "environment construction" do
+		mod = PropCheck.Test.Types
+		types = PropCheck.Test.Types.__type_debug__()
+		assert length(types) > 0
+
+		env = PropCheck.Type.create_environment(types, mod)
+
+		assert env |> Dict.has_key? {mod, :any_fun, 0}
+		assert env |> Dict.has_key? {mod, :my_non_empty_list, 1}
+		assert env |> Dict.has_key? {mod, :safe_stack, 1}
 	end
 end

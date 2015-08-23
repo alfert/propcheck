@@ -56,6 +56,19 @@ defmodule PropCheck.Type do
 		end
 	end
 
+	@doc """
+	Creates an environment of named types for a module. Expects as input the list of types
+	of a module. 
+	"""
+	@spec create_environment([Macro.t], atom) :: env
+	def create_environment(types, mod) do
+		types 
+			|> Stream.map(&parse_type/1)
+			|> Stream.map(fn %__MODULE__{name: n, params: p} = t -> {{mod, n, length(p)}, t} end)
+			|> Enum.into %{}
+	end
+	
+
 
 	@doc "Takes a type specification as an Elixir AST and returns the type def."
 	@spec parse_type({kind_t, Macro.t, nil, any}) :: t
