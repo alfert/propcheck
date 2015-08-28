@@ -1,6 +1,8 @@
 defmodule PropCheck.Test.TypeTest do
 	use ExUnit.Case
 	alias PropCheck.Type.TypeExpr
+	alias PropCheck.Type
+
 	test "all types available" do
 		types = PropCheck.Test.Types
 			|> PropCheck.TypeGen.defined_types
@@ -189,5 +191,27 @@ defmodule PropCheck.Test.TypeTest do
 		assert env |> Dict.has_key? {mod, :any_fun, 0}
 		assert env |> Dict.has_key? {mod, :my_non_empty_list, 1}
 		assert env |> Dict.has_key? {mod, :safe_stack, 1}
+	end
+
+	test "check non-recursive types" do
+		mod = PropCheck.Test.Types
+		types = PropCheck.Test.Types.__type_debug__()
+		assert length(types) > 0
+		env = Type.create_environment(types, mod)
+
+	 	refute Type.is_recursive({mod, :my_numbers, 0}, env)
+	 	refute Type.is_recursive({mod, :yesno, 0}, env)
+	 	refute Type.is_recursive({mod, :my_list, 1}, env)
+	 	refute Type.is_recursive({mod, :safe_stack, 1}, env)
+	end
+
+	test "check recursive types" do
+		mod = PropCheck.Test.Types
+		types = PropCheck.Test.Types.__type_debug__()
+		assert length(types) > 0
+		env = Type.create_environment(types, mod)
+
+	 	assert Type.is_recursive({mod, :tree, 1}, env)
+	 	# wir brauchen was anderes, das in den parameter rekursive ist
 	end
 end
