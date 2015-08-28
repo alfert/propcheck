@@ -13,11 +13,12 @@ defmodule PropCheck.Type do
 
 	defstruct name: :none,
 		params: [],
+		mod: :none,
 		kind: :none,
 		expr: nil,
 		uses: []
 
-	@type t :: %__MODULE__{name: atom, params: [atom], kind: kind_t, 
+	@type t :: %__MODULE__{name: atom, params: [atom], mod: atom, kind: kind_t, 
 		expr: TypeExpr.t, uses: [atom | mfa]}
 
 	defmodule TypeExpr do
@@ -83,6 +84,7 @@ defmodule PropCheck.Type do
 		%__MODULE__{name: name, params: params, kind: kind, expr: parse_body(body, params)}
 	end
 	
+	@doc "Parse the body of a type spec as an Elixir AST and returns the `TypeExp`"
 	@spec parse_body(Macro.t, [atom]) :: t
 	def parse_body({:|, _, children}, params) do
 		args = children |> Enum.map fn child -> parse_body(child, params) end
@@ -150,5 +152,65 @@ defmodule PropCheck.Type do
 	def referenced_types(body, params) do
 		[]
 	end	
+
+	@doc "Analyzes if the type definition is recursive"
+	@spec is_recursive(mfa, env ) :: boolean
+	def is_recursive({m, f, a} = t, env) do
+		# ensure that t is defined in env, otherwise we cannot check anything
+		{:ok, type} = env |> Dict.fetch(t)
+		%__MODULE__{} = type
+		is_recursive(t, type, env)
+	end
+	def is_recursive(mfa, %__MODULE__{expr: expr, params: ps}, env) do
+		# add all parameters to the environment. We use a TypeExpr for it
+		# but what is the true reason for this?
+		new_env = ps 
+			|> Stream.map(fn p -> 
+				t = %TypeExpr{constructor: :var, args: [p]} 
+				{t, t}
+			end)
+			|> Enum.into(env)
+		# 	|> IO.inspect
+		# IO.puts "OK, new_env is there, now the expressions!"
+		is_recursive(mfa, expr, new_env)
+	end
+
+	@doc "Analyzes of the type expression for `mfa` is recursive"
+	@spec is_recursive(mfa, TypeExpr.t, env) :: boolean
+	def is_recursive(_mfa, %TypeExpr{constructor: con}, _env) when 
+		con in [:literal, :range], do: false
+	def is_recursive(_mfa, %TypeExpr{constructor: :var}, _env), do: false
+	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [type]}, _env) 
+		when type in @predefined_types, do: false
+	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [type]}, env) do
+		# type is not predefined ==> it must existent in env, so we can look deeper into it.
+		case type do
+			^mfa -> true
+			_ -> # anything other must be present in the environment
+				{:ok, t} = env |> Dict.fetch(type)
+				is_recursive(mfa, t, env)
+		end
+	end
+	def is_recursive(mfa, %TypeExpr{constructor: con, args: args}, env) 
+			when con in  [:union, :tuple, :list, :map] do
+		args |> Enum.any? fn t -> is_recursive(mfa, t, env) end
+	end
+	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [t | args]} = type, env) do
+		case match_type(mfa, t) do 
+			true -> true
+			_ -> args |> Enum.any? fn ta -> is_recursive(mfa, ta, env) end
+		end
+	end
+	
+
+	def match_type(mfa1, mfa2) when mfa1 == mfa2, do: true
+	def match_type({_m, f1, _a}, f2) when f1 == f2, do: true
+	def match_type(_, _), do: false
+			
+
+	def body_for_type(%TypeExpr{constructor: con, args: args}) do
+		:ok	
+	end
+	
 
 end
