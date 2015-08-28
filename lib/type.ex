@@ -114,9 +114,11 @@ defmodule PropCheck.Type do
 	def parse_body({type, _, nil}, _params) when type in @predefined_types do
 		%TypeExpr{constructor: :ref, args: [type]}
 	end
-	def parse_body({var, _, nil}, params) when is_atom(var) do
-		true = params |> Enum.member? var
-		%TypeExpr{constructor: :var, args: [var]}
+	def parse_body({t, _, nil}, params) when is_atom(t) do
+		case params |> Enum.member? t do
+			true -> %TypeExpr{constructor: :var, args: [t]}
+			_ -> %TypeExpr{constructor: :ref, args: [t]}
+		end
 	end
 	# handle list(t) different because list is predefined type
 	def parse_body({:list, _, [subtype]}, params) do
