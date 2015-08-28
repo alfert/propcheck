@@ -26,9 +26,22 @@ defmodule PropCheck.Test.Types do
 	@type any_fun :: (... -> any)
 	@type side_effect :: (() -> any)
 	@type call_back :: (atom, boolean -> [atom])
+	
+	# mutual recursive types from the "Proper Types" paper
+	@type t_nat :: non_neg_integer 
+				| {:+, t_nat, t_nat}
+				| {:if, t_cond, t_nat, t_nat}
+				| {:from_bits, t_bits}
+	@type t_cond :: {:=, t_nat, t_nat}
+	 			| {:=, t_real, t_real}
+	@type t_real :: {:from_nat, t_nat}
+				| {:+, t_real, t_real}
+	@type t_bits :: {:from_nat, t_nat}
+				| {:concat, [t_bits | t_nat]}
 
 	# @type empty_bits :: <<>>
-	# @type my_3_bits :: << _ :: 3 >>
+	#@type my_3_bits :: << _ :: 3 >>
+	#@type my_bitstring_of_bytes :: << _ :: _ * 8 >>
+	# Does this type makes sense at all? It does not compile!
 	# @type any_bits :: << _ :: 1,  _ :: _ * 8 >>
-	# @tpye my_bitstring_of_bytes :: << _ :: _ * 8 >>
 end
