@@ -151,14 +151,14 @@ defmodule PropCheck.Type do
 	when is_list(l) and type_gen in [:.., :{}, :list] do 
 		l |> Enum.map(&(referenced_types(&1, params))) |> List.flatten
 	end
-	def referenced_types({:list, _, nil}, params) do [] end
-	def referenced_types(body, params) do
+	def referenced_types({:list, _, nil}, _params) do [] end
+	def referenced_types(_body, _params) do
 		[]
 	end	
 
 	@doc "Analyzes if the type definition is recursive"
 	@spec is_recursive(mfa, env ) :: boolean
-	def is_recursive({m, f, a} = t, env) do
+	def is_recursive({_m, _f, _a} = t, env) do
 		# ensure that t is defined in env, otherwise we cannot check anything
 		{:ok, type} = env |> Dict.fetch(t)
 		%__MODULE__{} = type
@@ -183,7 +183,7 @@ defmodule PropCheck.Type do
 	def is_recursive(_mfa, %TypeExpr{constructor: con}, _env) when 
 		con in [:literal, :range], do: false
 	def is_recursive(_mfa, %TypeExpr{constructor: :var}, _env), do: false
-	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [type]}, _env) 
+	def is_recursive(_mfa, %TypeExpr{constructor: :ref, args: [type]}, _env) 
 		when type in @predefined_types, do: false
 	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [type]}, env) do
 		# type is not predefined ==> it must existent in env, so we can look deeper into it.
@@ -200,7 +200,7 @@ defmodule PropCheck.Type do
 			when con in  [:union, :tuple, :list, :map] do
 		args |> Enum.any? fn t -> is_recursive(mfa, t, env) end
 	end
-	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [t | args]} = type, env) do
+	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [t | args]}, env) do
 		case match_type(mfa, t) do 
 			true -> true
 			_ -> args |> Enum.any? fn ta -> is_recursive(mfa, ta, env) end
@@ -243,8 +243,11 @@ defmodule PropCheck.Type do
 		when t in @unsupported_types, do: throw "unsupported type port"
 	def body_for_type(%TypeExpr{constructor: :ref, args: [t]}) 
 		when t in @predefined_types, do: body_for_predefined_type(t)
-	def body_for_type(%TypeExpr{constructor: con, args: args}) do
-		:ok	
+	def body_for_type(%TypeExpr{constructor: _con, args: _args} = t) do
+		t_msg = inspect t
+		quote do
+			throw "Unimplemented generator for type " <> unquote(t_msg)
+		end
 	end
 	
 	def body_for_predefined_type(:atom) do quote do atom end end
@@ -271,6 +274,6 @@ defmodule PropCheck.Type do
 	def body_for_predefined_type({:.., _, [left, right]}) do quote do integer(unquote(left), unquote(right)) end end
 	def body_for_predefined_type({:{}, _, tuple_vars}) do quote do tuple(unquote(tuple_vars)) end end
 	def body_for_predefined_type({:list, _, nil}) do quote do list(any) end end
-	def body_for_predefined_type({:list, _, [type]}) do :ok end
+	def body_for_predefined_type({:list, _, [_type]}) do :ok end
 
 end
