@@ -250,7 +250,7 @@ defmodule PropCheck.Type do
 	def body_for_type(%TypeExpr{constructor: :ref, args: [t]})
 		when t in @unsupported_types, do: throw "unsupported type port"
 	def body_for_type(%TypeExpr{constructor: :ref, args: [t]}) 
-		when t in @predefined_types, do: body_for_type(t)
+		when t in @predefined_types, do: body_for_predefined_type(t)
 	def body_for_type(%TypeExpr{constructor: con, args: args}) do
 		:ok	
 	end
