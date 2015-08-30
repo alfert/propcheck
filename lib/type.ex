@@ -9,7 +9,8 @@ defmodule PropCheck.Type do
 
 	@predefined_types [:atom, :integer, :pos_integer, :neg_integer, :non_neg_integer, :boolean, :byte, 
 		:char, :number, :char_list, :any, :term, :io_list, :io_data, :module, :mfa, :arity, :port,
-		:node, :timeout, :node, :fun, :binary, :bitstring]
+		:node, :timeout, :fun, :binary, :bitstring]
+	@unsupported_types [:port, :node, :reference, :module, :mfa]
 
 	defstruct name: :none,
 		params: [],
@@ -189,6 +190,8 @@ defmodule PropCheck.Type do
 		case type do
 			^mfa -> true
 			_ -> # anything other must be present in the environment
+				#
+				# Hmm, what about types of other modules (=mfa) or parameterized types?
 				{:ok, t} = env |> Dict.fetch(type)
 				is_recursive(mfa, t, env)
 		end
@@ -210,9 +213,72 @@ defmodule PropCheck.Type do
 	def match_type(_, _), do: false
 			
 
+	@spec type_generators(env) :: Macro.t
+	def type_generators(env) do
+		env
+			|> Enum.map(fn {mfa, type} -> type_generator(mfa, type) end)
+	end
+	
+	def type_generator(mfa, %__MODULE__{expr: type, params: ps, kind: :typep}) do
+		header = header_for_type(mfa, ps)
+		body = body_for_type(type)
+		quote do
+			defp unquote(header) do
+				unquote(body)
+			end
+		end
+	end
+	def type_generator(mfa, %__MODULE__{expr: type, params: ps}) do
+		header = header_for_type(mfa, ps)
+		body = body_for_type(type)
+		quote do
+			def unquote(header) do
+				unquote(body)
+			end
+		end
+	end
+	
+	@doc "Generates the AST for a function head."
+	def header_for_type({m, f, a}, ps) when length(ps) == a do
+		[{
+			f, [context: m], 
+			{ps |> Enum.map(fn p -> {p, [], [m]} end)}
+		}]
+	end
+	
+
+	def body_for_type(%TypeExpr{constructor: :ref, args: [t]})
+		when t in @unsupported_types, do: throw "unsupported type port"
+	def body_for_type(%TypeExpr{constructor: :ref, args: [t]}) 
+		when t in @predefined_types, do: body_for_type(t)
 	def body_for_type(%TypeExpr{constructor: con, args: args}) do
 		:ok	
 	end
 	
+	def body_for_predefined_type(:atom) do quote do atom end end
+	def body_for_predefined_type(:any) do quote do any end end
+	def body_for_predefined_type(:term) do quote do term end end
+	def body_for_predefined_type(:float) do quote do float(:inf, :inf) end end
+	def body_for_predefined_type(:integer) do quote do integer(:inf, :inf) end end
+	def body_for_predefined_type(:non_neg_integer) do quote do integer(0, :inf) end end
+	def body_for_predefined_type(:pos_integer) do quote do integer(1, :inf) end end
+	def body_for_predefined_type(:neg_integer) do quote do integer(:inf, -1) end end
+	def body_for_predefined_type(:byte) do quote do integer(0, 255) end end
+	def body_for_predefined_type(:arity) do quote do integer(0, 255) end end
+	def body_for_predefined_type(:boolean) do quote do boolean end end
+	def body_for_predefined_type(:char) do quote do char end end
+	def body_for_predefined_type(:number) do quote do number end end
+	def body_for_predefined_type(:char_list) do quote do char_list end end
+	def body_for_predefined_type(:io_list) do quote do io_list end end
+	def body_for_predefined_type(:io_data) do quote do io_data end end
+	def body_for_predefined_type(:timeout) do quote do timeout end end
+	def body_for_predefined_type(:fun) do quote do fun end end
+	def body_for_predefined_type(:binary) do quote do binary end end
+	def body_for_predefined_type(:bitstring) do quote do bitstring end end
+
+	def body_for_predefined_type({:.., _, [left, right]}) do quote do integer(unquote(left), unquote(right)) end end
+	def body_for_predefined_type({:{}, _, tuple_vars}) do quote do tuple(unquote(tuple_vars)) end end
+	def body_for_predefined_type({:list, _, nil}) do quote do list(any) end end
+	def body_for_predefined_type({:list, _, [type]}) do :ok end
 
 end
