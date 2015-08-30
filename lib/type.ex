@@ -243,6 +243,12 @@ defmodule PropCheck.Type do
 		when t in @unsupported_types, do: throw "unsupported type port"
 	def body_for_type(%TypeExpr{constructor: :ref, args: [t]}) 
 		when t in @predefined_types, do: body_for_predefined_type(t)
+	def body_for_type(%TypeExpr{constructor: list, args: [p]}) do
+		%TypeExpr{constructor: :var, args: [t]} = p
+		quote do
+			list(unquote(t))
+		end
+	end
 	def body_for_type(%TypeExpr{constructor: _con, args: _args} = t) do
 		t_msg = inspect t
 		quote do
