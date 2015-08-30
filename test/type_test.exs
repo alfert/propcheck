@@ -234,4 +234,13 @@ defmodule PropCheck.Test.TypeTest do
 		ast = Type.type_generator(type_mfa, env |> Dict.get(type_mfa))
 	end
 
+	test "all to be generated functions are there" do
+		mod = PropCheck.Test.Types
+		types = PropCheck.Test.Types.__type_debug__()
+		assert length(types) > 0
+		env = Type.create_environment(types, mod)
+
+		mod.my_numbers()
+	end
+
 end
