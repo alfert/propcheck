@@ -1,6 +1,6 @@
 defmodule PropCheck.Test.Stack do
-	use PropCheck.Properties
-	# muse PropCheck.TypeGen
+	#use PropCheck.Properties
+	use PropCheck.TypeGen
 
 	@opaque stack(t) :: [t] # when t: var
 
@@ -23,7 +23,7 @@ defmodule PropCheck.Test.Stack do
 
 	# Generator for properties of Stacks
 	# def stack(type), do: list(type)
-	def stack(t), do: :proper_types.native_type(__MODULE__, '[t]')
+	# def stack(t), do: :proper_types.native_type(__MODULE__, '[t]')
 
 	property "pop(push) = original" do
 		forall {s, x} in {stack(integer), integer} do
