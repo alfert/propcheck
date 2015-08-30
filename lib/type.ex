@@ -219,31 +219,23 @@ defmodule PropCheck.Type do
 			|> Enum.map(fn {mfa, type} -> type_generator(mfa, type) end)
 	end
 	
-	def type_generator(mfa, %__MODULE__{expr: type, params: ps, kind: :typep}) do
+	def type_generator(mfa, %__MODULE__{expr: type, params: ps, kind: kind}) do
 		header = header_for_type(mfa, ps)
 		body = body_for_type(type)
-		quote do
-			defp header do
-				unquote(body)
-			end
-		end
-	end
-	def type_generator(mfa, %__MODULE__{expr: type, params: ps}) do
-		header = header_for_type(mfa, ps)
-		body = body_for_type(type)
-		quote do
-			def header do
-				unquote(body)
-			end
-		end
+		d = if (kind == :typep) do :defp else :def end
+		{d, [context: Elixir, import: Kernel], 
+			[header, [do: body]]}
 	end
 	
 	@doc "Generates the AST for a function head."
 	def header_for_type({m, f, a}, ps) when length(ps) == a do
-		[{
+		{
 			f, [context: m], 
-			{ps |> Enum.map(fn p -> {p, [], [m]} end)}
-		}]
+			if (ps == []) do nil
+				else
+				 ps |> Enum.map(fn p -> {p, [], m} end)
+			end
+		}
 	end
 	
 
