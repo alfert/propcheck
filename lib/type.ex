@@ -223,7 +223,7 @@ defmodule PropCheck.Type do
 		header = header_for_type(mfa, ps)
 		body = body_for_type(type)
 		quote do
-			defp unquote(header) do
+			defp header do
 				unquote(body)
 			end
 		end
@@ -232,7 +232,7 @@ defmodule PropCheck.Type do
 		header = header_for_type(mfa, ps)
 		body = body_for_type(type)
 		quote do
-			def unquote(header) do
+			def header do
 				unquote(body)
 			end
 		end
