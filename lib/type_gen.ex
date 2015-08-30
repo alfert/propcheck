@@ -11,6 +11,7 @@ defmodule PropCheck.TypeGen do
 	for adding type generator functions during compilation, the latter is used for inspecting
 	and generating functions for types in a remote defined module (e.g. from the the Standard lib)
 	"""
+	alias PropCheck.Type
 
 	defmacro __using__(_options) do
 		quote do
@@ -31,7 +32,8 @@ defmodule PropCheck.TypeGen do
 			|> List.flatten
 		types
 			|> Enum.each &PropCheck.TypeGen.print_types/1
-		(types |> Enum.map &convert_type/1)
+		#(types |> Enum.map &convert_type/1)
+		(Type.create_environment(types, env.module) |> Type.type_generators )
 		++
 		(types |> Enum.map &generate_type_debug_fun/1)
 		++
