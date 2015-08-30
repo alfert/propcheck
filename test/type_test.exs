@@ -222,4 +222,15 @@ defmodule PropCheck.Test.TypeTest do
 
 	 	assert Type.is_recursive({mod, :t_nat, 0}, env)
 	end
+
+	test "simple type generator" do
+		mod = PropCheck.Test.Types
+		types = PropCheck.Test.Types.__type_debug__()
+		assert length(types) > 0
+		env = Type.create_environment(types, mod)
+
+		type_mfa = {mod, :my_numbers, 0}
+		ast = Type.type_generator(type_mfa, env |> Dict.get(type_mfa))
+	end
+
 end
