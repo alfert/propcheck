@@ -8,6 +8,7 @@ defmodule PropCheck.TreeTest do
 
 	test "all Tree properties" do
         {_, failures} = PropCheck.run(Tree)
-        assert length(failures) == 0
+        # the delete implementation is wrong per construction.
+        assert length(failures) == 1
     end	
 end

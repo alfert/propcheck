@@ -1,7 +1,8 @@
-Propcheck
+PropCheck
 =========
 
 Property based testing for Elixir, using PropEr as engine. This project
-is inspired by ProperEx, but is completely rewritten.
+is derived by ProperEx, but most is completely rewritten.
+
 
 

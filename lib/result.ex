@@ -2,6 +2,7 @@ defmodule PropCheck.Result do
   use GenServer
 
   defstruct tests: [], errors: [], current: nil
+  @type t :: %__MODULE__{tests: [any], errors: [any], current: nil | atom}
 
   def start_link do
     :gen_server.start_link({ :local, __MODULE__ }, __MODULE__, [], [])
@@ -21,10 +22,12 @@ defmodule PropCheck.Result do
     :gen_server.call(__MODULE__, {:message, fmt, args})
   end
 
+ @spec init(any) :: {:ok, t}
  def init(_args) do
     { :ok, %__MODULE__{} }
   end
 
+  @spec handle_call({:message, any, any}, {pid, any}, t) :: {:reply, :ok, t}
   def handle_call({:message, fmt, args}, _from, state) do
     if :lists.prefix('Error', fmt) do
        state = %__MODULE__{state | errors: [{state.current, {fmt, args}}|state.errors]}

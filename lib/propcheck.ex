@@ -133,7 +133,7 @@ defmodule PropCheck do
     defmacrop tera, do: 1_000_0000_000_0000
     defp fork_seed(:undefined = u), do: u
     defp fork_seed(time) do
-      hash = :crypto.hash(:binary.encode_unsigned(time2us(time)))
+      hash = :crypto.hash(:md5, :binary.encode_unsigned(time2us(time)))
       us2time(:binary.decode_unsigned(hash))
     end
 
