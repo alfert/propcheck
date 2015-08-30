@@ -104,7 +104,7 @@ defmodule PropCheck.Test.TypeTest do
 
 		%PropCheck.Type{expr: e, params: [:t]} = typedef
 
-		IO.inspect e
+		# IO.inspect e
 		constructors = e 
 			|> TypeExpr.preorder 
 			|> Enum.map fn %TypeExpr{constructor: c} -> c end
