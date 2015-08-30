@@ -6,23 +6,6 @@ defmodule PropcheckTest do
 	@type my_stack(t) :: [t]
 	@type tagged_stack(t) :: {:stack, [t]}
 
-	test "find type in Stack module" do
-		types = Kernel.Typespec.beam_types(Stack)
-		refute nil == types
-
-		assert [{:opaque, t1} = t] = types
-		assert {:stack, _, [{:var, _, :t}]} = t1
-
-		assert "" == List.flatten :erl_pp.form(t)
-	end
-
-  test "type in Stack module with Erlang syntax" do
-    type = get_type_in_abstract_form(Stack, :stack, 1)
-    refute nil == type
-    assert [t1] = type
-    t2 = recode_vars(t1)
-    assert "" == List.flatten :erl_pp.form(t2)
-  end
 
 	test "find types in proper_gen.erl" do
 		types = Kernel.Typespec.beam_types(:proper_gen)
