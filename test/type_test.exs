@@ -212,6 +212,14 @@ defmodule PropCheck.Test.TypeTest do
 		env = Type.create_environment(types, mod)
 
 	 	assert Type.is_recursive({mod, :tree, 1}, env)
-	 	# wir brauchen was anderes, das in den parameter rekursive ist
+	 end
+
+	test "check mutual recursive types" do
+		mod = PropCheck.Test.Types
+		types = PropCheck.Test.Types.__type_debug__()
+		assert length(types) > 0
+		env = Type.create_environment(types, mod)
+
+	 	assert Type.is_recursive({mod, :t_nat, 0}, env)
 	end
 end
