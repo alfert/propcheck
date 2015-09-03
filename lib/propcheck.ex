@@ -86,6 +86,7 @@ defmodule PropCheck do
         end
     end
 
+    @doc "Runs all properties of a module and return the list of succeeded and failed properties."
     def run(target), do: run(target, [report: true, output: true])
     def run(target, opts) do
        PropCheck.Result.start_link
