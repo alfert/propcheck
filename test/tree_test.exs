@@ -1,14 +1,8 @@
 defmodule PropCheck.TreeTest do
 	use ExUnit.Case
 	alias PropCheck.Test.Tree
+	use PropCheck.Properties
 
-	# property "a new stack is empty" do
-	# 	forall x in StackMod.stack, do: !StackMod.empty(x)
-	# end
+	prop_test Tree
 
-	test "all Tree properties" do
-        {_, failures} = PropCheck.run(Tree)
-        # the delete implementation is wrong per construction.
-        assert length(failures) == 1
-    end	
 end
