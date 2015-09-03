@@ -115,6 +115,46 @@ defmodule PropCheck do
       quote do: is_tuple(unquote(x)) and elem(unquote(x), 0) == :"$type"
     end
 
+    @doc """
+    Generates an `ExUnit` testcase for each property of the given module. 
+    Reporting of failures is then done via the usual `ExUnit` mechanism. 
+    """
+    defmacro prop_test(mod) do
+      props = mod |> Macro.expand(__CALLER__) |> extract_props
+      props |> Enum.map fn {f, 0} -> 
+        prop_name = "#{f}"
+        quote do
+          test unquote(prop_name) do
+            exec_property(unquote(mod), unquote(f))
+          end
+        end
+      end
+    end
+
+    @doc "Runs the property as part of an `ExUnit` test case."
+    def exec_property(m, f ) do  
+      p = apply(m, f, [])
+      case PropCheck.quickcheck(p, [:long_result]) do
+        true -> true
+        counter_example ->
+          raise ExUnit.AssertionError, [
+            message: "Property #{inspect m}.#{f} failed. Counter-Example is: \n#{inspect counter_example}",
+                expr: nil]
+      end
+    end
+
+    @doc "Extracs all properties of module."
+    @spec extract_props(atom) :: [{atom, arity}]
+    def extract_props(mod) do
+      apply(mod,:__info__, [:functions]) 
+        |> Stream.filter( 
+          fn {f, 0} -> f 
+              |> Atom.to_string 
+              |> String.starts_with? "prop_"
+                _ -> false end)
+    end
+
+
     # Delegates
 
     defdelegate [quickcheck(outer_test), quickcheck(outer_test, user_opts),
