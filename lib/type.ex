@@ -1,13 +1,13 @@
 defmodule PropCheck.Type do
 	@moduledoc """
 	This modules defines the syntax tree of types and translates the type definitions
-	of Elixir into the internal format. It also provides functions for analysis of types. 
+	of Elixir into the internal format. It also provides functions for analysis of types.
 	"""
 
 	@type env :: %{mfa: __MODULE__.t}
 	@type kind_t :: :type | :opaque | :typep | :none
 
-	@predefined_types [:atom, :integer, :pos_integer, :neg_integer, :non_neg_integer, :boolean, :byte, 
+	@predefined_types [:atom, :integer, :pos_integer, :neg_integer, :non_neg_integer, :boolean, :byte,
 		:char, :number, :char_list, :any, :term, :io_list, :io_data, :module, :mfa, :arity, :port,
 		:node, :timeout, :fun, :binary, :bitstring]
 	@unsupported_types [:port, :node, :reference, :module, :mfa]
@@ -19,28 +19,28 @@ defmodule PropCheck.Type do
 		expr: nil,
 		uses: []
 
-	@type t :: %__MODULE__{name: atom, params: [atom], mod: atom, kind: kind_t, 
+	@type t :: %__MODULE__{name: atom, params: [atom], mod: atom, kind: kind_t,
 		expr: TypeExpr.t, uses: [atom | mfa]}
 
 	defmodule TypeExpr do
 		@typedoc """
-		Various type constructors, `:ref` denote a reference to an existing type or 
+		Various type constructors, `:ref` denote a reference to an existing type or
 		parameter, `:literal` means a literal value, in many cases, this will be an atom value.
 
 		Nonempty lists are encoded like a list, but have a second type parameter, which is the
-		literal `:...`. 
-		"""	
+		literal `:...`.
+		"""
 		@type constructor_t :: :union | :tuple | :list | :map | :ref | :range | :fun |
 			:literal | :var | :none
 		defstruct constructor: :none,
 			args: [] # elements of union, tuple, list or map; or the referenced type or the literal value
-	
+
 		@type t :: %__MODULE__{constructor: constructor_t, args: [Macro.t | t]}
 		def preorder(%__MODULE__{args: []} = t), do: [t]
 		def preorder(%__MODULE__{args: a} = t) when not is_list(a), do: [t]
-		def preorder(%__MODULE__{args: a} = t), do: 
-			[t | (a |> Enum.map fn ta -> preorder(ta) end) |> List.flatten] 
-		# this looks strange, but this is an arg value which is not a type expr. 
+		def preorder(%__MODULE__{args: a} = t), do:
+			[t | (a |> Enum.map fn ta -> preorder(ta) end) |> List.flatten]
+		# this looks strange, but this is an arg value which is not a type expr.
 		# this is ignored in the pre-order, its value is contained in the type expr above.
 		def preorder(_value), do: []
 
@@ -48,7 +48,7 @@ defmodule PropCheck.Type do
 			import Inspect.Algebra
 
 			def inspect(%{constructor: c, args: a}, opts) do
-				surround_many("%#{TypeExpr}{", 
+				surround_many("%#{TypeExpr}{",
 					[constructor: c, args: a],
 					"}",
 					%Inspect.Opts{limit: :infinity},
@@ -60,21 +60,21 @@ defmodule PropCheck.Type do
 
 	@doc """
 	Creates an environment of named types for a module. Expects as input the list of types
-	of a module. 
+	of a module.
 	"""
 	@spec create_environment([Macro.t], atom) :: env
 	def create_environment(types, mod) do
-		types 
+		types
 			|> Stream.map(&parse_type/1)
 			|> Stream.map(fn %__MODULE__{name: n, params: p} = t -> {{mod, n, length(p)}, t} end)
 			|> Enum.into %{}
 	end
-	
+
 
 
 	@doc "Takes a type specification as an Elixir AST and returns the type def."
 	@spec parse_type({kind_t, Macro.t, nil, any}) :: t
-	def parse_type({kind, {:::, _, [header, body] = _typedef}, nil, _env}) 
+	def parse_type({kind, {:::, _, [header, body] = _typedef}, nil, _env})
 	when kind in [:type, :opaque, :typep] do
 		{name, _, ps} = header
 		params = case ps do
@@ -84,7 +84,7 @@ defmodule PropCheck.Type do
 		# IO.puts "Type body is: #{inspect body}"
 		%__MODULE__{name: name, params: params, kind: kind, expr: parse_body(body, params)}
 	end
-	
+
 	@doc "Parse the body of a type spec as an Elixir AST and returns the `TypeExp`"
 	@spec parse_body(Macro.t, [atom]) :: t
 	def parse_body({:|, _, children}, params) do
@@ -108,7 +108,7 @@ defmodule PropCheck.Type do
 		args = children |> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :fun, args: args}
 	end
-	# "..." is any arity of a function or a non-empty list. 
+	# "..." is any arity of a function or a non-empty list.
 	def parse_body({:..., _, nil}, _params) do
 		%TypeExpr{constructor: :literal, args: [:...]}
 	end
@@ -131,30 +131,30 @@ defmodule PropCheck.Type do
 		%TypeExpr{constructor: :ref, args: [type, ps]}
 	end
 	def parse_body(body, params) when is_tuple(body) do
-		args = body 
-			|> Tuple.to_list 
+		args = body
+			|> Tuple.to_list
 			|> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :tuple, args: args}
 	end
 	def parse_body(body, params) when is_list(body) do
-		args = body 
+		args = body
 			|> Enum.map fn child -> parse_body(child, params) end
 		%TypeExpr{constructor: :list, args: args}
 	end
 	def parse_body(body, _params) when not(is_tuple(body)) do
 		%TypeExpr{constructor: :literal, args: [body]}
 	end
-	
+
 
 	@doc "Calculates the list of referenced types"
-	def referenced_types({type_gen, _, l}, params) 
-	when is_list(l) and type_gen in [:.., :{}, :list] do 
+	def referenced_types({type_gen, _, l}, params)
+	when is_list(l) and type_gen in [:.., :{}, :list] do
 		l |> Enum.map(&(referenced_types(&1, params))) |> List.flatten
 	end
 	def referenced_types({:list, _, nil}, _params) do [] end
 	def referenced_types(_body, _params) do
 		[]
-	end	
+	end
 
 	@doc "Analyzes if the type definition is recursive"
 	@spec is_recursive(mfa, env ) :: boolean
@@ -167,9 +167,9 @@ defmodule PropCheck.Type do
 	def is_recursive(mfa, %__MODULE__{expr: expr, params: ps}, env) do
 		# add all parameters to the environment. We use a TypeExpr for it
 		# but what is the true reason for this?
-		new_env = ps 
-			|> Stream.map(fn p -> 
-				t = %TypeExpr{constructor: :var, args: [p]} 
+		new_env = ps
+			|> Stream.map(fn p ->
+				t = %TypeExpr{constructor: :var, args: [p]}
 				{t, t}
 			end)
 			|> Enum.into(env)
@@ -180,10 +180,10 @@ defmodule PropCheck.Type do
 
 	@doc "Analyzes of the type expression for `mfa` is recursive"
 	@spec is_recursive(mfa, TypeExpr.t, env) :: boolean
-	def is_recursive(_mfa, %TypeExpr{constructor: con}, _env) when 
+	def is_recursive(_mfa, %TypeExpr{constructor: con}, _env) when
 		con in [:literal, :range], do: false
 	def is_recursive(_mfa, %TypeExpr{constructor: :var}, _env), do: false
-	def is_recursive(_mfa, %TypeExpr{constructor: :ref, args: [type]}, _env) 
+	def is_recursive(_mfa, %TypeExpr{constructor: :ref, args: [type]}, _env)
 		when type in @predefined_types, do: false
 	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [type]}, env) do
 		# type is not predefined ==> it must existent in env, so we can look deeper into it.
@@ -196,52 +196,52 @@ defmodule PropCheck.Type do
 				is_recursive(mfa, t, env)
 		end
 	end
-	def is_recursive(mfa, %TypeExpr{constructor: con, args: args}, env) 
+	def is_recursive(mfa, %TypeExpr{constructor: con, args: args}, env)
 			when con in  [:union, :tuple, :list, :map] do
 		args |> Enum.any? fn t -> is_recursive(mfa, t, env) end
 	end
 	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [t | args]}, env) do
-		case match_type(mfa, t) do 
+		case match_type(mfa, t) do
 			true -> true
 			_ -> args |> Enum.any? fn ta -> is_recursive(mfa, ta, env) end
 		end
 	end
-	
+
 
 	def match_type(mfa1, mfa2) when mfa1 == mfa2, do: true
 	def match_type({_m, f1, _a}, f2) when f1 == f2, do: true
 	def match_type(_, _), do: false
-			
+
 
 	@spec type_generators(env) :: Macro.t
 	def type_generators(env) do
 		env
 			|> Enum.map(fn {mfa, type} -> type_generator(mfa, type) end)
 	end
-	
+
 	def type_generator(mfa, %__MODULE__{expr: type, params: ps, kind: kind}) do
 		header = header_for_type(mfa, ps)
 		body = body_for_type(type)
 		d = if (kind == :typep) do :defp else :def end
-		{d, [context: Elixir, import: Kernel], 
+		{d, [context: Elixir, import: Kernel],
 			[header, [do: body]]}
 	end
-	
+
 	@doc "Generates the AST for a function head."
 	def header_for_type({m, f, a}, ps) when length(ps) == a do
 		{
-			f, [context: m], 
+			f, [context: m],
 			if (ps == []) do nil
 				else
 				 ps |> Enum.map(fn p -> {p, [], m} end)
 			end
 		}
 	end
-	
+
 
 	def body_for_type(%TypeExpr{constructor: :ref, args: [t]})
 		when t in @unsupported_types, do: throw "unsupported type port"
-	def body_for_type(%TypeExpr{constructor: :ref, args: [t]}) 
+	def body_for_type(%TypeExpr{constructor: :ref, args: [t]})
 		when t in @predefined_types, do: body_for_predefined_type(t)
 	def body_for_type(%TypeExpr{constructor: list, args: [p]}) do
 		%TypeExpr{constructor: :var, args: [t]} = p
@@ -255,7 +255,7 @@ defmodule PropCheck.Type do
 			throw "Unimplemented generator for type " <> unquote(t_msg)
 		end
 	end
-	
+
 	def body_for_predefined_type(:atom) do quote do atom end end
 	def body_for_predefined_type(:any) do quote do any end end
 	def body_for_predefined_type(:term) do quote do term end end
