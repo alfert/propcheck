@@ -6,7 +6,7 @@ defmodule PropCheck.Properties do
             import :proper_types, except: [lazy: 1, to_binary: 1, function: 2]
         end
     end
-    
+
     defmacro property(name, opts) do
         case name do
             {name, _, _} ->
@@ -20,9 +20,9 @@ defmodule PropCheck.Properties do
     end
 
     def print_mod_as_erlang(mod) when is_atom(mod) do
-        {m, beam, file} = :code.get_object_code(mod)
+        {_m, beam, _file} = :code.get_object_code(mod)
         {:ok, {_, [{:abstract_code, {_, ac}}]}} = :beam_lib.chunks(beam, [:abstract_code])
         ac |> Enum.map(&:erl_pp.form/1) |> List.flatten |> IO.puts
     end
-    
+
 end
