@@ -6,7 +6,7 @@ defmodule PropCheck.TypeGen do
 	"""
 
 	@doc """
-	This function lists the types defined in the module. If the module is open (i.e. it is 
+	This function lists the types defined in the module. If the module is open (i.e. it is
 	currently compiled) it shall work, but also after the compilation. The first one is required
 	for adding type generator functions during compilation, the latter is used for inspecting
 	and generating functions for types in a remote defined module (e.g. from the the Standard lib)
@@ -27,7 +27,7 @@ defmodule PropCheck.TypeGen do
 
 	defmacro __before_compile__(env) do
 		#IO.inspect env
-		types = env.module 
+		types = env.module
 			|> PropCheck.TypeGen.defined_types
 			|> List.flatten
 		types
@@ -47,21 +47,22 @@ defmodule PropCheck.TypeGen do
 	def defined_types(mod) do
 		if Module.open? mod do
 			IO.puts "Module #{mod} is open"
-			[:type, :opaque, :typep] 
-				|> Enum.map &(Module.get_attribute(mod,&1)) 
+			[:type, :opaque, :typep]
+				|> Enum.map &(Module.get_attribute(mod,&1))
 		else
 			IO.puts "Module #{mod} is closed"
 			[beam: Kernel.Typespec.beam_types(mod), attr: mod.__info__(:attributes)]
 			Kernel.Typespec.beam_types(mod)
 		end
 	end
-	
-	def print_types({kind, {:::, _, [lhs, rhs]=t }, nil, _env}) when kind in [:type, :opaque, :typep] do
+
+	def print_types({kind, {:::, _, [lhs, rhs]=t }, _env})
+	when kind in [:type, :opaque, :typep] do
 		IO.puts "Type definition for #{inspect lhs} ::= #{inspect rhs}"
 	end
 
 	@doc "Generates a `type_debug body(name, args)` containing the type definition before compilation. "
-	def generate_type_debug_fun({kind, {:::, _, [{name, _, args}, _rhs]} = t, nil, _env} = typedef) do
+	def generate_type_debug_fun({kind, {:::, _, [{name, _, args}, _rhs]} = t, _env} = typedef) do
 		a = if args == nil, do: 0, else: length(args)
 		t = Macro.escape(typedef)
 		quote do
@@ -75,10 +76,10 @@ defmodule PropCheck.TypeGen do
 	def generate_all_types_debug_fun(types) do
 		ts = Macro.escape(types)
 		quote do
-			def __type_debug__(), do: unquote(ts) 
+			def __type_debug__(), do: unquote(ts)
 		end
 	end
-	
+
 
 	@doc "Generates a function for a type definition"
 	def convert_type({:typep, {:::, _, typedef}, nil, _env}) do
@@ -99,17 +100,17 @@ defmodule PropCheck.TypeGen do
 			end
 		end
 	end
-	
+
 	@doc "Generates the type generator signature"
-	def type_header([{name, _, nil}, _rhs]) do 
-		quote do 
+	def type_header([{name, _, nil}, _rhs]) do
+		quote do
 			unquote(name)()
 		end
 	end
 	def type_header([{name, _, vars} = head, _rhs]) when is_atom(name) do
 		head
 	end
-	
+
 	@doc "Generates a simple body for the type generator function"
 	# TODO: build up an environment of parameters to stop the recursion, if they are used
 	#       otherwise a nested recursion like safe_stack does not work properly.
@@ -127,35 +128,35 @@ defmodule PropCheck.TypeGen do
 	def type_body({:.., _, [left, right]}) do quote do integer(unquote(left), unquote(right)) end end
 	def type_body({:{}, _, tuple_vars}) do quote do tuple(unquote(tuple_vars)) end end
 	def type_body({:list, _, nil}) do quote do list(any) end end
-	def type_body({:list, _, [type]}) do 
+	def type_body({:list, _, [type]}) do
 		param = type_body type
-		quote do 
-			:proper_types.list(unquote param) 
-		end 
+		quote do
+			:proper_types.list(unquote param)
+		end
 	end
-	def type_body([type]) do 
-		quote do 
-			:proper_types.list(unquote(type_body(type))) 
-		end 
+	def type_body([type]) do
+		quote do
+			:proper_types.list(unquote(type_body(type)))
+		end
 	end
 	# this doesn't work ==> go for proper recursive types, including :{}, :|, :list, :map
 	#
 	# this tuple detection also detects type variables and all not yet implemented type generators
 	# therefore we need to detect these other situations properly, otherwise recursive definitions
-	# do not work. 
+	# do not work.
 	# IDEA: separate function for parameterized types types, such that access to type variables
 	# properly identified (pair(f,s) is encoded as :{}, where my_int_tuple is a {..}!)
-	def type_body(ts) when is_tuple(ts) do 
+	def type_body(ts) when is_tuple(ts) do
 		IO.puts "found a tuple type: #{inspect ts}"
-		types = ts |> :erlang.tuple_to_list 
+		types = ts |> :erlang.tuple_to_list
 			|> Enum.map &(type_body &1)
-		quote do tuple(unquote(types)) end 
+		quote do tuple(unquote(types)) end
 	end
-	def type_body(body) do 
+	def type_body(body) do
 		body_s = "#{inspect body}"
-		quote do 
-			throw "catch all: no generator available for " <> unquote(body_s) 
-		end 
+		quote do
+			throw "catch all: no generator available for " <> unquote(body_s)
+		end
 	end
 
 

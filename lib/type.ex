@@ -74,7 +74,7 @@ defmodule PropCheck.Type do
 
 	@doc "Takes a type specification as an Elixir AST and returns the type def."
 	@spec parse_type({kind_t, Macro.t, nil, any}) :: t
-	def parse_type({kind, {:::, _, [header, body] = _typedef}, nil, _env})
+	def parse_type({kind, {:::, _, [header, body] = _typedef}, _env})
 	when kind in [:type, :opaque, :typep] do
 		{name, _, ps} = header
 		params = case ps do
