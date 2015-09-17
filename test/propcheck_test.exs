@@ -2,7 +2,7 @@ defmodule PropcheckTest do
 	use ExUnit.Case
 
 	alias PropCheck.Test.Stack
-	
+
 	@type my_stack(t) :: [t]
 	@type tagged_stack(t) :: {:stack, [t]}
 
@@ -14,12 +14,13 @@ defmodule PropcheckTest do
 		IO.inspect types
 	end
 
-  def recode_vars({:var, line, n}), do: {:var, line, n |> Atom.to_string |> String.upcase |> String_to_atom}
+  def recode_vars({:var, line, n}), do:
+		{:var, line, n |> Atom.to_string |> String.upcase |> String.to_atom}
   def recode_vars({t, l, sub_t, expr}), do: {t, l, recode_vars(sub_t), recode_vars(expr)}
   def recode_vars([]), do: []
-  def recode_vars([h | t]), do: [recode_vars(h) | recode_vars(t)] 
+  def recode_vars([h | t]), do: [recode_vars(h) | recode_vars(t)]
   def recode_vars(what_ever), do: what_ever
-  
+
 	def get_type_in_abstract_form(module, type_name, arg_count \\ 0) do
 	    case abstract_code(module) do
     		{:ok, abstract_code} ->
@@ -28,7 +29,7 @@ defmodule PropcheckTest do
 
           for {:attribute, _, kind, {name, _, args}} = type <- abstract_code, kind
  					  in [:opaque, :type, :export_type] do
-              if (name == type_name and arg_count == length(args)) do 
+              if (name == type_name and arg_count == length(args)) do
                 type
               else
                 nil
