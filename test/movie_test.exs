@@ -18,10 +18,11 @@ defmodule PropCheck.Test.Movies do
       trap_exit do
         MovieServer.start_link()
         r = run_commands(__MODULE__, cmds)
-        {_, _, result} = r
+        {history, state, result} = r
         MovieServer.stop
         #IO.puts "Property finished. result is: #{inspect r}"
-        IO.inspect(result == :ok)
+        when_fail(IO.puts("History: #{inspect history}\nState: #{inspect state}\nResult: #{inspect result}"),
+          result == :ok)
       end
     end
   end
