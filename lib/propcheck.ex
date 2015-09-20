@@ -8,7 +8,7 @@ defmodule PropCheck do
             :proper.forall(unquote(rawtype), fn(unquote(x)) -> unquote(prop) end)
         end
     end
-    
+
     defmacro implies(pre, prop) do
         quote do
             :proper.implies(unquote(pre), PropCheck.delay(unquote(prop)))
@@ -116,12 +116,12 @@ defmodule PropCheck do
     end
 
     @doc """
-    Generates an `ExUnit` testcase for each property of the given module. 
-    Reporting of failures is then done via the usual `ExUnit` mechanism. 
+    Generates an `ExUnit` testcase for each property of the given module.
+    Reporting of failures is then done via the usual `ExUnit` mechanism.
     """
     defmacro prop_test(mod) when is_atom(mod) do
       props = mod |> Macro.expand(__CALLER__) |> extract_props
-      props |> Enum.map fn {f, 0} -> 
+      props |> Enum.map fn {f, 0} ->
         prop_name = "#{f}"
         quote do
           test unquote(prop_name) do
@@ -145,7 +145,7 @@ defmodule PropCheck do
     end
 
     @doc "Runs the property as part of an `ExUnit` test case."
-    def exec_property(m, f ) do  
+    def exec_property(m, f ) do
       p = apply(m, f, [])
       case PropCheck.quickcheck(p, [:long_result]) do
         true -> true
@@ -159,10 +159,10 @@ defmodule PropCheck do
     @doc "Extracs all properties of module."
     @spec extract_props(atom) :: [{atom, arity}]
     def extract_props(mod) do
-      apply(mod,:__info__, [:functions]) 
-        |> Stream.filter( 
-          fn {f, 0} -> f 
-              |> Atom.to_string 
+      apply(mod,:__info__, [:functions])
+        |> Stream.filter(
+          fn {f, 0} -> f
+              |> Atom.to_string
               |> String.starts_with? "prop_"
                 _ -> false end)
     end
