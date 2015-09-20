@@ -7,14 +7,15 @@ defmodule PropCheck.Test.Movies do
   use PropCheck.StateM
   use ExUnit.Case
 
-  @mod PropCheck.Test.MovieServer
+  alias PropCheck.Test.MovieServer
+
   #########################################################################
   ### The properties
   #########################################################################
 
   property_test "server works fine" do
     trap_exit(
-    forall cmds in commands(__MODULE__) do
+      forall cmds in commands(__MODULE__) do
         MovieServer.start_link()
         r = run_commands(__MODULE__, cmds)
         {_, _, result} = r
@@ -34,7 +35,7 @@ defmodule PropCheck.Test.Movies do
   # a property list of the available movies,
   # each pair in the list consists of a movie name and the number of
   # existing copies of this movie
-  @available_movies @mod.available_movies
+  @available_movies MovieServer.available_movies
 
   # movies that clients will ask to rent in the testcases
   # apart from the movies available, clients will also ask for titanic
@@ -71,15 +72,15 @@ defmodule PropCheck.Test.Movies do
 
   @doc "Set of all allowed commands"
   def command(_state = %__MODULE__{users: []}) do
-      oneof([{:call, @mod, :create_account, [name]},
-           {:call, @mod, :ask_for_popcorn, []}])
+      oneof([{:call, MovieServer, :create_account, [name]},
+           {:call, MovieServer, :ask_for_popcorn, []}])
   end
   def command(state = %__MODULE__{}) do
-    oneof([{:call, @mod, :create_account, [name]},
-           {:call, @mod, :ask_for_popcorn, []},
-           {:call, @mod, :delete_account, [password(state)]},
-           {:call, @mod, :rent_dvd, [password(state), movie]},
-           {:call, @mod, :return_dvd, [password(state), movie]}
+    oneof([{:call, MovieServer, :create_account, [name]},
+           {:call, MovieServer, :ask_for_popcorn, []},
+           {:call, MovieServer, :delete_account, [password(state)]},
+           {:call, MovieServer, :rent_dvd, [password(state), movie]},
+           {:call, MovieServer, :return_dvd, [password(state), movie]}
          ])
   end
 
