@@ -16,7 +16,7 @@ defmodule PropCheck.Test.Movies do
     forall cmds in commands(__MODULE__) do
       @mod.start_link()
       {_, _, result} = run_commands(__MODULE__, cmds)
-      @mod.stop_server()
+      @mod.stop()
       result == :ok
     end
   end

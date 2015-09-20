@@ -16,7 +16,7 @@ defmodule PropCheck.Test.MovieServer do
   def start_link(), do:
     GenServer.start_link(__MODULE__, [], name: {:local, __MODULE__})
 
-  def stop(), do: GenServer.stop(__MODULE__)
+  def stop(), do: GenServer.call(__MODULE__, :stop)
 
   @spec create_account(name) :: password
   def create_account(name), do: GenServer.call(__MODULE__, {:new_account, name})
@@ -41,9 +41,9 @@ defmodule PropCheck.Test.MovieServer do
 
   def init([]) do
     tid = :ets.new(:movies, [])
-    :ets.insert(:movies, @movies)
-    {:ok, %__MODULE__{users: :ets.new(:users,[],
-      movies: tid, next_pass: 1)}}
+    :ets.insert(tid, @movies)
+    {:ok, %__MODULE__{users: :ets.new(:users, []),
+      movies: tid, next_pass: 1}}
   end
 
   def terminate(_reason, %__MODULE__{movies: m, users: u}) do
