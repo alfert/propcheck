@@ -105,7 +105,10 @@ defmodule PropCheck.Test.Movies do
   end
   def next_state(s, _v, {:call, _, :ask_for_popcorn, []}), do: s
 
-  @doc "Currently no preconditions"
+  @doc "Don't return dvds, which are not rented"
+  def precondition(state, {:call, _, :return_dvd, [password, movie]}) do
+    state.rented |> Enum.member? {password, movie}
+  end
   def precondition(_state, _call), do: true
 
   @doc "Postconditions ensure that the expected effect has taken place"
