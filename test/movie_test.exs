@@ -42,7 +42,7 @@ defmodule PropCheck.Test.Movies do
   # apart from the movies available, clients will also ask for titanic
   # and inception, in order to test how the server responds to these
   # requests
-  @movie_titles @available_movies ++ [:titanic, :inception]
+  @movie_titles (@available_movies |> Keyword.keys) ++ [:titanic, :inception]
 
   @doc "generator for name"
   def name(), do: elements @names
