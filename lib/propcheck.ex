@@ -15,13 +15,13 @@ defmodule PropCheck do
         end
     end
 
-    defmacro whenfail(action, prop) do
+    defmacro when_fail(action, prop) do
         quote do
             :proper.whenfail(PropCheck.delay(unquote(action)), PropCheck.delay(unquote(prop)))
         end
     end
 
-    defmacro trapexit(prop) do
+    defmacro trap_exit(prop) do
         quote do
             :proper.trapexit(PropCheck.delay(unquote(prop)))
         end
