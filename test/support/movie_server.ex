@@ -62,7 +62,7 @@ defmodule PropCheck.Test.MovieServer do
     reply = case :ets.lookup(u, p) do
       []          -> :not_a_client
       [{_,_,[]}]  -> :ets.delete(u, p)
-                     :deleted
+                     :account_deleted
       [{_, _, _}] -> :return_movies_first
     end
     {:reply, reply, s}
