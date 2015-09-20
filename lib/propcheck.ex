@@ -21,6 +21,12 @@ defmodule PropCheck do
         end
     end
 
+    defmacro trap_exit(do: prop) do
+      quote do
+        :proper.trapexit(PropCheck.delay(unquote(prop)))
+      end
+    end
+
     defmacro trap_exit(prop) do
         quote do
             :proper.trapexit(PropCheck.delay(unquote(prop)))
