@@ -3,6 +3,8 @@ defmodule PropCheck.StateM do
   defmacro __using__(_) do
     quote do
       @behaviour :proper_statem
+      use PropCheck.Properties
+      import PropCheck.StateM
     end
   end
 
