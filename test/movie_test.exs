@@ -120,7 +120,7 @@ defmodule PropCheck.Test.Movies do
       not (result |> Enum.member? movie)
     end
   end
-  def postcondition(_state, {:call, _, :popcorn, []}, result) do
+  def postcondition(_state, {:call, _, :ask_for_popcorn, []}, result) do
     result == :bon_appetit
   end
 
