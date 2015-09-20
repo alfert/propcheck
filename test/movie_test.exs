@@ -5,8 +5,21 @@ defmodule PropCheck.Test.Movies do
   """
 	use PropCheck.Properties
   use PropCheck.StateM
+  use ExUnit.Case
 
   @mod PropCheck.Test.MovieServer
+  #########################################################################
+  ### The properties
+  #########################################################################
+
+  property_test "server works fine" do
+    forall cmds in commands(__MODULE__) do
+      @mod.start_link()
+      {_, _, result} = run_commands(__MODULE__, cmds)
+      @mod.stop_server()
+      result == :ok
+    end
+  end
 
   #########################################################################
   ### Value generators
