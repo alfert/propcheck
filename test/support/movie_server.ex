@@ -55,7 +55,7 @@ defmodule PropCheck.Test.MovieServer do
   def handle_call(:popcorn, _from, s), do: {:reply, :bon_appetit, s}
   def handle_call(:stop, _from, s), do: {:stop, :normal, :stopped, s}
   def handle_call({:new_account, name}, _from, %__MODULE__{next_pass: p, users: u} = s) do
-    :ets.insert(u, {p, name})
+    :ets.insert(u, {p, name, []})
     {:reply, p, %__MODULE__{s | next_pass: p+1}}
   end
   def handle_call({:delete_account, p}, _from, %__MODULE__{users: u} = s) do
