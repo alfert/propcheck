@@ -13,12 +13,15 @@ defmodule PropCheck.Test.Movies do
   #########################################################################
 
   property_test "server works fine" do
+    trap_exit(
     forall cmds in commands(__MODULE__) do
-      @mod.start_link()
-      {_, _, result} = run_commands(__MODULE__, cmds)
-      @mod.stop()
-      result == :ok
-    end
+        MovieServer.start_link()
+        r = run_commands(__MODULE__, cmds)
+        {_, _, result} = r
+        MovieServer.stop
+        #IO.puts "Property finished. result is: #{inspect r}"
+        IO.inspect(result == :ok)
+      end)
   end
 
   #########################################################################
