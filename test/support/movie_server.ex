@@ -14,7 +14,7 @@ defmodule PropCheck.Test.MovieServer do
     next_pass: 0
 
   def start_link(), do:
-    GenServer.start_link({:local, __MODULE__}, __MODULE__, [], [])
+    GenServer.start_link(__MODULE__, [], name: {:local, __MODULE__})
 
   def stop(), do: GenServer.stop(__MODULE__)
 
