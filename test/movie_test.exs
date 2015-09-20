@@ -62,19 +62,21 @@ defmodule PropCheck.Test.Movies do
   end
 
   #########################################################################
+  #########################################################################
+  ### Command generators, pre- and postcondition
+  #########################################################################
 
   @doc "Set of all allowed commands"
-  def command(state = %__MODULE__{users: []}) do
+  def command(_state = %__MODULE__{users: []}) do
       oneof([{:call, @mod, :create_account, [name]},
            {:call, @mod, :ask_for_popcorn, []}])
   end
   def command(state = %__MODULE__{}) do
-    user_cmds = fn() -> [] end
     oneof([{:call, @mod, :create_account, [name]},
            {:call, @mod, :ask_for_popcorn, []},
-           {:call, @mod, :delete_account, [password(S)]},
-           {:call, @mod, :rent_dvd, [password(S), movie]},
-           {:call, @mod, :return_dvd, [password(S), movie]}
+           {:call, @mod, :delete_account, [password(state)]},
+           {:call, @mod, :rent_dvd, [password(state), movie]},
+           {:call, @mod, :return_dvd, [password(state), movie]}
          ])
   end
 
@@ -96,7 +98,7 @@ defmodule PropCheck.Test.Movies do
   def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :return_dvd, [password, movie]}) do
      %__MODULE__{s | rented: List.delete(rented, {password, movie})}
   end
-  def next_state(s, _v, {:call, _, :popcorn, []}), do: s
+  def next_state(s, _v, {:call, _, :ask_for_popcorn, []}), do: s
 
   @doc "Currently no preconditions"
   def precondition(_state, _call), do: true
@@ -126,7 +128,6 @@ defmodule PropCheck.Test.Movies do
   @doc "is the movie available?"
   def is_available(%__MODULE__{rented: rented}, movie) do
     max_av = @available_movies |> Keyword.get(movie, -1)
-    m = movie
     (rented |> Enum.count fn(_, m) -> m == movie end) < max_av
   end
 
