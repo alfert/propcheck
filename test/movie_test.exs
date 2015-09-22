@@ -129,9 +129,9 @@ defmodule PropCheck.Test.Movies do
   end
   def postcondition(%__MODULE__{rented: rented}, {:call, _, :delete_account,[passwd]}, result) do
     # deletion does not work always
-		case rented |> Dict.has_key?(passwd) do
-    	false -> result == :account_deleted
-			true ->  result == :return_movies_first
+		case rented |> Dict.get(passwd, []) do
+    	[] -> result == :account_deleted
+			_any_movie ->  result == :return_movies_first
 		end
   end
   def postcondition(state, {:call, _, :rent_dvd,[_passwd, movie]}, result) do
