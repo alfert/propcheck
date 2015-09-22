@@ -137,7 +137,7 @@ defmodule PropCheck.Test.Movies do
   @doc "is the movie available?"
   def is_available(%__MODULE__{rented: rented}, movie) do
     max_av = @available_movies |> Keyword.get(movie, -1)
-    (rented |> Enum.count fn(_, m) -> m == movie end) < max_av
+    (rented |> Enum.count fn({_, m}) -> m == movie end) < max_av
   end
 
 end
