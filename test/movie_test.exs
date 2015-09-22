@@ -55,7 +55,7 @@ defmodule PropCheck.Test.Movies do
   # first components holds the return value of create_account,
   # the second components holds the rented movies
   defstruct users: [],
-    rented: []
+    rented: HashDict.new
 
   @doc """
   Generate only valid passwords, i.e those from existing users.
@@ -92,18 +92,21 @@ defmodule PropCheck.Test.Movies do
   @doc "The state machine entries"
   def next_state(s = %__MODULE__{users: users}, v, {:call, _, :create_account, [_name]}), do:
     %__MODULE__{s | users: [v | users]}
-  def next_state(s = %__MODULE__{users: users}, _v, {:call, _, :delete_account, [password]}), do:
-    %__MODULE__{s | users: List.delete(users, password)}
+  def next_state(s = %__MODULE__{rented: rented, users: users}, _v, {:call, _, :delete_account, [password]}) do
+		case (rented |> Dict.has_key? password) do
+			false -> %__MODULE__{s | users: List.delete(users, password)}
+			true  ->	s
+		end
+	end
   def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :rent_dvd, [password, movie]}) do
     if is_available(s, movie) do
-      %__MODULE__{s | rented: [{password, movie} | rented]}
+      %__MODULE__{s | rented: rented |> Dict.update(password, [movie], &([movie | &1]))}
     else
       s
     end
   end
-  def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :return_dvd, [password, movie]}) do
-     %__MODULE__{s | rented: List.delete(rented, {password, movie})}
-  end
+  def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :return_dvd, [password, movie]}), do:
+    %__MODULE__{s | rented: Dict.update!(rented, password, &(&1 |> List.delete movie)) }
   def next_state(s, _v, {:call, _, :ask_for_popcorn, []}), do: s
 
   @doc "Don't return dvds, which are not rented"
@@ -117,9 +120,12 @@ defmodule PropCheck.Test.Movies do
     # the new user was formerly not available
     not (users |> Enum.member? result)
   end
-  def postcondition(_state, {:call, _, :delete_account,[_passwd]}, result) do
-    # deletion always works
-    result == :account_deleted
+  def postcondition(%__MODULE__{rented: rented}, {:call, _, :delete_account,[passwd]}, result) do
+    # deletion does not work always
+		case rented |> Dict.has_key?(passwd) do
+    	false -> result == :account_deleted
+			true ->  result == :return_movies_first
+		end
   end
   def postcondition(state, {:call, _, :rent_dvd,[_passwd, movie]}, result) do
     # if the movie exists, then it must there, otherwise not
@@ -129,8 +135,8 @@ defmodule PropCheck.Test.Movies do
       not (result |> Enum.member? movie)
     end
   end
-	def postcondition(_state, _, {:return_dvd, [_passwd, movie]}, result) do
-	  not result |> Enum.member? result
+	def postcondition(_state, {:call, _, :return_dvd, [_passwd, movie]}, result) do
+	  not result |> Enum.member? movie
 	end
   def postcondition(_state, {:call, _, :ask_for_popcorn, []}, result) do
     result == :bon_appetit
