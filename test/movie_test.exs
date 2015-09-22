@@ -14,7 +14,7 @@ defmodule PropCheck.Test.Movies do
   #########################################################################
 
   property_test "server works fine" do
-      forall cmds in commands(__MODULE__) do
+    forall cmds in commands(__MODULE__) do
       trap_exit do
         MovieServer.start_link()
         r = run_commands(__MODULE__, cmds)
@@ -93,26 +93,33 @@ defmodule PropCheck.Test.Movies do
   def next_state(s = %__MODULE__{users: users}, v, {:call, _, :create_account, [_name]}), do:
     %__MODULE__{s | users: [v | users]}
   def next_state(s = %__MODULE__{rented: rented, users: users}, _v, {:call, _, :delete_account, [password]}) do
-		case (rented |> Dict.has_key? password) do
-			false -> %__MODULE__{s | users: List.delete(users, password)}
-			true  ->	s
+		case rented |> Dict.get(password, []) do
+			[]    -> %__MODULE__{s | users: List.delete(users, password),
+															 rented: rented |> Dict.delete(password)}
+			_any  ->	s
 		end
 	end
   def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :rent_dvd, [password, movie]}) do
-    if is_available(s, movie) do
-      %__MODULE__{s | rented: rented |> Dict.update(password, [movie], &([movie | &1]))}
-    else
-      s
+    case is_available(s, movie) do
+      true  -> %__MODULE__{s | rented: rented |> Dict.update(password, [movie], &([movie | &1]))}
+      false -> s
     end
   end
   def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :return_dvd, [password, movie]}), do:
     %__MODULE__{s | rented: Dict.update!(rented, password, &(&1 |> List.delete movie)) }
   def next_state(s, _v, {:call, _, :ask_for_popcorn, []}), do: s
 
-  @doc "Don't return dvds, which are not rented"
+  @doc "Don't return dvds, which are not rented and ensure that the user exists"
   def precondition(state, {:call, _, :return_dvd, [password, movie]}) do
-    state.rented |> Enum.member? {password, movie}
+    state.rented |> Dict.has_key?(password) and
+			state.rented |> Dict.fetch!(password) |> Enum.member? movie
   end
+	def precondition(state, {:call, _, :rent_dvd, [password, _movie]}) do
+		state.users |> Enum.member? password
+	end
+	def precondition(state, {:call, _, :delete_account, [password]}) do
+		state.users |> Enum.member? password
+	end
   def precondition(_state, _call), do: true
 
   @doc "Postconditions ensure that the expected effect has taken place"
@@ -129,14 +136,13 @@ defmodule PropCheck.Test.Movies do
   end
   def postcondition(state, {:call, _, :rent_dvd,[_passwd, movie]}, result) do
     # if the movie exists, then it must there, otherwise not
-    if is_available(state, movie) do
-      result |> Enum.member? movie
-    else
-      not (result |> Enum.member? movie)
+    case is_available(state, movie) do
+      true  -> result |> Enum.member? movie
+      false -> not (result |> Enum.member? movie)
     end
   end
 	def postcondition(_state, {:call, _, :return_dvd, [_passwd, movie]}, result) do
-	  not result |> Enum.member? movie
+	  not (result |> Enum.member? movie)
 	end
   def postcondition(_state, {:call, _, :ask_for_popcorn, []}, result) do
     result == :bon_appetit
