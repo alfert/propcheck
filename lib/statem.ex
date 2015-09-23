@@ -17,7 +17,7 @@ defmodule PropCheck.StateM do
     term, :proper_statem.symbolic_call) ::
     :proper_statem.symbolic_state | :proper_statem.dynamic_state
 
-  defdelegate [commands_name(cmds), commands(mod), commands(mod, initial_state),
+  defdelegate [command_names(cmds), commands(mod), commands(mod, initial_state),
     more_commands(n, cmd_type), parallel_commands(mod),
     parallel_commands(mod, initial_state), run_commands(mod, cmds),
     run_commands(mod, cmds, env), run_parallel_commands(mod, testcase),
