@@ -114,8 +114,9 @@ defmodule PropCheck.Test.Movies do
     state.rented |> Dict.has_key?(password) and
 			state.rented |> Dict.fetch!(password) |> Enum.member? movie
   end
-	def precondition(state, {:call, _, :rent_dvd, [password, _movie]}) do
-		state.users |> Enum.member? password
+	def precondition(state, {:call, _, :rent_dvd, [password, movie]}) do
+		state.users |> Enum.member?(password) and
+		not (state.rented |> Dict.get(password, []) |> Enum.member?(movie))
 	end
 	def precondition(state, {:call, _, :delete_account, [password]}) do
 		state.users |> Enum.member? password
