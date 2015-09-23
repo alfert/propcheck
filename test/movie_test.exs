@@ -134,11 +134,12 @@ defmodule PropCheck.Test.Movies do
 			_any_movie ->  result == :return_movies_first
 		end
   end
-  def postcondition(state, {:call, _, :rent_dvd,[_passwd, movie]}, result) do
+  def postcondition(state, {:call, _, :rent_dvd,[passwd, movie]}, result) do
     # if the movie exists, then it must there, otherwise not
     case is_available(state, movie) do
       true  -> result |> Enum.member? movie
-      false -> not (result |> Enum.member? movie)
+      false -> IO.puts "rent_dvd #{movie} for passwd #{passwd} did not succeed"
+				not (result |> Enum.member? movie)
     end
   end
 	def postcondition(_state, {:call, _, :return_dvd, [_passwd, movie]}, result) do
