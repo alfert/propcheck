@@ -75,17 +75,34 @@ defmodule PropCheck.Test.Movies do
 
   @doc "Set of all allowed commands"
   def command(_state = %__MODULE__{users: []}) do
-      oneof([{:call, MovieServer, :create_account, [name]},
-           {:call, MovieServer, :ask_for_popcorn, []}])
+      frequency([{1, {:call, MovieServer, :create_account, [name]}},
+           {1, {:call, MovieServer, :ask_for_popcorn, []}}
+					 ])
   end
-  def command(state = %__MODULE__{}) do
-    oneof([{:call, MovieServer, :create_account, [name]},
-           {:call, MovieServer, :ask_for_popcorn, []},
-           {:call, MovieServer, :delete_account, [password(state)]},
-           {:call, MovieServer, :rent_dvd, [password(state), movie]},
-           {:call, MovieServer, :return_dvd, [password(state), movie]}
+  def command(state = %__MODULE__{rented: rented}) do
+		movies_rented = 0 < (rented |> Dict.values |> List.flatten |> Enum.count)
+    frequency([{1, {:call, MovieServer, :create_account, [name]}},
+           {1, {:call, MovieServer, :ask_for_popcorn, []}},
+           {1, {:call, MovieServer, :delete_account, [password(state)]}},
+           {1, {:call, MovieServer, :rent_dvd, [password(state), movie]}},
+           {5,
+					 	let({p, m} = elements(user_movie_pairs(state.rented)), [
+							do:
+					 		{:call, MovieServer, :return_dvd, [p, m]},
+							when: movies_rented])
+						}
          ])
   end
+
+	def user_movie_pairs(rented) do
+		k = rented |> Dict.keys
+		k |> Enum.map(&(make_pairs(&1, rented |> Dict.fetch! &1)))
+			|> List.flatten
+	end
+	def make_pairs(password, movies) do
+		movies
+			|> Stream.map &({password, &1})
+	end
 
   @doc "Initialize the model"
   def initial_state(), do: %__MODULE__{}
