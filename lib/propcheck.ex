@@ -76,7 +76,8 @@ defmodule PropCheck do
         condition = opts[:when]
         strict = Keyword.get(opts, :strict, true)
         quote do
-            :proper_types.add_constraint(unquote(rawtype),fn(unquote(x)) -> unquote(condition) end, unquote(strict))
+            :proper_types.add_constraint(unquote(rawtype),
+              fn(unquote(x)) -> unquote(condition) end, unquote(strict))
         end
     end
 
