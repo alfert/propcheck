@@ -81,17 +81,22 @@ defmodule PropCheck.Test.Movies do
   end
   def command(state = %__MODULE__{rented: rented}) do
 		movies_rented = 0 < (rented |> Dict.values |> List.flatten |> Enum.count)
-    frequency([{1, {:call, MovieServer, :create_account, [name]}},
+		std_calls = [{1, {:call, MovieServer, :create_account, [name]}},
            {1, {:call, MovieServer, :ask_for_popcorn, []}},
            {1, {:call, MovieServer, :delete_account, [password(state)]}},
-           {1, {:call, MovieServer, :rent_dvd, [password(state), movie]}},
-           {5,
-					 	let({p, m} = elements(user_movie_pairs(state.rented)), [
-							do:
-					 		{:call, MovieServer, :return_dvd, [p, m]},
-							when: movies_rented])
-						}
-         ])
+           {1, {:call, MovieServer, :rent_dvd, [password(state), movie]}}]
+		calls = if (movies_rented) do
+				pms = user_movie_pairs(rented)
+				#IO.puts "User/movie pairs: #{inspect pms}"
+     		[{5,	let {p, m} = elements(pms) do
+						{:call, MovieServer, :return_dvd, [p, m]}
+				 end} | std_calls]
+			else
+				#IO.puts "Nothing rented, no returns generated"
+				std_calls
+			end
+
+    frequency(calls)
   end
 
 	def user_movie_pairs(rented) do
