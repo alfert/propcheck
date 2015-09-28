@@ -101,7 +101,7 @@ defmodule PropCheck.Test.Movies do
 	end
 	def make_pairs(password, movies) do
 		movies
-			|> Stream.map &({password, &1})
+			|> Enum.map &({password, &1})
 	end
 
   @doc "Initialize the model"
