@@ -41,7 +41,7 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   @doc "Start playing ping pong"
-  def play_pipng_pong(player) do
+  def play_ping_pong(player) do
     send(player, :ping_pong)
   end
 
