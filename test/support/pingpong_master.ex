@@ -43,16 +43,23 @@ defmodule PropCheck.Test.PingPongMaster do
   @doc "Start playing ping pong"
   def play_ping_pong(player) do
     send(player, :ping_pong)
+    :ok
   end
 
   @doc "Start playing football"
-  def football(player) do
+  def play_football(player) do
     send(player, {:football, self})
+    receive do
+      reply -> reply
+    end
   end
 
   @doc "Start playing tennis"
   def play_tennis(player) do
     send(player, {:tennis, self})
+    receive do
+      reply -> reply
+    end
   end
 
 
