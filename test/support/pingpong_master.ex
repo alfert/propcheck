@@ -7,7 +7,7 @@ defmodule PropCheck.Test.PingPongMaster do
   use GenServer
 
   def start_link() do
-    GenServer.start_link(PingPongMaster, name: PingPongMaster)
+    GenServer.start_link(__MODULE__, [], name: PingPongMaster)
   end
 
   def stop() do
