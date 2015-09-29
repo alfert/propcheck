@@ -107,7 +107,10 @@ defmodule PropCheck.Test.PingPongStateM do
   def postcondition(_s, {:call, PingPongMaster, :play_ping_pong, [_name]}, :ok), do: true
   def postcondition(_s, {:call, PingPongMaster, :play_tennis, [_name]}, :maybe_later), do: true
   def postcondition(s, {:call, PingPongMaster, :get_score, [name]}, result), do:
-    result == s.scores |> Dict.fetch!(name)
+    # playing ping pong is asynchronuous, therefore the counter in scores
+    # might not be updated properly: our model is eager (and synchronous), but
+    # the real machinery might be updated later
+    result <= s.scores |> Dict.fetch!(name)
   def postcondition(s, {:call, _, f, _}, r) do
     IO.puts "Failing postcondition for call #{f} with result #{inspect r} in state #{inspect s}"
     false
