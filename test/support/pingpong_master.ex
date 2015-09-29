@@ -93,7 +93,10 @@ defmodule PropCheck.Test.PingPongMaster do
     {:reply, {:removed, name}, scores |> Dict.delete(name)}
   end
   def handle_call({:ping, from_name}, _from, scores) do
+    if (scores |> Dict.has_key? from_name) do
     {:reply, :pong, scores |> Dict.update!(from_name, &(&1 + 1))}
+    else
+      {:reply, {:removed, from_name}, scores}
   end
   end
   def handle_call({:get_score, name}, _from, scores) do
