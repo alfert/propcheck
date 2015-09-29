@@ -95,7 +95,8 @@ defmodule PropCheck.Test.PingPongMaster do
   def handle_call({:ping, from_name}, _from, scores) do
     {:reply, :pong, scores |> Dict.update!(from_name, &(&1 + 1))}
   end
-  def handle_call({get_score, name}, _from, scores) do
+  end
+  def handle_call({:get_score, name}, _from, scores) do
     {:reply, scores |> Dict.fetch!(name), scores}
   end
 
