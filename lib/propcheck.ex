@@ -126,7 +126,7 @@ defmodule PropCheck do
     Generates an `ExUnit` testcase for each property of the given module.
     Reporting of failures is then done via the usual `ExUnit` mechanism.
     """
-    defmacro prop_test(mod) when is_atom(mod) do
+    defmacro prop_test(mod) do
       props = mod |> Macro.expand(__CALLER__) |> extract_props
       props |> Enum.map fn {f, 0} ->
         prop_name = "#{f}"
@@ -137,6 +137,7 @@ defmodule PropCheck do
         end
       end
     end
+
     defmacro property_test(p, do: body) when is_binary(p)  do
       prop = p |> Macro.expand(__CALLER__)
       mod = __CALLER__.module
