@@ -33,7 +33,7 @@ defmodule PropCheck.Test.PingPongMaster do
   @doc "Process loop for the ping pong player process"
   def ping_pong_player(name) do
     receive do
-      :ping_pong -> :poing = ping(name)
+      :ping_pong -> :pong = ping(name)
       {:tennis, from} -> send(from, :maybe_later)
       {:football, from} -> send(from, :no_way)
     end
