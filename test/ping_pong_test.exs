@@ -4,5 +4,6 @@ defmodule PropCheck.Test.PingPongTest do
   import PropCheck
 
   prop_test(PropCheck.Test.MasterStateM)
+  prop_test(PropCheck.Test.PingPongStateM)
 
 end
