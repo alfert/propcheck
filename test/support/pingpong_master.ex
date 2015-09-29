@@ -77,7 +77,11 @@ defmodule PropCheck.Test.PingPongMaster do
     end
   end
   def handle_call({:remove_player, name}, _from, scores) do
-    pid = Process.whereis(name)
+    pid = case Process.whereis(name) do
+      nil -> IO.puts("Process #{name} is unknown / not running")
+        true == is_pid(nil)
+      pid -> pid
+    end
     Process.exit(pid, :kill)
     {:reply, {:removed, name}, scores |> Dict.delete(name)}
   end
