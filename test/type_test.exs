@@ -2,6 +2,7 @@ defmodule PropCheck.Test.TypeTest do
 	use ExUnit.Case
 	alias PropCheck.Type.TypeExpr
 	alias PropCheck.Type
+	# @moduletag capture_log: true
 
 	test "all types available" do
 		types = PropCheck.Test.Types
@@ -215,13 +216,14 @@ defmodule PropCheck.Test.TypeTest do
 	 end
 
 	test "check mutual recursive types" do
+		require Logger
 		mod = PropCheck.Test.Types
 		types = PropCheck.Test.Types.__type_debug__()
 		assert length(types) > 0
 		env = Type.create_environment(types, mod)
 
 	 	# assert Type.is_recursive({mod, :t_nat, 0}, env)
-	 	IO.puts "Test check mutual recursive types is not executed!"
+	 	Logger.error "No support yet, thus: testing check mutual recursive types is not executed!"
 	end
 
 	test "simple type generator" do
