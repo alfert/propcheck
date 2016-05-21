@@ -159,7 +159,10 @@ defmodule PropCheck do
         true -> true
         counter_example ->
           raise ExUnit.AssertionError, [
-            message: "Property #{inspect m}.#{f} failed. Counter-Example is: \n#{inspect counter_example}",
+            message: """
+            Property #{inspect m}.#{f} failed. Counter-Example is:
+            #{inspect counter_example, pretty: true}
+            """,
                 expr: nil]
       end
     end
