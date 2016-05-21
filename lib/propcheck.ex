@@ -128,14 +128,14 @@ defmodule PropCheck do
     """
     defmacro prop_test(mod) do
       props = mod |> Macro.expand(__CALLER__) |> extract_props
-      props |> Enum.map fn {f, 0} ->
+      props |> Enum.map(fn {f, 0} ->
         prop_name = "#{f}"
         quote do
           test unquote(prop_name) do
             exec_property(unquote(mod), unquote(f))
           end
         end
-      end
+      end)
     end
 
     defmacro property_test(p, do: body) when is_binary(p)  do
@@ -169,10 +169,8 @@ defmodule PropCheck do
     def extract_props(mod) do
       apply(mod,:__info__, [:functions])
         |> Stream.filter(
-          fn {f, 0} -> f
-              |> Atom.to_string
-              |> String.starts_with? "prop_"
-                _ -> false end)
+          fn {f, 0} -> f |> Atom.to_string |> String.starts_with?( "prop_")
+                  _ -> false end)
     end
 
 

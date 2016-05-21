@@ -39,7 +39,7 @@ defmodule PropCheck.Test.PingPongStateM do
   ##
   #####################################################
   @max_players 100
-  @players 1..@max_players |> Enum.map &("player_#{&1}" |> String.to_atom)
+  @players 1..@max_players |> Enum.map(&("player_#{&1}") |> String.to_atom)
 
   def name(), do: elements @players
   def name(%__MODULE__{players: player_list}), do: elements player_list
@@ -72,7 +72,7 @@ defmodule PropCheck.Test.PingPongStateM do
   that the new state can depend on the old state and the returned value.
   """
   def next_state(s, _value, {:call, PingPongMaster, :add_player, [name]}) do
-    case s.players |> Enum.member? name do
+    case s.players |> Enum.member?(name) do
       false -> %__MODULE__{s |
           players: [name | s.players],
           scores: s.scores |> Dict.put(name, 0)}
@@ -93,7 +93,7 @@ defmodule PropCheck.Test.PingPongStateM do
   def precondition(s, {:call, PingPongMaster, do_it, [name]}) when
     do_it in [:remove_player, :play_tennis, :play_ping_pong, :get_score]
   do
-    s.players |> Enum.member? name
+    s.players |> Enum.member?(name)
   end
   def precondition(_state, _call),  do: true
 

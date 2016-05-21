@@ -93,7 +93,7 @@ defmodule PropCheck.Test.PingPongMaster do
     {:reply, {:removed, name}, scores |> Dict.delete(name)}
   end
   def handle_call({:ping, from_name}, _from, scores) do
-    if (scores |> Dict.has_key? from_name) do
+    if (scores |> Dict.has_key?(from_name)) do
     {:reply, :pong, scores |> Dict.update!(from_name, &(&1 + 1))}
     else
       {:reply, {:removed, from_name}, scores}
@@ -107,6 +107,9 @@ defmodule PropCheck.Test.PingPongMaster do
   def terminate(_reason, scores) do
     scores
       |> Dict.keys
-      |> Enum.each &(Process.whereis(&1) |> Process.exit(:kill))
+      |> Enum.each(&(case Process.whereis(&1) do
+          nil -> "Process #{&1} does not exist"
+          pid -> pid |> Process.exit(:kill)
+        end))
   end
 end

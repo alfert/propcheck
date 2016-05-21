@@ -8,11 +8,9 @@ defmodule PropCheck.Properties do
     end
 
     defmacro property(name, opts) do
-        case name do
-            {name, _, _} ->
-                prop_name = :"prop_#{name}"
-            name when is_atom(name) or is_binary(name) or is_list(name) ->
-                prop_name = :"prop_#{name}"
+        prop_name = case name do
+            {name, _, _} -> :"prop_#{name}"
+            name when is_atom(name) or is_binary(name) or is_list(name) -> :"prop_#{name}"
         end
         quote do
             def unquote(prop_name)(), unquote(opts)

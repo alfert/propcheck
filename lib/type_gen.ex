@@ -31,11 +31,11 @@ defmodule PropCheck.TypeGen do
 			|> PropCheck.TypeGen.defined_types
 			|> List.flatten
 		types
-			|> Enum.each &PropCheck.TypeGen.print_types/1
+			|> Enum.each(&PropCheck.TypeGen.print_types/1)
 		#(types |> Enum.map &convert_type/1)
 		(Type.create_environment(types, env.module) |> Type.type_generators )
 		++
-		(types |> Enum.map &generate_type_debug_fun/1)
+		(types |> Enum.map(&generate_type_debug_fun/1))
 		++
 		[(types |> generate_all_types_debug_fun)]
 	end
@@ -48,7 +48,7 @@ defmodule PropCheck.TypeGen do
 		if Module.open? mod do
 			IO.puts "Module #{mod} is open"
 			[:type, :opaque, :typep]
-				|> Enum.map &(Module.get_attribute(mod,&1))
+				|> Enum.map(&(Module.get_attribute(mod,&1)))
 		else
 			IO.puts "Module #{mod} is closed"
 			[beam: Kernel.Typespec.beam_types(mod), attr: mod.__info__(:attributes)]
@@ -149,7 +149,7 @@ defmodule PropCheck.TypeGen do
 	def type_body(ts) when is_tuple(ts) do
 		IO.puts "found a tuple type: #{inspect ts}"
 		types = ts |> :erlang.tuple_to_list
-			|> Enum.map &(type_body &1)
+			|> Enum.map(&(type_body &1))
 		quote do tuple(unquote(types)) end
 	end
 	def type_body(body) do

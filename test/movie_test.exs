@@ -80,7 +80,7 @@ defmodule PropCheck.Test.Movies do
 					 ])
   end
   def command(state = %__MODULE__{rented: rented}) do
-		movies_rented = 0 < (rented |> Dict.values |> List.flatten |> Enum.count)
+		movies_rented = 0 < (rented |> Dict.values() |> List.flatten() |> Enum.count())
 		std_calls = [{1, {:call, MovieServer, :create_account, [name]}},
            {1, {:call, MovieServer, :ask_for_popcorn, []}},
            {1, {:call, MovieServer, :delete_account, [password(state)]}},
@@ -100,13 +100,13 @@ defmodule PropCheck.Test.Movies do
   end
 
 	def user_movie_pairs(rented) do
-		k = rented |> Dict.keys
-		k |> Enum.map(&(make_pairs(&1, rented |> Dict.fetch! &1)))
-			|> List.flatten
+		k = rented |> Dict.keys()
+		k |> Enum.map(&(make_pairs(&1, rented |> Dict.fetch!(&1))))
+			|> List.flatten()
 	end
 	def make_pairs(password, movies) do
 		movies
-			|> Enum.map &({password, &1})
+			|> Enum.map(&({password, &1}))
 	end
 
   @doc "Initialize the model"
@@ -129,27 +129,27 @@ defmodule PropCheck.Test.Movies do
     end
   end
   def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :return_dvd, [password, movie]}), do:
-    %__MODULE__{s | rented: Dict.update!(rented, password, &(&1 |> List.delete movie)) }
+    %__MODULE__{s | rented: Dict.update!(rented, password, &(&1 |> List.delete(movie))) }
   def next_state(s, _v, {:call, _, :ask_for_popcorn, []}), do: s
 
   @doc "Don't return dvds, which are not rented and ensure that the user exists"
   def precondition(state, {:call, _, :return_dvd, [password, movie]}) do
     state.rented |> Dict.has_key?(password) and
-			state.rented |> Dict.fetch!(password) |> Enum.member? movie
+			state.rented |> Dict.fetch!(password) |> Enum.member?(movie)
   end
 	def precondition(state, {:call, _, :rent_dvd, [password, movie]}) do
 		state.users |> Enum.member?(password) and
 		not (state.rented |> Dict.get(password, []) |> Enum.member?(movie))
 	end
 	def precondition(state, {:call, _, :delete_account, [password]}) do
-		state.users |> Enum.member? password
+		state.users |> Enum.member?(password)
 	end
   def precondition(_state, _call), do: true
 
   @doc "Postconditions ensure that the expected effect has taken place"
   def postcondition(%__MODULE__{users: users}, {:call, _, :create_account,[_name]}, result) do
     # the new user was formerly not available
-    not (users |> Enum.member? result)
+    not (users |> Enum.member?(result))
   end
   def postcondition(%__MODULE__{rented: rented}, {:call, _, :delete_account,[passwd]}, result) do
     # deletion does not work always
@@ -161,13 +161,13 @@ defmodule PropCheck.Test.Movies do
   def postcondition(state, {:call, _, :rent_dvd,[passwd, movie]}, result) do
     # if the movie exists, then it must there, otherwise not
     case is_available(state, movie) do
-      true  -> result |> Enum.member? movie
+      true  -> result |> Enum.member?(movie)
       false -> IO.puts "rent_dvd #{movie} for passwd #{passwd} did not succeed"
-				not (result |> Enum.member? movie)
+				not (result |> Enum.member?(movie))
     end
   end
 	def postcondition(_state, {:call, _, :return_dvd, [_passwd, movie]}, result) do
-	  not (result |> Enum.member? movie)
+	  not (result |> Enum.member?(movie))
 	end
   def postcondition(_state, {:call, _, :ask_for_popcorn, []}, result) do
     result == :bon_appetit
@@ -178,10 +178,10 @@ defmodule PropCheck.Test.Movies do
   def is_available(%__MODULE__{rented: rented}, movie) do
     max_av = @available_movies |> Keyword.get(movie, -1)
 		available = max_av - (rented
-			|> Dict.values
-			|> List.flatten
+			|> Dict.values()
+			|> List.flatten()
 			|> Stream.filter(&(&1 == movie))
-			|> Enum.count)
+			|> Enum.count())
 		available > 0
   end
 

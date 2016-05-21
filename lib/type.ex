@@ -39,7 +39,7 @@ defmodule PropCheck.Type do
 		def preorder(%__MODULE__{args: []} = t), do: [t]
 		def preorder(%__MODULE__{args: a} = t) when not is_list(a), do: [t]
 		def preorder(%__MODULE__{args: a} = t), do:
-			[t | (a |> Enum.map fn ta -> preorder(ta) end) |> List.flatten]
+			[t | (a |> Enum.map(fn ta -> preorder(ta) end)) |> List.flatten()]
 		# this looks strange, but this is an arg value which is not a type expr.
 		# this is ignored in the pre-order, its value is contained in the type expr above.
 		def preorder(_value), do: []
@@ -67,7 +67,7 @@ defmodule PropCheck.Type do
 		types
 			|> Stream.map(&parse_type/1)
 			|> Stream.map(fn %__MODULE__{name: n, params: p} = t -> {{mod, n, length(p)}, t} end)
-			|> Enum.into %{}
+			|> Enum.into(%{})
 	end
 
 
@@ -79,7 +79,7 @@ defmodule PropCheck.Type do
 		{name, _, ps} = header
 		params = case ps do
 			nil -> []
-			l -> l |> Enum.map fn({n, _, _}) -> n end
+			l -> l |> Enum.map(fn({n, _, _}) -> n end)
 		end
 		# IO.puts "Type body is: #{inspect body}"
 		%__MODULE__{name: name, params: params, kind: kind, expr: parse_body(body, params)}
@@ -88,24 +88,24 @@ defmodule PropCheck.Type do
 	@doc "Parse the body of a type spec as an Elixir AST and returns the `TypeExp`"
 	@spec parse_body(Macro.t, [atom]) :: t
 	def parse_body({:|, _, children}, params) do
-		args = children |> Enum.map fn child -> parse_body(child, params) end
+		args = children |> Enum.map(fn child -> parse_body(child, params) end)
 		%TypeExpr{constructor: :union, args: args}
 	end
 	def parse_body({:{}, _, children}, params) do
-		args = children |> Enum.map fn child -> parse_body(child, params) end
+		args = children |> Enum.map(fn child -> parse_body(child, params) end)
 		%TypeExpr{constructor: :tuple, args: args}
 	end
 	def parse_body({:%{}, _, children}, params) do
-		args = children |> Enum.map fn child -> parse_body(child, params) end
+		args = children |> Enum.map(fn child -> parse_body(child, params) end)
 		%TypeExpr{constructor: :map, args: args}
 	end
 	def parse_body({:.., _, children}, params) do
-		args = children |> Enum.map fn child -> parse_body(child, params) end
+		args = children |> Enum.map(fn child -> parse_body(child, params) end)
 		%TypeExpr{constructor: :range, args: args}
 	end
 	# strange syntax tree: a ĺist containing the function type
 	def parse_body([{:->, _, children}], params) do
-		args = children |> Enum.map fn child -> parse_body(child, params) end
+		args = children |> Enum.map(fn child -> parse_body(child, params) end)
 		%TypeExpr{constructor: :fun, args: args}
 	end
 	# "..." is any arity of a function or a non-empty list.
@@ -116,7 +116,7 @@ defmodule PropCheck.Type do
 		%TypeExpr{constructor: :ref, args: [type]}
 	end
 	def parse_body({t, _, nil}, params) when is_atom(t) do
-		case params |> Enum.member? t do
+		case params |> Enum.member?(t) do
 			true -> %TypeExpr{constructor: :var, args: [t]}
 			_ -> %TypeExpr{constructor: :ref, args: [t]}
 		end
@@ -127,18 +127,18 @@ defmodule PropCheck.Type do
 		%TypeExpr{constructor: :list, args: [p]}
 	end
 	def parse_body({type, _, sub}, params) when is_atom(type) do
-		ps = sub |> Enum.map fn s -> parse_body s, params end
+		ps = sub |> Enum.map(fn s -> parse_body s, params end)
 		%TypeExpr{constructor: :ref, args: [type, ps]}
 	end
 	def parse_body(body, params) when is_tuple(body) do
 		args = body
-			|> Tuple.to_list
-			|> Enum.map fn child -> parse_body(child, params) end
+			|> Tuple.to_list()
+			|> Enum.map(fn child -> parse_body(child, params) end)
 		%TypeExpr{constructor: :tuple, args: args}
 	end
 	def parse_body(body, params) when is_list(body) do
 		args = body
-			|> Enum.map fn child -> parse_body(child, params) end
+			|> Enum.map(fn child -> parse_body(child, params) end)
 		%TypeExpr{constructor: :list, args: args}
 	end
 	def parse_body(body, _params) when not(is_tuple(body)) do
@@ -198,12 +198,12 @@ defmodule PropCheck.Type do
 	end
 	def is_recursive(mfa, %TypeExpr{constructor: con, args: args}, env)
 			when con in  [:union, :tuple, :list, :map] do
-		args |> Enum.any? fn t -> is_recursive(mfa, t, env) end
+		args |> Enum.any?(fn t -> is_recursive(mfa, t, env) end)
 	end
 	def is_recursive(mfa, %TypeExpr{constructor: :ref, args: [t | args]}, env) do
 		case match_type(mfa, t) do
 			true -> true
-			_ -> args |> Enum.any? fn ta -> is_recursive(mfa, ta, env) end
+			_ -> args |> Enum.any?(fn ta -> is_recursive(mfa, ta, env) end)
 		end
 	end
 
