@@ -6,8 +6,11 @@ defmodule PropCheck.Test.Movies do
 	use PropCheck.Properties
   use PropCheck.StateM
   use ExUnit.Case
+	require Logger
 
   alias PropCheck.Test.MovieServer
+
+	@moduletag capture_log: true
 
   #########################################################################
   ### The properties
@@ -162,7 +165,7 @@ defmodule PropCheck.Test.Movies do
     # if the movie exists, then it must there, otherwise not
     case is_available(state, movie) do
       true  -> result |> Enum.member?(movie)
-      false -> IO.puts "rent_dvd #{movie} for passwd #{passwd} did not succeed"
+      false -> Logger.debug "rent_dvd #{movie} for passwd #{passwd} did not succeed"
 				not (result |> Enum.member?(movie))
     end
   end

@@ -1,7 +1,8 @@
 defmodule PropcheckTest do
 	use ExUnit.Case
+	require Logger
 
-	alias PropCheck.Test.Stack
+	@moduletag capture_log: true
 
 	@type my_stack(t) :: [t]
 	@type tagged_stack(t) :: {:stack, [t]}
@@ -11,7 +12,7 @@ defmodule PropcheckTest do
 		types = Kernel.Typespec.beam_types(:proper_gen)
 		refute nil == types
 
-		IO.inspect types
+		Logger.debug(inspect types, pretty: true)
 	end
 
   def recode_vars({:var, line, n}), do:

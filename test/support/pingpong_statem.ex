@@ -85,7 +85,8 @@ defmodule PropCheck.Test.PingPongStateM do
       scores: s.scores |> Dict.delete(name)}
   end
   def next_state(s, _value, {:call, PingPongMaster, :play_ping_pong, [name]}) do
-    %__MODULE__{s | scores: s.scores |> Dict.update!(name, &(&1 + 1))}
+    %__MODULE__{s |
+      scores: s.scores |> Dict.update!(name, &(&1 + 1))}
   end
   def next_state(state, _value, _call), do: state
 
