@@ -36,11 +36,11 @@ defmodule Propcheck.Mixfile do
   defp deps do
     [
       {:dialyze, "0.2.0", only: [:dev, :test]},
-      {:ex_doc, "~>0.8", only: :dev},
-      {:earmark, ">= 0.0.0", only: :dev},
+      {:ex_doc, "~>0.11.0", only: :dev},
+      {:earmark, ">= 0.2.1", only: :dev},
       # {:proper, git: "../../erlang/proper/proper"}
-      {:proper, github: "manopapad/proper", ref: "fa58f8" } # from 26.05.2015
-      # {:proper, "~> 1.1.0"}
+      # {:proper, github: "manopapad/proper", ref: "fa58f8" } # from 26.05.2015
+      {:proper, "~> 1.1.1-beta"}
     ]
   end
 end
