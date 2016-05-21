@@ -6,22 +6,44 @@ defmodule PropCheck.Test.PingPongStateM do
 
   use PropCheck.StateM
   alias PropCheck.Test.PingPongMaster
+  require Logger
 
   property "ping-pong playing works fine" do
     forall cmds in commands(__MODULE__) do
       trap_exit do
+        kill_all_player_processes()
         PingPongMaster.start_link()
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         PingPongMaster.stop
         #IO.puts "Property finished. result is: #{inspect r}"
         when_fail(
-          IO.puts("History: #{inspect history}\nState: #{inspect state}\nResult: #{inspect result}"),
+          IO.puts("""
+          History: #{inspect history, pretty: true}\n
+          State: #{inspect state, pretty: true}\n
+          Result: #{inspect result, pretty: true}
+          """),
           aggregate(command_names(cmds), result == :ok))
       end
     end
   end
 
+
+  # ensure all player processes are dead
+  defp kill_all_player_processes() do
+    Process.registered
+    |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
+    |> Enum.each(fn name ->
+      pid = Process.whereis(name)
+      if is_pid(pid) and Process.alive?(pid) do
+        try do
+          Process.exit(pid, :kill)
+        catch
+          _what, _value -> Logger.debug "Already killed process #{name}"
+        end
+      end
+    end)
+  end
 
   #####################################################
   ##
@@ -31,7 +53,7 @@ defmodule PropCheck.Test.PingPongStateM do
   #####################################################
 
   defstruct players: [],
-    scores: HashDict.new()
+    scores: %{}
 
   #####################################################
   ##
@@ -52,7 +74,8 @@ defmodule PropCheck.Test.PingPongStateM do
       {:call, PingPongMaster, :remove_player, [name(state)]},
       {:call, PingPongMaster, :get_score, [name(state)]},
       {:call, PingPongMaster, :play_ping_pong,[name(state)]},
-      {:call, PingPongMaster, :play_tennis,[name(state)]}
+      {:call, PingPongMaster, :play_tennis,[name(state)]},
+      {:call, PingPongMaster, :play_football,[name(state)]}
       ])
   end
 
@@ -75,18 +98,18 @@ defmodule PropCheck.Test.PingPongStateM do
     case s.players |> Enum.member?(name) do
       false -> %__MODULE__{s |
           players: [name | s.players],
-          scores: s.scores |> Dict.put(name, 0)}
+          scores: s.scores |> Map.put(name, 0)}
       true  -> s
     end
   end
   def next_state(s, _value, {:call, PingPongMaster, :remove_player, [name]}) do
     %__MODULE__{s |
       players: s.players |> List.delete(name),
-      scores: s.scores |> Dict.delete(name)}
+      scores: s.scores |> Map.delete(name)}
   end
   def next_state(s, _value, {:call, PingPongMaster, :play_ping_pong, [name]}) do
     %__MODULE__{s |
-      scores: s.scores |> Dict.update!(name, &(&1 + 1))}
+      scores: s.scores |> Map.update!(name, &(&1 + 1))}
   end
   def next_state(state, _value, _call), do: state
 
@@ -107,11 +130,12 @@ defmodule PropCheck.Test.PingPongStateM do
   def postcondition(_s, {:call, PingPongMaster, :add_player, [_name]}, :ok), do: true
   def postcondition(_s, {:call, PingPongMaster, :play_ping_pong, [_name]}, :ok), do: true
   def postcondition(_s, {:call, PingPongMaster, :play_tennis, [_name]}, :maybe_later), do: true
+  def postcondition(_s, {:call, PingPongMaster, :play_football, [_name]}, :no_way), do: true
   def postcondition(s, {:call, PingPongMaster, :get_score, [name]}, result), do:
     # playing ping pong is asynchronuous, therefore the counter in scores
     # might not be updated properly: our model is eager (and synchronous), but
     # the real machinery might be updated later
-    result <= s.scores |> Dict.fetch!(name)
+    result <= s.scores |> Map.fetch!(name)
   def postcondition(s, {:call, _, f, _}, r) do
     IO.puts "Failing postcondition for call #{f} with result #{inspect r} in state #{inspect s}"
     false

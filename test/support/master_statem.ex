@@ -10,6 +10,7 @@ defmodule PropCheck.Test.MasterStateM do
   property "master works fine" do
     forall cmds in commands(__MODULE__) do
       trap_exit do
+        kill_all_player_processes()
         PingPongMaster.start_link()
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
@@ -20,6 +21,23 @@ defmodule PropCheck.Test.MasterStateM do
           aggregate(command_names(cmds), result == :ok))
       end
     end
+  end
+
+  # ensure all player processes are dead
+  defp kill_all_player_processes() do
+    require Logger
+    Process.registered
+    |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
+    |> Enum.each(fn name ->
+      pid = Process.whereis(name)
+      if is_pid(pid) and Process.alive?(pid) do
+        try do
+          Process.exit(pid, :kill)
+        catch
+          _what, _value -> Logger.debug "Already killed process #{name}"
+        end
+      end
+    end)
   end
 
   #####################################################

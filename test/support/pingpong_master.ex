@@ -2,57 +2,103 @@ defmodule PropCheck.Test.PingPongMaster do
   @moduledoc """
   This is the ping pong master from Proper's Process Interaction Tutorial,
   translated from Erlang to Elixir.
+
+  From the tutorial introduction:
+
+  In this tutorial, we will use PropEr to test a group of interacting processes.
+  The system under test consists of one master and multiple slave processes.
+  The main concept is that the master plays ping-pong (i.e. exchanges ping and
+  pong messages) with all slave processes, which do not interact with each other.
+  For the rest of this tutorial, we will refer to the slave processes as
+  the ping-pong players.
+
   """
 
   use GenServer
   require Logger
-  
+
+  # -------------------------------------------------------------------
+  # Master's API
+  # -------------------------------------------------------------------
+
   def start_link() do
-    GenServer.start_link(__MODULE__, [], name: PingPongMaster)
+    GenServer.start_link(__MODULE__, [], name: __MODULE__, opts: [:debug])
   end
 
   def stop() do
-    GenServer.cast(PingPongMaster, :stop)
+    GenServer.cast(__MODULE__, :stop)
+    Process.unregister __MODULE__
   end
 
   def add_player(name) do
-    GenServer.call(PingPongMaster, {:add_player, name})
+    GenServer.call(__MODULE__, {:add_player, name})
   end
 
   def remove_player(name) do
-    GenServer.call(PingPongMaster, {:remove_player, name})
+    GenServer.call(__MODULE__, {:remove_player, name})
   end
 
   def ping(from_name) do
-    GenServer.call(PingPoingMaster, {:ping, from_name})
+    Logger.debug "Ping Pong Game for #{inspect from_name}"
+    r = GenServer.call(__MODULE__, {:ping, from_name})
+    Logger.debug "Ping Pong result: #{inspect r}"
+    r
   end
 
   def get_score(name) do
-    GenServer.call(PingPongMaster, {:get_score, name})
+    GenServer.call(__MODULE__, {:get_score, name})
   end
 
+  # -------------------------------------------------------------------
+  # Player's internal loop
+  # -------------------------------------------------------------------
+
   @doc "Process loop for the ping pong player process"
-  def ping_pong_player(name) do
+  def ping_pong_player(name, counter \\ 1) do
+    Logger.debug "Player #{inspect name} is waiting round #{counter}"
     receive do
-      :ping_pong        -> :pong = ping(name)
+      :ping_pong        -> # Logger.debug "Player #{inspect name} got a request for a ping-pong game"
+          ping(name)
       {:tennis, from}   -> send(from, :maybe_later)
       {:football, from} -> send(from, :no_way)
     end
-    ping_pong_player(name)
+    # Logger.debug "Player #{inspect name} is recursive"
+    ping_pong_player(name, counter + 1)
   end
+
+  # -------------------------------------------------------------------
+  # Player's API
+  # -------------------------------------------------------------------
 
   @doc "Start playing ping pong"
   def play_ping_pong(player) do
-    send(player, :ping_pong)
-    :ok
+    pid = Process.whereis(player)
+    if is_pid(pid) and Process.alive?(pid) do
+      send(player, :ping_pong)
+      :ok
+    else
+      {:dead_player, player}
+    end
   end
 
   @doc "Start playing football"
   def play_football(player) do
+    case robust_send(player, {:football, self}) do
+      :ok ->
+        receive do
+          reply -> reply
+          after 500 -> "Football timeout!"
+        end
+      return -> return
+    end
+  end
+
+  @doc "Start playing football"
+  def play_football_eager(player) do
     send(player, {:football, self})
     receive do
       reply -> reply
-      after 500 -> "Football timeout!"
+    after 500 -> "Football timeout!"
     end
   end
 
@@ -65,11 +111,21 @@ defmodule PropCheck.Test.PingPongMaster do
     end
   end
 
+  defp robust_send(name, msg) do
+    try do
+      send(name, msg)
+      :ok
+    catch
+      :error, :badarg -> {:dead_player, name}
+    end
+  end
 
-  ######################################################################
+  # -------------------------------------------------------------------
+  # Callbacks
+  # -------------------------------------------------------------------
 
   def init([]) do
-    {:ok, HashDict.new}
+    {:ok, %{}}
   end
 
   def handle_cast(:stop, scores) do
@@ -77,47 +133,49 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   def handle_call({:add_player, name}, _from, scores) do
-    case Process.whereis(name) do
+    case Map.get(scores, name) do
       nil ->
           pid = spawn(fn() -> ping_pong_player(name) end)
           true = Process.register(pid, name)
-          {:reply, :ok, scores |> Dict.put(name, 0)}
-      pid when is_pid(pid) ->
+          {:reply, :ok, scores |> Map.put(name, 0)}
+      s when is_integer(s) ->
           Logger.debug "add_player: player #{name} already exists!"
           {:reply, :ok, scores}
     end
   end
   def handle_call({:remove_player, name}, _from, scores) do
-    pid = case Process.whereis(name) do
+    case Process.whereis(name) do
       nil -> Logger.debug("Process #{name} is unknown / not running")
-        true == is_pid(nil)
-      pid -> pid
+      pid ->
+        if Process.alive? pid do
+          Process.exit(pid, :kill)
+        else
+          Logger.debug "player #{name} with pid #{pid} is not alive any longer"
+        end
     end
-    if Process.alive? pid do
-      Process.exit(pid, :kill)
-    else
-      Logger.debug "player #{name} with pid #{pid} is not alive any longer"
-    end
-    {:reply, {:removed, name}, scores |> Dict.delete(name)}
+    # Process.whereis(name) |> Process.exit(:kill)
+    {:reply, {:removed, name}, scores |> Map.delete(name)}
   end
   def handle_call({:ping, from_name}, _from, scores) do
-    if (scores |> Dict.has_key?(from_name)) do
-      {:reply, :pong, scores |> Dict.update!(from_name, &(&1 + 1))}
+    # Logger.debug "Master: Ping Pong Game for #{inspect from_name}"
+    if (scores |> Map.has_key?(from_name)) do
+      {:reply, :pong, scores |> Map.update!(from_name, &(&1 + 1))}
     else
       {:reply, {:removed, from_name}, scores}
     end
   end
   def handle_call({:get_score, name}, _from, scores) do
-    {:reply, scores |> Dict.fetch!(name), scores}
+    {:reply, scores |> Map.fetch!(name), scores}
   end
 
   @doc "Terminates all clients"
-  def terminate(_reason, scores) do
+  def terminate(reason, scores) do
+    Logger.info "Terminate Master with scores #{inspect scores}"
     scores
-      |> Dict.keys
+      |> Map.keys
       |> Enum.each(&(case Process.whereis(&1) do
-          nil -> "Process #{&1} does not exist"
-          pid -> pid |> Process.exit(:kill)
+          nil -> "terminate: Process #{&1} does not exist"
+          pid -> Process.exit(pid, :kill)
         end))
   end
 end
