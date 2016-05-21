@@ -28,7 +28,7 @@ defmodule PropCheck.Test.MasterStateM do
   ##
   #####################################################
   @max_players 100
-  @players 1..@max_players |> Enum.map &("player_#{&1}" |> String.to_atom)
+  @players 1..@max_players |> Enum.map(&("player_#{&1}") |> String.to_atom)
 
   def name(), do: oneof @players
 
@@ -74,7 +74,7 @@ defmodule PropCheck.Test.MasterStateM do
 
   @doc "can the call in the current state be made?"
   def precondition(players, {:call, PingPongMaster, :remove_player, [name]}) do
-    players |> Set.member? name
+    players |> Set.member?(name)
   end
   def precondition(_state, _call),  do: true
 
@@ -85,7 +85,7 @@ defmodule PropCheck.Test.MasterStateM do
   """
   def postcondition(players, {:call, PingPongMaster, :remove_player, [name]}, r = {:removed, n}) do
     # IO.puts "postcondition: remove player #{name} => #{inspect r} in state: #{inspect players}"
-    (name == n) and (players |> Set.member? name)
+    (name == n) and (players |> Set.member?(name))
   end
   def postcondition(players, {:call, PingPongMaster, :get_score, [_name]}, score) do
     score == 0
