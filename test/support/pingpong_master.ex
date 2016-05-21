@@ -5,7 +5,8 @@ defmodule PropCheck.Test.PingPongMaster do
   """
 
   use GenServer
-
+  require Logger
+  
   def start_link() do
     GenServer.start_link(__MODULE__, [], name: PingPongMaster)
   end
@@ -33,8 +34,8 @@ defmodule PropCheck.Test.PingPongMaster do
   @doc "Process loop for the ping pong player process"
   def ping_pong_player(name) do
     receive do
-      :ping_pong -> :pong = ping(name)
-      {:tennis, from} -> send(from, :maybe_later)
+      :ping_pong        -> :pong = ping(name)
+      {:tennis, from}   -> send(from, :maybe_later)
       {:football, from} -> send(from, :no_way)
     end
     ping_pong_player(name)
@@ -51,6 +52,7 @@ defmodule PropCheck.Test.PingPongMaster do
     send(player, {:football, self})
     receive do
       reply -> reply
+      after 500 -> "Football timeout!"
     end
   end
 
@@ -59,6 +61,7 @@ defmodule PropCheck.Test.PingPongMaster do
     send(player, {:tennis, self})
     receive do
       reply -> reply
+      after 500 -> "Tennis timeout!"
     end
   end
 
@@ -80,24 +83,29 @@ defmodule PropCheck.Test.PingPongMaster do
           true = Process.register(pid, name)
           {:reply, :ok, scores |> Dict.put(name, 0)}
       pid when is_pid(pid) ->
+          Logger.debug "add_player: player #{name} already exists!"
           {:reply, :ok, scores}
     end
   end
   def handle_call({:remove_player, name}, _from, scores) do
     pid = case Process.whereis(name) do
-      nil -> IO.puts("Process #{name} is unknown / not running")
+      nil -> Logger.debug("Process #{name} is unknown / not running")
         true == is_pid(nil)
       pid -> pid
     end
-    Process.exit(pid, :kill)
+    if Process.alive? pid do
+      Process.exit(pid, :kill)
+    else
+      Logger.debug "player #{name} with pid #{pid} is not alive any longer"
+    end
     {:reply, {:removed, name}, scores |> Dict.delete(name)}
   end
   def handle_call({:ping, from_name}, _from, scores) do
     if (scores |> Dict.has_key?(from_name)) do
-    {:reply, :pong, scores |> Dict.update!(from_name, &(&1 + 1))}
+      {:reply, :pong, scores |> Dict.update!(from_name, &(&1 + 1))}
     else
       {:reply, {:removed, from_name}, scores}
-  end
+    end
   end
   def handle_call({:get_score, name}, _from, scores) do
     {:reply, scores |> Dict.fetch!(name), scores}
