@@ -30,4 +30,5 @@ defmodule PropCheck.FSM do
         more_commands(n, cmd_type), run_commands(mod, cmds),
         run_commands(mod, cmds, env), target_states(mod, from, data, call),
         state_names(history)], to: :proper_fsm
+  defdelegate [command_names(cmds)], to: :proper_statem
 end
