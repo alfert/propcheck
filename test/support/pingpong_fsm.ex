@@ -9,6 +9,29 @@ defmodule PropCheck.Test.PingPongFSM do
   alias PropCheck.Test.PingPongMaster
   require Logger
 
+
+  property "ping-pong FSM works properly" do
+    numtests(1_000, forall cmds in commands(__MODULE__) do
+      trap_exit do
+        kill_all_player_processes()
+        PingPongMaster.start_link()
+        r = run_commands(__MODULE__, cmds)
+        {history, state, result} = r
+        PingPongMaster.stop
+        #IO.puts "Property finished. result is: #{inspect r}"
+        when_fail(
+          IO.puts("""
+          History: #{inspect history, pretty: true}\n
+          State: #{inspect state, pretty: true}\n
+          Result: #{inspect result, pretty: true}
+          """),
+          aggregate(command_names(cmds), result == :ok))
+      end
+    end)
+  end
+
+
+
   defstruct players: [], scores: %{}
 
   @max_players 100
@@ -87,27 +110,6 @@ defmodule PropCheck.Test.PingPongFSM do
     end
   end
   def next_state_data(_from, _target, state, _res, _call), do: state
-
-
-  property "ping-pong FSM works properly" do
-    numtests(3_000, forall cmds in commands(__MODULE__) do
-      trap_exit do
-        kill_all_player_processes()
-        PingPongMaster.start_link()
-        r = run_commands(__MODULE__, cmds)
-        {history, state, result} = r
-        PingPongMaster.stop
-        #IO.puts "Property finished. result is: #{inspect r}"
-        when_fail(
-          IO.puts("""
-          History: #{inspect history, pretty: true}\n
-          State: #{inspect state, pretty: true}\n
-          Result: #{inspect result, pretty: true}
-          """),
-          aggregate(PropCheck.StateM.command_names(cmds), result == :ok))
-      end
-    end)
-  end
 
   # ensure all player processes are dead
   defp kill_all_player_processes() do
