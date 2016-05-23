@@ -39,9 +39,9 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   def ping(from_name) do
-    Logger.debug "Ping Pong Game for #{inspect from_name}"
+    #Logger.debug "Ping Pong Game for #{inspect from_name}"
     r = GenServer.call(__MODULE__, {:ping, from_name})
-    Logger.debug "Ping Pong result: #{inspect r}"
+    #Logger.debug "Ping Pong result: #{inspect r}"
     r
   end
 
@@ -55,7 +55,7 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Process loop for the ping pong player process"
   def ping_pong_player(name, counter \\ 1) do
-    Logger.debug "Player #{inspect name} is waiting round #{counter}"
+    #Logger.debug "Player #{inspect name} is waiting round #{counter}"
     receive do
       :ping_pong        -> # Logger.debug "Player #{inspect name} got a request for a ping-pong game"
           ping(name)
@@ -71,14 +71,9 @@ defmodule PropCheck.Test.PingPongMaster do
   # -------------------------------------------------------------------
 
   @doc "Start playing ping pong"
+  @spec play_ping_pong(atom) :: :ok | {:dead_player, atom}
   def play_ping_pong(player) do
-    pid = Process.whereis(player)
-    if is_pid(pid) and Process.alive?(pid) do
-      send(player, :ping_pong)
-      :ok
-    else
-      {:dead_player, player}
-    end
+    robust_send(player, :ping_pong)
   end
 
   @doc "Start playing football"
@@ -104,10 +99,13 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Start playing tennis"
   def play_tennis(player) do
-    send(player, {:tennis, self})
-    receive do
-      reply -> reply
-      after 500 -> "Tennis timeout!"
+    case robust_send(player, {:tennis, self}) do
+      :ok ->
+        receive do
+          reply -> reply
+          after 500 -> "Tennis timeout!"
+        end
+      return -> return
     end
   end
 
