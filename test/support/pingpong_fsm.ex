@@ -47,12 +47,18 @@ defmodule PropCheck.Test.PingPongFSM do
                     {:call, _, :get_score, [player]}, res) do
     res <= scores[player]
   end
-  def postcondition(_from, _target, _state, {:call, _m, _f, _a}, _res) do
-    true
-  end
+  def postcondition(_f, _t, _s, {:call, _m, :add_player, _a}, :ok), do: true
+  def postcondition(_f, :player_state, _s, {:call, _m, :remove_player, _a}, {:removed, _}), do: true
+  def postcondition(:player_state, _t, _s, {:call, _m, :play_ping_pong, _a}, :ok), do: true
+  def postcondition(:player_state, _t, _s, {:call, _m, :play_tennis, _a}, :maybe_later), do: true
+  def postcondition(:player_state, _t, _s, {:call, _m, :play_football, _a}, :no_way), do: true
+  def postcondition(:player_state, _t, _s, {:call, _m, :play_ping_pong, _a}, {:dead_player, _}), do: true
+  def postcondition(:player_state, _t, _s, {:call, _m, :play_tennis, _a}, {:dead_player, _}), do: true
+  def postcondition(:player_state, _t, _s, {:call, _m, :play_football, _a}, {:dead_player, _}), do: true
+  def postcondition(_from, _target, _state, {:call, _m, _f, _a}, _res), do: false
 
   # state data is updates for adding, removing, playing.
-  def next_state_data(_from, _target, state, _res, {:call, _m, :add_player, [p]}) do
+  def next_state_data(_from, :player_state, state, _res, {:call, _m, :add_player, [p]}) do
     if not Enum.member?(state.players, p) do
       %__MODULE__{state |
           players: [p | state.players],
@@ -62,7 +68,7 @@ defmodule PropCheck.Test.PingPongFSM do
       state
     end
   end
-  def next_state_data(_from, _target, state, _res, {:call, _, :remove_player, [p]}) do
+  def next_state_data(:player_state, _target, state, _res, {:call, _, :remove_player, [p]}) do
     if Enum.member?(state.players, p) do
       %__MODULE__{state |
           players: List.delete(state.players, p),
@@ -72,7 +78,7 @@ defmodule PropCheck.Test.PingPongFSM do
       state
     end
   end
-  def next_state_data(_from, _target, state, _res, {:call, _, :play_ping_pong, [p]}) do
+  def next_state_data(:player_state, _target, state, _res, {:call, _, :play_ping_pong, [p]}) do
     if Enum.member?(state.players, p) do
       %__MODULE__{state |
           scores: Map.update!(state.scores, p, fn v -> v+1 end)}

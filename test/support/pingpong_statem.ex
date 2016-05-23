@@ -131,6 +131,9 @@ defmodule PropCheck.Test.PingPongStateM do
   def postcondition(_s, {:call, PingPongMaster, :play_ping_pong, [_name]}, :ok), do: true
   def postcondition(_s, {:call, PingPongMaster, :play_tennis, [_name]}, :maybe_later), do: true
   def postcondition(_s, {:call, PingPongMaster, :play_football, [_name]}, :no_way), do: true
+  def postcondition(_s, {:call, PingPongMaster, :play_ping_pong, [name]}, {:dead_player, name}), do: true
+  def postcondition(_s, {:call, PingPongMaster, :play_tennis, [name]}, {:dead_player, name}), do: true
+  def postcondition(_s, {:call, PingPongMaster, :play_football, [name]}, {:dead_player, name}), do: true
   def postcondition(s, {:call, PingPongMaster, :get_score, [name]}, result), do:
     # playing ping pong is asynchronuous, therefore the counter in scores
     # might not be updated properly: our model is eager (and synchronous), but
