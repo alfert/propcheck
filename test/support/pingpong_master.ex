@@ -168,11 +168,11 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Terminates all clients"
   def terminate(reason, scores) do
-    Logger.info "Terminate Master with scores #{inspect scores}"
+    # Logger.info "Terminate Master with scores #{inspect scores}"
     scores
       |> Map.keys
       |> Enum.each(&(case Process.whereis(&1) do
-          nil -> "terminate: Process #{&1} does not exist"
+          nil -> :ok # "terminate: Process #{&1} does not exist"
           pid -> Process.exit(pid, :kill)
         end))
   end
