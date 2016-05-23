@@ -9,7 +9,7 @@ defmodule PropCheck.Test.PingPongStateM do
   require Logger
 
   property "ping-pong playing works fine" do
-    forall cmds in commands(__MODULE__) do
+    numtests(3_000, forall cmds in commands(__MODULE__) do
       trap_exit do
         kill_all_player_processes()
         PingPongMaster.start_link()
@@ -25,7 +25,7 @@ defmodule PropCheck.Test.PingPongStateM do
           """),
           aggregate(command_names(cmds), result == :ok))
       end
-    end
+    end)
   end
 
 
