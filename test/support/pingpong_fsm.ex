@@ -34,7 +34,7 @@ defmodule PropCheck.Test.PingPongFSM do
     ]
   end
 
-  defp play_games(s = %__MODULE__{players: ps}) do
+  defp play_games(%__MODULE__{players: ps}) do
     [:play_ping_pong, :play_tennis, :play_football]
     |> Enum.map(fn f -> {:history, {:call, PingPongMaster, f, [oneof ps]}} end)
   end
@@ -48,7 +48,7 @@ defmodule PropCheck.Test.PingPongFSM do
     res <= scores[player]
   end
   def postcondition(_f, _t, _s, {:call, _m, :add_player, _a}, :ok), do: true
-  def postcondition(_f, :player_state, _s, {:call, _m, :remove_player, _a}, {:removed, _}), do: true
+  def postcondition(:player_state, _t, _s, {:call, _m, :remove_player, _a}, {:removed, _}), do: true
   def postcondition(:player_state, _t, _s, {:call, _m, :play_ping_pong, _a}, :ok), do: true
   def postcondition(:player_state, _t, _s, {:call, _m, :play_tennis, _a}, :maybe_later), do: true
   def postcondition(:player_state, _t, _s, {:call, _m, :play_football, _a}, :no_way), do: true
@@ -104,7 +104,7 @@ defmodule PropCheck.Test.PingPongFSM do
           State: #{inspect state, pretty: true}\n
           Result: #{inspect result, pretty: true}
           """),
-          aggregate(state_names(cmds), result == :ok))
+          aggregate(PropCheck.StateM.command_names(cmds), result == :ok))
       end
     end)
   end
