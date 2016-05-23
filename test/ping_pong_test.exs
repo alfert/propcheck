@@ -8,6 +8,8 @@ defmodule PropCheck.Test.PingPongTest do
 
   prop_test(PropCheck.Test.PingPongStateM)
 
+  prop_test(PropCheck.Test.PingPongFSM)
+
   test "Strange Call Sequence" do
     PropCheck.Test.PingPongMaster.start_link
     PropCheck.Test.PingPongMaster.add_player :player_73
