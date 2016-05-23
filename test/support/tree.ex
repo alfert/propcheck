@@ -48,6 +48,13 @@ defmodule PropCheck.Test.Tree do
 
 	# delete is faulty, therefore we expect it fail now and then
 	property "delete" do
+		fails(forall {x, t} in {integer, tree(integer)} do
+			not member(delete(t, x), x)
+		end)
+	end
+
+	# delete2 is not faulty
+	property "delete2" do
 		forall {x, t} in {integer, tree(integer)} do
 			not member(delete2(t, x), x)
 		end

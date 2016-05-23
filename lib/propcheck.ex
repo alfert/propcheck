@@ -155,8 +155,15 @@ defmodule PropCheck do
     @doc "Runs the property as part of an `ExUnit` test case."
     def exec_property(m, f ) do
       p = apply(m, f, [])
+      should_fail = is_tuple(p) and elem(p, 0) == :fails
       case PropCheck.quickcheck(p, [:long_result]) do
-        true -> true
+        true when not should_fail -> true
+        true when should_fail ->
+          raise ExUnit.AssertionError, [
+            message:
+              "Property #{inspect m}.#{f} should fail, but succeeded for all test data :-(",
+            expr: nil]
+        counter_example when should_fail -> true
         counter_example ->
           raise ExUnit.AssertionError, [
             message: """
