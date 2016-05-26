@@ -1,13 +1,46 @@
 defmodule PropCheck do
-    #
-    # Test generation macros
-    #
+    @moduledoc """
+    Provides the macros and functions for property based testing
+    using `proper` as base implementation. `PropCheck` supports many
+    features of `proper`, but the automated generation of test data
+    generators is only partially supported due to internal features of
+    `proper` focussing of Erlang only.
 
-    defmacro forall({:in, _, [x, rawtype]}, [do: prop]) do
+    To use `PropCheck`, you need to add `use PropCheck.Properties` to your
+    Elixir files. This gives you access to the functions and macros
+    defined here as well as to the `property` macros. In most examples shown
+    here, we directly use the `quickcheck` function, but typically you
+    use the `property` macro instead to define test cases for `ExUnit`.
+    """
+
+    @doc """
+    A property that should hold for all values generated.
+
+        iex> use PropCheck.Properties
+        iex> quickcheck(
+        ...> forall n <- nat do
+        ...>   n >= 0
+        ...> end)
+        true
+
+    If you need more than one generator, collect the generator names
+    and the generators definitions in tuples, respectively:
+
+        iex> use PropCheck.Properties
+        iex> quickcheck(
+        ...> forall [n, l] <- [nat, list(nat)] do
+        ...>   n * Enum.sum(l) >= 0
+        ...> end
+        ...>)
+        true
+    """
+    @in_ops [:<-, :in]
+    defmacro forall({op, _, [x, rawtype]}, do: prop) when op in @in_ops do
         quote do
             :proper.forall(unquote(rawtype), fn(unquote(x)) -> unquote(prop) end)
         end
     end
+    defmacro forall(binding, property), do: syntax_error("var <- generator, do: prop")
 
     defmacro implies(pre, prop) do
         quote do
@@ -211,6 +244,8 @@ defmodule PropCheck do
     defp us2time(n) do
       {rem(div(n, tera), mega), rem(div(n, mega), mega), rem(n, mega)}
     end
+
+    defp syntax_error(err), do: raise(ArgumentError, "Usage: " <> err)
 
 
 end
