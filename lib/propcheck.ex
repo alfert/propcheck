@@ -6,11 +6,16 @@ defmodule PropCheck do
     generators is only partially supported due to internal features of
     `proper` focussing of Erlang only.
 
+    ## Using `PropCheck`
     To use `PropCheck`, you need to add `use PropCheck.Properties` to your
     Elixir files. This gives you access to the functions and macros
     defined here as well as to the `property` macros. In most examples shown
     here, we directly use the `quickcheck` function, but typically you
     use the `property` macro instead to define test cases for `ExUnit`.
+
+    ## Acknowldgement
+    Very much of the documentation is immediately taken from the
+    `proper` API documentation.
     """
 
     @doc """
@@ -24,7 +29,7 @@ defmodule PropCheck do
         true
 
     If you need more than one generator, collect the generator names
-    and the generators definitions in tuples, respectively:
+    and the generators definitions in tuples or lists, respectively:
 
         iex> use PropCheck.Properties
         iex> quickcheck(
@@ -42,54 +47,104 @@ defmodule PropCheck do
     end
     defmacro forall(binding, property), do: syntax_error("var <- generator, do: prop")
 
-    defmacro implies(pre, prop) do
+    @doc """
+    This wrapper only makes sense when in the scope of at least one
+    `forall`. The `precondition` field must be a boolean expression or a
+    statement block that returns a boolean. If the precondition evaluates to
+    `false` for the variable instances produced in the enclosing `forall`
+    wrappers, the test case is rejected (it doesn't count as a failing test
+    case), and `PropCheck` starts over with a new random test case. Also, in
+    verbose mode, an `x` is printed on screen.
+
+        iex> use PropCheck.Properties
+        iex> require Integer
+        iex> quickcheck(
+        ...> forall n <- nat do
+        ...>    implies rem(n,2) == 0, do: Integer.is_even n
+        ...> end
+        ...>)
+        true
+    """
+    defmacro implies(precondition, do: property) do
         quote do
-            :proper.implies(unquote(pre), PropCheck.delay(unquote(prop)))
+            :proper.implies(unquote(precondition), delay(unquote(property)))
         end
     end
 
+    @doc """
+    The `action` field should contain an expression or statement block
+    that produces some side-effect (e.g. prints something to the screen).
+    In case this test fails, `action` will be executed. Note that the output
+    of such actions is not affected by the verbosity setting of the main
+    application.
+    """
     defmacro when_fail(action, prop) do
         quote do
-            :proper.whenfail(PropCheck.delay(unquote(action)), PropCheck.delay(unquote(prop)))
+            :proper.whenfail(delay(unquote(action)), delay(unquote(prop)))
         end
     end
 
+    @doc """
+    If the code inside `prop` spawns and links to a process that dies
+    abnormally, PropEr will catch the exit signal and treat it as a test
+    failure, instead of crashing. `trap_exit` cannot contain any more
+    wrappers.
+
+        iex> use PropCheck.Properties
+        iex> quickcheck(
+        ...>   trap_exit(forall n <- nat do
+        ...>     # this must fail
+        ...>     pid = spawn_link(fn() -> n / 0 end)
+        ...>     # wait for arrivial of the dieing linked process signal
+        ...>     :timer.sleep(50)
+        ...>     true #
+        ...>   end)
+        ...> )
+        false
+    """
     defmacro trap_exit(do: prop) do
       quote do
-        :proper.trapexit(PropCheck.delay(unquote(prop)))
+        :proper.trapexit(delay(unquote(prop)))
       end
     end
 
     defmacro trap_exit(prop) do
         quote do
-            :proper.trapexit(PropCheck.delay(unquote(prop)))
+            :proper.trapexit(delay(unquote(prop)))
         end
     end
 
-    defmacro timeout(limit, prop) do
-        quote do
-            :proper.timeout(unquote(limit), PropCheck.delay(unquote(prop)))
-        end
-    end
+    @doc """
+    Signifies that `prop` should be considered failing if it takes more
+    than `time_limit` milliseconds to return. The purpose of this wrapper is
+    to test code that may hang if something goes wrong. `timeout` cannot
+    contain any more wrappers.
 
+        iex> use PropCheck.Properties
+        iex> quickcheck(
+        ...>   timeout(100, forall n <- nat do
+        ...>     :ok == :timer.sleep(n*100)
+        ...>   end)
+        ...> )
+        false
 
-    # Generator macros
-    defmacro force(x) do
+    """
+    defmacro timeout(time_limit, prop) do
         quote do
-            unquote(x).()
-        end
-    end
-
-    defmacro delay(x) do
-        quote do
-            fn() -> unquote(x) end
+            :proper.timeout(unquote(time_limit), delay(unquote(prop)))
         end
     end
 
     defmacro lazy(x) do
-        quote do
-            :proper_types.lazy(PropCheck.delay(unquote(x)))
-        end
+      quote do
+        :proper_types.lazy(delay(unquote(x)))
+      end
+    end
+
+    defmacro delay(x) do
+      quote do
+        fn() -> unquote(x) end
+      end
     end
 
     defmacro sized(size_arg, gen) do
@@ -116,7 +171,7 @@ defmodule PropCheck do
 
     defmacro shrink(gen, alt_gens) do
         quote do
-            :proper_types.shrinkwith(PropCheck.delay(unquote(gen)), PropCheck.delay(unquote(alt_gens)))
+            :proper_types.shrinkwith(delay(unquote(gen)), delay(unquote(alt_gens)))
         end
     end
 
