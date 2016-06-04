@@ -172,6 +172,13 @@ defmodule PropCheck do
     @doc """
     Binds a generator to a name for use in another generator.
 
+    The `binding` has the generator syntax `x <- type`.
+    To produce an instance of this type, all appearances of the variables
+    in `x` are replaced inside `generator` by their corresponding values in a
+    randomly generated instance of `type`. It's OK for the `gen` part to
+    evaluate to a type - in that case, an instance of the inner type is
+    generated recursively.
+
         iex> use PropCheck
         iex> even = let n <- nat do
         ...>  n * 2
@@ -181,6 +188,9 @@ defmodule PropCheck do
         ...>     rem(n, 2) == 0
         ...>   end)
         true
+
+    If you require more than one type, put the pairs of variable and type
+    into a list as shown in the example below.
 
         iex> use PropCheck
         iex> even_factor = let [n <- nat, m <- nat] do
@@ -193,25 +203,14 @@ defmodule PropCheck do
         true
 
     """
-    @let_ops [:<-, :in]
-    defmacro let({op, _, [x, rawtype]},[{:do, gen}]) when op in @let_ops do
+    defmacro let({:<-, _, [x, rawtype]}, generator) do
+        [{:do, gen}] = generator
         quote do
             :proper_types.bind(unquote(rawtype), fn(unquote(x)) -> unquote(gen) end, false)
         end
     end
 
-    defmacro let({op, _, [x, rawtype]}, opts) when op in @let_ops do
-        unless opts[:when], do: throw(:badarg)
-        condition = opts[:when]
-        strict = Keyword.get(opts, :strict, true)
-        quote do
-            :proper_types.add_constraint(unquote(rawtype),
-              fn(unquote(x)) -> unquote(condition) end, unquote(strict))
-        end
-    end
-
-    defmacro let([{op, _, [x, rawtype]} | rest] = bindings, [{:do, gen}])
-      when op in @let_ops do
+    defmacro let([{:<-, _, _} | rest] = bindings, [{:do, gen}]) do
         bound = let_bind(bindings) |> Enum.reverse
         vars = bound |> Enum.map(&(elem(&1, 0)))
         raw_types = bound |> Enum.map(&(elem(&1, 1)))
@@ -220,14 +219,54 @@ defmodule PropCheck do
             fn(unquote(vars)) -> unquote(gen) end, false)
         end
     end
-    def let_bind({op, _, [x, rawtype]} = bind), do: {x, rawtype}
-    def let_bind([{op, _, [x, rawtype]}]) when op in @let_ops do
+    defp let_bind({:<-, _, [x, rawtype]} = bind), do: {x, rawtype}
+    defp let_bind([{:<-, _, [x, rawtype]}]) do
       {x, rawtype}
     end
-    def let_bind([{op, _, [x, rawtype]} | rest]) when op in @let_ops do
+    defp let_bind([{:<-, _, [x, rawtype]} | rest]) do
       [{x, rawtype}, let_bind(rest)]
     end
 
+    @doc """
+    This produces a specialization of a generator, encoded as
+    a binding of form `x <- type` (as in the let macro).
+
+    The specialization of members of `type` that satisfy the
+    constraint `condition` - that is,
+    those members for which the function `fn(x) -> condition end` returns
+    `true`. If the constraint is very strict - that is, only a small
+    percentage of instances of `type` pass the test - it will take a lot of
+    tries for the instance generation subsystem to randomly produce a valid
+    instance. This will result in slower testing, and testing may even be
+    stopped short, in case the `constraint_tries` limit is reached (see the
+    "Options" section in the documentation of the {@link proper} module).
+
+    If this is the case, it would be more appropriate to generate valid instances
+    of the specialized type using the `let` macro. Also make sure that even
+    small instances can satisfy the constraint, since PropEr will only try
+    small instances at the start of testing. If this is not possible, you can
+    instruct PropEr to start at a larger size, by supplying a suitable value
+    for the `start_size` option (see the "Options" section in the
+    documentation of the {@link proper} module).
+
+        iex> use PropCheck
+        iex> even = such_that n <- nat, when: rem(n, 2) == 0
+        iex> quickcheck(
+        ...>   forall n <- even do
+        ...>     rem(n, 2) == 0
+        ...>   end)
+        true
+
+    """
+    defmacro such_that({:<-, _, [x, rawtype]} = binding, condition)  do
+        unless condition[:when], do: throw(:badarg)
+        cond_block = condition[:when]
+        strict = Keyword.get(condition, :strict, true)
+        quote do
+            :proper_types.add_constraint(unquote(rawtype),
+              fn(unquote(x)) -> unquote(cond_block) end, unquote(strict))
+        end
+    end
 
     defmacro shrink(gen, alt_gens) do
         quote do
