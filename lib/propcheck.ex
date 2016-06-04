@@ -7,7 +7,7 @@ defmodule PropCheck do
     `proper` focussing of Erlang only.
 
     ## Using `PropCheck`
-    To use `PropCheck`, you need to add `use PropCheck.Properties` to your
+    To use `PropCheck`, you need to add `use PropCheck` to your
     Elixir files. This gives you access to the functions and macros
     defined here as well as to the `property` macros. In most examples shown
     here, we directly use the `quickcheck` function, but typically you
@@ -17,11 +17,19 @@ defmodule PropCheck do
     Very much of the documentation is immediately taken from the
     `proper` API documentation.
     """
+    defmacro __using__(_) do
+        quote do
+            import PropCheck
+            import PropCheck.Properties
+            import :proper_types, except: [lazy: 1, to_binary: 1, function: 2]
+        end
+    end
+
 
     @doc """
     A property that should hold for all values generated.
 
-        iex> use PropCheck.Properties
+        iex> use PropCheck
         iex> quickcheck(
         ...> forall n <- nat do
         ...>   n >= 0
@@ -31,7 +39,7 @@ defmodule PropCheck do
     If you need more than one generator, collect the generator names
     and the generators definitions in tuples or lists, respectively:
 
-        iex> use PropCheck.Properties
+        iex> use PropCheck
         iex> quickcheck(
         ...> forall [n, l] <- [nat, list(nat)] do
         ...>   n * Enum.sum(l) >= 0
@@ -56,7 +64,7 @@ defmodule PropCheck do
     case), and `PropCheck` starts over with a new random test case. Also, in
     verbose mode, an `x` is printed on screen.
 
-        iex> use PropCheck.Properties
+        iex> use PropCheck
         iex> require Integer
         iex> quickcheck(
         ...> forall n <- nat do
@@ -90,7 +98,7 @@ defmodule PropCheck do
     failure, instead of crashing. `trap_exit` cannot contain any more
     wrappers.
 
-        iex> use PropCheck.Properties
+        iex> use PropCheck
         iex> quickcheck(
         ...>   trap_exit(forall n <- nat do
         ...>     # this must fail
@@ -120,7 +128,7 @@ defmodule PropCheck do
     to test code that may hang if something goes wrong. `timeout` cannot
     contain any more wrappers.
 
-        iex> use PropCheck.Properties
+        iex> use PropCheck
         iex> quickcheck(
         ...>   timeout(100, forall n <- nat do
         ...>     :ok == :timer.sleep(n*100)
@@ -135,15 +143,23 @@ defmodule PropCheck do
         end
     end
 
-    defmacro lazy(x) do
+    @doc """
+    Mostly internally used macro to create a lazy value for `proper`. The parameter
+    `delayed_value` needs to be an already `delay`ed value.
+    """
+    defmacro lazy(delayed_value) do
       quote do
-        :proper_types.lazy(delay(unquote(x)))
+        :proper_types.lazy(delay(unquote(delayed_value)))
       end
     end
 
-    defmacro delay(x) do
+    @doc """
+    Delays the evaluation of `expr`. Required for defining recursive
+    generators and similar situations.
+    """
+    defmacro delay(expr) do
       quote do
-        fn() -> unquote(x) end
+        fn() -> unquote(expr) end
       end
     end
 
@@ -153,13 +169,38 @@ defmodule PropCheck do
         end
     end
 
-    defmacro let({:"=", _, [x, rawtype]},[{:do, gen}]) do
+    @doc """
+    Binds a generator to a name for use in another generator.
+
+        iex> use PropCheck
+        iex> even = let n <- nat do
+        ...>  n * 2
+        ...> end
+        iex> quickcheck(
+        ...>   forall n <- even do
+        ...>     rem(n, 2) == 0
+        ...>   end)
+        true
+
+        iex> use PropCheck
+        iex> even_factor = let [n <- nat, m <- nat] do
+        ...>  n * m * 2
+        ...> end
+        iex> quickcheck(
+        ...>   forall n <- even_factor do
+        ...>     rem(n, 2) == 0
+        ...>   end)
+        true
+
+    """
+    @let_ops [:<-, :in]
+    defmacro let({op, _, [x, rawtype]},[{:do, gen}]) when op in @let_ops do
         quote do
             :proper_types.bind(unquote(rawtype), fn(unquote(x)) -> unquote(gen) end, false)
         end
     end
 
-    defmacro let({:"=", _, [x, rawtype]}, opts) do
+    defmacro let({op, _, [x, rawtype]}, opts) when op in @let_ops do
         unless opts[:when], do: throw(:badarg)
         condition = opts[:when]
         strict = Keyword.get(opts, :strict, true)
@@ -168,6 +209,25 @@ defmodule PropCheck do
               fn(unquote(x)) -> unquote(condition) end, unquote(strict))
         end
     end
+
+    defmacro let([{op, _, [x, rawtype]} | rest] = bindings, [{:do, gen}])
+      when op in @let_ops do
+        bound = let_bind(bindings) |> Enum.reverse
+        vars = bound |> Enum.map(&(elem(&1, 0)))
+        raw_types = bound |> Enum.map(&(elem(&1, 1)))
+        quote do
+          :proper_types.bind(unquote(raw_types),
+            fn(unquote(vars)) -> unquote(gen) end, false)
+        end
+    end
+    def let_bind({op, _, [x, rawtype]} = bind), do: {x, rawtype}
+    def let_bind([{op, _, [x, rawtype]}]) when op in @let_ops do
+      {x, rawtype}
+    end
+    def let_bind([{op, _, [x, rawtype]} | rest]) when op in @let_ops do
+      [{x, rawtype}, let_bind(rest)]
+    end
+
 
     defmacro shrink(gen, alt_gens) do
         quote do
