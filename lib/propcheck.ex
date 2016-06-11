@@ -13,6 +13,9 @@ defmodule PropCheck do
     here, we directly use the `quickcheck` function, but typically you
     use the `property` macro instead to define test cases for `ExUnit`.
 
+    Also availables are the value generators which are imported directly
+    from `proper_types`. 
+
     ## Acknowldgements
     Very much of the documentation is immediately taken from the
     `proper` API documentation.
