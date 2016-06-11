@@ -8,7 +8,29 @@ defmodule Propcheck.Mixfile do
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+      package: package,
+     name: "PropCheck - Property Testing with PropEr for Elixir",
+     source_url: "https://github.com/alfert/coverex",
+     homepage_url: "https://github.com/alfert/coverex",
+     docs: [readme: "README.md"],
+     description: description,
      deps: deps]
+  end
+
+  # Hex Package description
+  defp description do
+    """
+    PropCheck provides property based testing and is an Elixir layer around
+    PropEr. It tries to be compatible to Quuvic's QuickCheck Elixir library.
+    """
+  end
+
+  # Hex Package definition
+  defp package do
+    [maintainers: ["Klaus Alfert"],
+     licenses: ["GPL 3.0"],
+     links: %{"GitHub" => "https://github.com/alfert/propcheck"}
+    ]
   end
 
   # Configuration for the OTP application
