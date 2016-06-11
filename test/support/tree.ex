@@ -48,6 +48,9 @@ defmodule PropCheck.Test.Tree do
 
 	# delete is faulty, therefore we expect it fail now and then
 	property "delete" do
+		# faulty_tree = such_that [x,t] <- {integer, tree(integer)} when
+		# 	[x, x | l ] === pre_order(t) |> Enum.filter(&(&1 == x))
+
 		fails(forall {x, t} in {integer, tree(integer)} do
 			not member(delete(t, x), x)
 		end)
@@ -134,7 +137,10 @@ defmodule PropCheck.Test.Tree do
     def tree6(s, g), do:
     	frequency [
     		{1, tree6(0, g)},
-    		{9, letshrink([l, r] = [tree6(div(s, 2), g), tree6(div(s, 2), g)]) do
+    		{9, let_shrink([
+						l <- tree6(div(s, 2), g),
+						r <- tree6(div(s, 2), g)
+					]) do
     				{:node, g, l, r}
     			end
     			}
