@@ -5,12 +5,7 @@ defmodule PropCheck.TypeGen do
 	This is Elixir version of PropEr's parse transformation
 	"""
 
-	@doc """
-	This function lists the types defined in the module. If the module is open (i.e. it is
-	currently compiled) it shall work, but also after the compilation. The first one is required
-	for adding type generator functions during compilation, the latter is used for inspecting
-	and generating functions for types in a remote defined module (e.g. from the the Standard lib)
-	"""
+
 	alias PropCheck.Type
 
 	defmacro __using__(_options) do
