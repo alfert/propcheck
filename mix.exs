@@ -10,9 +10,9 @@ defmodule Propcheck.Mixfile do
      start_permanent: Mix.env == :prod,
       package: package,
      name: "PropCheck - Property Testing",
-     source_url: "https://github.com/alfert/coverex",
-     homepage_url: "https://github.com/alfert/coverex",
-     docs: [extras: ["README.md"], extra_section: "Introduction"],
+     source_url: "https://github.com/alfert/propcheck",
+     homepage_url: "https://github.com/alfert/propcheck",
+     docs: [extras: ["README.md"], extra_section: "Overview"],
      description: description,
      deps: deps]
   end
