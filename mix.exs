@@ -9,10 +9,10 @@ defmodule Propcheck.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
       package: package,
-     name: "PropCheck - Property Testing with PropEr for Elixir",
+     name: "PropCheck - Property Testing",
      source_url: "https://github.com/alfert/coverex",
      homepage_url: "https://github.com/alfert/coverex",
-     docs: [readme: "README.md"],
+     docs: [extras: ["README.md"], extra_section: "Introduction"],
      description: description,
      deps: deps]
   end
@@ -37,7 +37,7 @@ defmodule Propcheck.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger],
+    [applications: [:logger, :proper],
      mod: {PropCheck.App, []}]
   end
 
