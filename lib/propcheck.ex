@@ -52,12 +52,13 @@ defmodule PropCheck do
         true
     """
     @in_ops [:<-, :in]
+    defmacro forall(binding, property)
     defmacro forall({op, _, [var, rawtype]}, do: prop) when op in @in_ops do
         quote do
             :proper.forall(unquote(rawtype), fn(unquote(var)) -> unquote(prop) end)
         end
     end
-    defmacro forall(binding, property), do: syntax_error("var <- generator, do: prop")
+    defmacro forall(_binding, _property), do: syntax_error("var <- generator, do: prop")
 
     @doc """
     A property that is only tested if a condition is true.
@@ -235,7 +236,7 @@ defmodule PropCheck do
         end
     end
 
-    defmacro let([{:<-, _, _} | rest] = bindings, [{:do, gen}]) do
+    defmacro let([{:<-, _, _} | _rest] = bindings, [{:do, gen}]) do
         bound = let_bind(bindings) |> Enum.reverse
         vars = bound |> Enum.map(&(elem(&1, 0)))
         raw_types = bound |> Enum.map(&(elem(&1, 1)))
@@ -244,7 +245,7 @@ defmodule PropCheck do
             fn(unquote(vars)) -> unquote(gen) end, false)
         end
     end
-    defp let_bind({:<-, _, [var, rawtype]} = bind), do: {var, rawtype}
+    defp let_bind({:<-, _, [var, rawtype]} = _bind), do: {var, rawtype}
     defp let_bind([{:<-, _, [var, rawtype]}]) do
       {var, rawtype}
     end
@@ -283,7 +284,8 @@ defmodule PropCheck do
         true
 
     """
-    defmacro such_that({:<-, _, [var, rawtype]} = binding, condition)  do
+    defmacro such_that(binding, condition)
+    defmacro such_that({:<-, _, [var, rawtype]}, condition)  do
         unless condition[:when], do: throw(:badarg)
         cond_block = condition[:when]
         strict = Keyword.get(condition, :strict, true)
@@ -308,7 +310,8 @@ defmodule PropCheck do
         true
 
     """
-    defmacro such_that_maybe({:<-, _, [x, rawtype]} = binding, condition)  do
+    defmacro such_that_maybe(binding, condition)
+    defmacro such_that_maybe({:<-, _, [x, rawtype]} = _binding, condition)  do
         unless condition[:when], do: throw(:badarg)
         cond_block = condition[:when]
         strict = Keyword.get(condition, :strict, false)
@@ -384,7 +387,7 @@ defmodule PropCheck do
                 fn(unquote(var)) -> unquote(gen) end, true)
         end
     end
-    defmacro let_shrink([{:<-, _, _} | rest] = bindings, [do: gen]) do
+    defmacro let_shrink([{:<-, _, _} | _rest] = bindings, [do: gen]) do
         bound = let_bind(bindings) |> Enum.reverse
         vars = bound |> Enum.map(&(elem(&1, 0)))
         raw_types = bound |> Enum.map(&(elem(&1, 1)))
@@ -464,7 +467,7 @@ defmodule PropCheck do
             message:
               "Property #{inspect m}.#{f} should fail, but succeeded for all test data :-(",
             expr: nil]
-        counter_example when should_fail -> true
+        _counter_example when should_fail -> true
         counter_example ->
           raise ExUnit.AssertionError, [
             message: """
@@ -499,7 +502,6 @@ defmodule PropCheck do
                  with_title(title), equals(a,b)], to: :proper
 
     # Helper functions
-    defmacrop kilo, do: 1_000
     defmacrop mega, do: 1_000_0000
     defmacrop tera, do: 1_000_0000_000_0000
     defp fork_seed(:undefined = u), do: u

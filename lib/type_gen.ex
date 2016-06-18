@@ -51,13 +51,13 @@ defmodule PropCheck.TypeGen do
 		end
 	end
 
-	def print_types({kind, {:::, _, [lhs, rhs]=t }, _env})
+	def print_types({kind, {:::, _, [lhs, rhs]= _type }, _env})
 	when kind in [:type, :opaque, :typep] do
 		IO.puts "Type definition for #{inspect lhs} ::= #{inspect rhs}"
 	end
 
 	@doc "Generates a `type_debug body(name, args)` containing the type definition before compilation. "
-	def generate_type_debug_fun({kind, {:::, _, [{name, _, args}, _rhs]} = t, _env} = typedef) do
+	def generate_type_debug_fun({_kind, {:::, _, [{name, _, args}, _rhs]} = _t, _env} = typedef) do
 		a = if args == nil, do: 0, else: length(args)
 		t = Macro.escape(typedef)
 		quote do
@@ -102,7 +102,7 @@ defmodule PropCheck.TypeGen do
 			unquote(name)()
 		end
 	end
-	def type_header([{name, _, vars} = head, _rhs]) when is_atom(name) do
+	def type_header([{name, _, _vars} = head, _rhs]) when is_atom(name) do
 		head
 	end
 
