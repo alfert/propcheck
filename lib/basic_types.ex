@@ -27,6 +27,8 @@ defmodule PropCheck.BasicTypes do
 
   @type frequency :: pos_integer
 
+  @type size :: non_neg_integer
+  @type value :: any
 
   @doc """
   All integers between `low` and `high`, bounds included.
@@ -195,7 +197,8 @@ defmodule PropCheck.BasicTypes do
 
   For reasons of efficiency, functions are never produced as instances of
   this type.
-  *CAUTION:* Instances of this type are expensive to produce, shrink and instance-
+
+  **CAUTION:** Instances of this type are expensive to produce, shrink and instance-
   check, both in terms of processing time and consumed memory. Only use this
   type if you are certain that you need it.
   """
@@ -208,16 +211,16 @@ defmodule PropCheck.BasicTypes do
   #
   ###############################################
 
-  @doc "All integers: `integer(:inf, :inf)`"
+  @doc "All integers, i.e. `integer(:inf, :inf)`"
   @spec integer() :: type
   def integer(), do: integer(:inf, :inf)
-  @doc "Strictly positive integers: `integer(1, :inf)`"
+  @doc "Strictly positive integers, i.e. `integer(1, :inf)`"
   @spec pos_integer :: type
   def pos_integer(), do: integer(1, :inf)
-  @doc "Non negative integers: `integer(0, :inf)`"
+  @doc "Non negative integers, i.e. `integer(0, :inf)`"
   @spec non_neg_integer :: type
   def non_neg_integer(), do: integer(0, :inf)
-  @doc "Negative integers: `integer(:inf, -1)`"
+  @doc "Negative integers, i.e. `integer(:inf, -1)`"
   @spec neg_integer :: type
   def neg_integer(), do: integer(:inf, -1)
 
@@ -225,14 +228,14 @@ defmodule PropCheck.BasicTypes do
   @spec range(ext_int, ext_int) ::type
   def range(low, high), do: integer(low, high)
 
-  @doc "All floats: `float(:inf, :inf)`"
+  @doc "All floats, i.e. `float(:inf, :inf)`"
   @spec float() :: type
   def float(), do: float(:inf, :inf)
-  @doc "Non negative floats: `float(0.0, inf)`"
+  @doc "Non negative floats, i.e. `float(0.0, inf)`"
   @spec non_neg_float() :: type
   def non_neg_float(), do: float(0.0, :inf)
 
-  @doc "Numbers are integers or floats: `union([integer(), float()])`"
+  @doc "Numbers are integers or floats, i.e. `union([integer(), float()])`"
   @spec number() :: type
   def number(), do: union([integer(), float()])
 
@@ -240,23 +243,23 @@ defmodule PropCheck.BasicTypes do
   @spec boolean() :: type
   def boolean(), do: union([false, true])
 
-  @doc "Byte values: `integer(0, 255)`"
+  @doc "Byte values, i.e. `integer(0, 255)`"
   @spec byte() :: type
   def byte(), do: integer(0, 255)
 
-  @doc "Char values (16 bit for some reason): `integer(0, 0xffff)`"
+  @doc "Char values (16 bit for some reason), i.e. `integer(0, 0xffff)`"
   @spec char() :: type
   def char(), do: integer(0, 0xffff)
 
-  @doc "List of any types: `list(any)`"
+  @doc "List of any types, i.e. `list(any)`"
   @spec list() :: type
   def list(), do: list(any)
 
-  @doc "Tuples of any types: `loose_tuple(any)`"
+  @doc "Tuples of any types, i.e. `loose_tuple(any)`"
   @spec tuple() :: type
   def tuple(), do: loose_tuple(any)
 
-  @doc "An Erlang string: `list(char)`"
+  @doc "An Erlang string, i.e. `list(char)`"
   @spec char_list() :: type
   def char_list(), do: list(char)
 
@@ -268,11 +271,11 @@ defmodule PropCheck.BasicTypes do
   @spec term() :: type
   def term(), do: any
 
-  @doc "timeout values: `union([non_neg_integer() | :infinity])`"
+  @doc "timeout values, i.e. `union([non_neg_integer() | :infinity])`"
   @spec timeout() :: type
   def timeout(), do: union([non_neg_integer(), :infinity])
 
-  @doc "Arity is a byte value: `integer(0, 255)`"
+  @doc "Arity is a byte value, i.e. `integer(0, 255)`"
   @spec arity() :: type
   def arity(), do: integer(0, 255)
 
@@ -350,6 +353,108 @@ defmodule PropCheck.BasicTypes do
     let l <- list(elem_type), do: :lists.sort(l)
   end
 
+  @doc """
+  A specialization of `default/2`.
 
+  Parameters `default` and `type` are
+  assigned weights to be considered by the random instance generator. The
+  shrinking subsystem will ignore the weights and try to shrink using the
+  default value.
+  """
+  @spec weighted_default({frequency,raw_type}, {frequency,raw_type}) :: type
+  def weighted_default(default, type), do: weighted_union([default, type])
+
+  @doc "A function with 0 parameters, i.e. `function(0, ret_type)`"
+  @spec function0(type) :: type
+  def function0(ret_type), do: function(0, ret_type)
+
+  @doc "A function with 1 parameter, i.e. `function(1, ret_type)`"
+  @spec function1(type) :: type
+  def function1(ret_type), do: function(1, ret_type)
+  @doc "A function with 2 parameters, i.e. `function(2, ret_type)`"
+  @spec function2(type) :: type
+  def function2(ret_type), do: function(2, ret_type)
+  @doc "A function with 3 parameters, i.e. `function(3, ret_type)`"
+  @spec function3(type) :: type
+  def function3(ret_type), do: function(3, ret_type)
+  @doc "A function with 4 parameters, i.e. `function(4, ret_type)`"
+  @spec function4(type) :: type
+  def function4(ret_type), do: function(4, ret_type)
+  
+  #######################################################
+  #
+  # Additional type specification functions
+  #
+  #######################################################
+  @doc """
+  Overrides the `size` parameter used when generating instances of
+  `type` with `new_size`.
+
+  Has no effect on size-less types, such as unions.
+  Also, this will not affect the generation of any internal types contained in
+  `type`, such as the elements of a list - those will still be generated
+  using the test-wide value of `size`. One use of this function is to modify
+  types to produce instances that grow faster or slower, like so:
+
+  ```
+  sized(size, resize(size * 2, list(integer()))
+  ```
+
+  The above specifies a list type that grows twice as fast as normal lists.
+  """
+  @spec resize(size, raw_type) :: type
+  defdelegate resize(new_size, raw_type), to: :proper_types
+
+  @doc """
+  This is a predefined constraint that can be applied to random-length
+  list and binary types to ensure that the produced values are never empty.
+
+  Use for e.g. `list/0`, `char_list/0`, `binary/0`
+  """
+  @spec non_empty(raw_type) :: type
+  def non_empty(list_type) do
+    such_that l <- list_type, when: l != [] and l != <<>>
+  end
+
+  @doc """
+  Creates a new type which is equivalent to `type`, but whose instances
+  are never shrunk by the shrinking subsystem.
+  """
+  @spec noshrink(raw_type) :: type
+  defdelegate noshrink(type), to: :proper_types
+
+  @doc """
+  Associates the atom key `parameter` with the value `value` while
+  generating instances of `type`.
+  """
+  @spec with_parameter(atom, value, raw_type) :: type
+  def with_parameter(parameter, value, type), do:
+      with_parameters([{parameter,value}], type)
+
+  @doc """
+  Similar to `with_parameter/3`, but accepts a list of
+  `{parameter, value}` pairs.
+  """
+  @spec with_parameters([{atom, value}], raw_type) :: type
+  defdelegate with_parameters(pv_list, type), to: :proper_types
+
+  @doc """
+  Returns the value associated with `parameter`, or `:undefined` in case
+  `parameter` is not associated with any value.
+
+  Association occurs with calling `with_parameter/3` or `with_parameters/2`
+  before.
+  """
+  @spec parameter(atom) :: value
+  def parameter(parameter), do: parameter(parameter, :undefined)
+  @doc """
+  Returns the value associated with `parameter`, or `default` in case
+  `parameter` is not associated with any value.
+
+  Association occurs with calling `with_parameter/3` or `with_parameters/2`
+  before.
+  """
+  @spec parameter(atom, value) :: value
+  defdelegate parameter(parameter, default), to: :proper_types
 
 end
