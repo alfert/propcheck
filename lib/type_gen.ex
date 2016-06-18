@@ -1,9 +1,10 @@
 defmodule PropCheck.TypeGen do
-	@moduledoc """
-	This module creates type generating functions from type specifications.
-
-	This is Elixir version of PropEr's parse transformation
-	"""
+	@moduledoc false
+	# @moduledoc """
+	# This module creates type generating functions from type specifications.
+	#
+	# This is Elixir version of PropEr's parse transformation
+	# """
 
 
 	alias PropCheck.Type

@@ -1,8 +1,10 @@
 defmodule PropCheck.Type do
-	@moduledoc """
-	This modules defines the syntax tree of types and translates the type definitions
-	of Elixir into the internal format. It also provides functions for analysis of types.
-	"""
+	@moduledoc false
+
+	# @moduledoc """
+	# This modules defines the syntax tree of types and translates the type definitions
+	# of Elixir into the internal format. It also provides functions for analysis of types.
+	# """
 
 	@type env :: %{mfa: __MODULE__.t}
 	@type kind_t :: :type | :opaque | :typep | :none
@@ -23,6 +25,8 @@ defmodule PropCheck.Type do
 		expr: TypeExpr.t, uses: [atom | mfa]}
 
 	defmodule TypeExpr do
+		@moduledoc false
+		
 		@typedoc """
 		Various type constructors, `:ref` denote a reference to an existing type or
 		parameter, `:literal` means a literal value, in many cases, this will be an atom value.

@@ -1,4 +1,8 @@
 defmodule PropCheck.Result do
+  @moduledoc false
+
+  # A GenServer managing the results of test runs
+
   use GenServer
 
   defstruct tests: [], errors: [], current: nil
