@@ -48,10 +48,14 @@ defmodule PropCheck.Test.Tree do
 
 	# delete is faulty, therefore we expect it fail now and then
 	property "delete" do
-		# faulty_tree = such_that [x,t] <- {integer, tree(integer)} when
-		# 	[x, x | l ] === pre_order(t) |> Enum.filter(&(&1 == x))
+		# the faulty tree has a default-value, which occurs more often#
+		# than other values. We also delete this default-value, hence
+		# the buggy delete method should fail.
+		faulty_tree = let x <- integer do
+			{x, tree(default(x, integer))}
+		end
 
-		fails(forall {x, t} in {integer, tree(integer)} do
+		fails(forall {x, t} in faulty_tree do
 			not member(delete(t, x), x)
 		end)
 	end
