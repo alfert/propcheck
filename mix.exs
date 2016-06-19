@@ -8,7 +8,8 @@ defmodule Propcheck.Mixfile do
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-      package: package,
+     test_coverage: [tool: Coverex.Task, console_log: true],
+     package: package,
      name: "PropCheck - Property Testing",
      source_url: "https://github.com/alfert/propcheck",
      homepage_url: "https://github.com/alfert/propcheck",
@@ -58,6 +59,7 @@ defmodule Propcheck.Mixfile do
   defp deps do
     [
       {:dialyze, "0.2.0", only: [:dev, :test]},
+      {:coverex, "~> 1.4", only: :test},
       {:ex_doc, "~>0.11.0", only: :dev},
       {:earmark, ">= 0.2.1", only: :dev},
       # {:proper, git: "../../erlang/proper/proper"}
