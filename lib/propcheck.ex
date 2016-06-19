@@ -141,7 +141,8 @@ defmodule PropCheck do
 
     @opaque counterexample :: :proper.counterexample
     @type user_opts :: [user_opt] | user_opt
-    @opaque outer_test :: :proper.outer_test
+    @type outer_test :: :proper.outer_test
+    @type test :: :proper.test
     @type output_fun :: ((char_list,[term]) -> :ok)
     @type size :: non_neg_integer
     @type user_opt :: :quiet
@@ -173,6 +174,14 @@ defmodule PropCheck do
     @type long_result :: :true | counterexample | error
     @type short_result :: boolean | error
     @type result :: long_result | short_result
+    @type long_module_result :: [{mfa,counterexample}] | error
+    @type short_module_result :: [mfa] | error
+    @type module_result :: long_module_result | short_module_result
+
+    @type sample :: [any]
+    @type title :: char_list | atom | String.t
+    @type stats_printer :: ((sample) -> :ok)
+    		       | ((sample, output_fun) -> :ok)
 
     @doc """
     A property that should hold for all values generated.
@@ -662,19 +671,145 @@ defmodule PropCheck do
     def counterexample(outer_test, user_opts \\ []), do:
       :proper.counterexample(outer_test, user_opts)
 
+    @doc "Tests the accuracy of an exported function's spec."
+    @spec check_spec(mfa, user_opts) :: result
+    def check_spec(mfa, user_opts \\ []), do: :proper.check_spec(mfa, user_opts)
 
-    # Delegates
+    @doc """
+    Re-checks a specific counterexample `cexm` against the property
+    `outer_test` that it previously falsified.
+    """
+    @spec check(outer_test, counterexample, user_opts) :: short_result
+    def check(outer_test, cexm, user_opts \\ []), do:
+      :proper.check(outer_test, cexm, user_opts)
 
-    defdelegate [ #quickcheck(outer_test), quickcheck(outer_test, user_opts),
-                  #counterexample(outer_test), counterexample(outer_test, user_opts),
-                 check(outer_test, cexm), check(outer_test, cexm, user_opts),
-                 module(mod), module(mod, user_opts), check_spec(mfa), check_spec(mfa, user_opts),
-                 check_specs(mod), check_specs(mod, user_opts),
-                 numtests(n, test), fails(test), on_output(print, test), conjunction(sub_props),
-                 collect(category, test), collect(printer, category, test),
-                 aggregate(sample, test), aggregate(printer, sample, test),
-                 classify(count, sample, test), measure(title, sample, test),
-                 with_title(title), equals(a,b)], to: :proper
+    @doc """
+    Tests all properties (i.e., all 0-arity functions whose name begins with
+    `prop_`) exported from module `mod`
+    """
+    @spec module(atom, user_opts) :: module_result
+    def module(mod, user_opts \\ []), do:
+      :proper.module(mod, user_opts)
+
+    @doc "Tests all exported, `-spec`ed functions of a module `mod` against their spec."
+    @spec check_specs(atom, user_opts) :: module_result
+    def check_specs(mod, user_opts \\ []), do: :proper.check_specs(mod, user_opts)
+
+    @doc """
+    Specifies the number `N` of tests to run when testing the property
+    `property`.
+
+    Default is 100.
+    """
+    @spec numtests(pos_integer, outer_test) :: outer_test
+    def numtests(n, property), do: {:numtests, n, property}
+
+    @doc """
+    Specifies that we expect the property `property` to fail for some input.
+
+    The property will be considered failing if it passes all the tests.
+    """
+    @spec fails(outer_test) :: outer_test
+    def fails(property), do: {:fails, property}
+
+    @doc """
+    Specifies an output function `print` to be used by PropCheck for all output
+    printing during the testing of property `property`.
+
+    This wrapper is equivalent to the `on_output` option.
+    """
+    @spec on_output(output_fun, outer_test) :: outer_test
+    def on_output(print, property), do: {:on_output, print, property}
+
+    @doc """
+    Specifies that test cases produced by this property should be
+    categorized under the term `category`.
+
+    This field can be an expression or
+    statement block that evaluates to any term. All produced categories are
+    printed at the end of testing (in case no test fails) along with the
+    percentage of test cases belonging to each category. Multiple `collect`
+    wrappers are allowed in a single property, in which case the percentages for
+    each `collect` wrapper are printed separately.
+    """
+    @spec collect(any, test) :: test
+    def collect(category, property), do: collect(with_title(''), category, property)
+
+    @doc """
+    Same as `collect/2`, but also accepts a fun `printer` to be used
+    as the stats printer.
+    """
+    @spec collect(stats_printer, any, test) :: test
+    def collect(printer, category, property), do:
+        aggregate(printer, [category], property)
+
+    @doc """
+    Same as `collect/2`, but accepts a list of categories under which
+    to classify the produced test case.
+    """
+    @spec aggregate(sample, test) :: test
+    def aggregate(sample, property) do
+        aggregate(with_title(''), sample, property)
+    end
+
+    @doc """
+    Same as `collect/3`, but accepts a list of categories under which
+    to classify the produced test case.
+    """
+    @spec aggregate(stats_printer(), sample(), test()) ::  test()
+    def aggregate(printer, sample, property), do:
+        {:sample, sample, printer, property}
+
+    @doc """
+    Same as `collect/2`, but can accept both a single category and a
+    list of categories.
+
+    `count` is a boolean flag: when `false`, the particular
+    test case will not be counted.
+    """
+    @spec classify(boolean, any | sample, test):: test
+    defdelegate classify(count, sample, test), to: :proper
+
+    @doc """
+    A function that collects numeric statistics on the produced instances.
+
+    The number (or numbers) provided are collected and some statistics over the
+    collected sample are printed at the end of testing (in case no test fails),
+    prepended with `title`, which should be an atom or string.
+    """
+    @spec measure(title, number | [number], test) :: test
+    def measure(title, num, test) when is_binary(title) do
+      measure(String.to_char_list(title), num, test)
+    end
+    def measure(title, num, test), do: :proper.measure(title, num, test)
+
+    @doc """
+    A custom property that evaluates to `true` only if `a === b`, else
+    evaluates to `false` and prints `"A != B"` on the screen.
+    """
+    @spec equals(any, any) :: test
+    def equals(a, b), do:
+        when_fail(:io.format('~w != ~w~n', [a, b]), a === b)
+
+    @doc """
+    A predefined function that accepts an atom or string and returns a
+    stats printing function which is equivalent to the default one, but prints
+    the given title `title` above the statistics.
+    """
+    @spec with_title(title) :: stats_printer
+    def with_title(title) when is_binary(title), do: with_title(String.to_char_list(title))
+    def with_title(title), do: :proper.with_title(title)
+
+    @doc """
+    Returns a property that is true only if all of the sub-properties
+    `sub_properties` are true.
+
+    Each sub-property should be tagged with a distinct atom.
+    If this property fails, each failing sub-property will be reported and saved
+    inside the counterexample along with its tag.
+    """
+    @spec conjunction([{atom, test}]) :: test()
+    def conjunction(sub_properties), do: {:conjunction, sub_properties}
 
     # Helper functions
     defmacrop mega, do: 1_000_0000
