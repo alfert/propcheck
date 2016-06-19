@@ -29,6 +29,10 @@ defmodule PropCheck do
         end
     end
 
+    @opaque counterexample :: :proper.counterexample
+    @type result :: :proper.result
+    @type user_opts :: :proper.user_opts
+    @type outer_test :: :proper.outer_test
 
     @doc """
     A property that should hold for all values generated.
@@ -487,11 +491,41 @@ defmodule PropCheck do
                   _ -> false end)
     end
 
+    @doc """
+    Retrieves the last (simplest) counterexample produced by PropCheck during
+    the most recent testing run.
+    """
+    @spec counterexample() :: counterexample | :undefined
+    def counterexample(), do: :erlang.get(:"$counterexample")
+
+    @doc """
+    Returns a counterexample for each failing property of the most recent
+    module testing run.
+    """
+    @spec counterexamples() :: [{mfa,counterexample}] | :undefined
+    def counterexamples(), do: :erlang.get(:"$counterexamples")
+
+    @doc "Runs PropEr on the property `outer_test`."
+    @spec quickcheck(outer_test) :: result
+    def quickcheck(outer_test), do: quickcheck(outer_test, [])
+
+    @doc "Same as `quickcheck/1`, but also accepts a list of options."
+    @spec quickcheck(outer_test, user_opts) :: result
+    defdelegate quickcheck(outer_test, user_opts), to: :proper
+
+    @equiv quickcheck(outer_test, [long_result])
+    @spec counterexample(outer_test) :: long_result
+    def counterexample(outer_test), do: counterexample(outer_test, []).
+
+    @doc "Same as `counterexample/1`, but also accepts a list of options."
+    @spec counterexample(outer_test, user_opts) :: long_result
+    defdelegate counterexample(outer_test, user_opts), to: :proper
+
 
     # Delegates
 
-    defdelegate [quickcheck(outer_test), quickcheck(outer_test, user_opts),
-                 counterexample(outer_test), counterexample(outer_test, user_opts),
+    defdelegate [ #quickcheck(outer_test), quickcheck(outer_test, user_opts),
+                  #counterexample(outer_test), counterexample(outer_test, user_opts),
                  check(outer_test, cexm), check(outer_test, cexm, user_opts),
                  module(mod), module(mod, user_opts), check_spec(mfa), check_spec(mfa, user_opts),
                  check_specs(mod), check_specs(mod, user_opts),
