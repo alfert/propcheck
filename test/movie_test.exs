@@ -3,7 +3,7 @@ defmodule PropCheck.Test.Movies do
   This module is the Elixir version of the StateM-Tutorial
   from Proper (see http://proper.softlab.ntua.gr/Tutorials/PropEr_testing_of_generic_servers.html).
   """
-	use PropCheck.Properties
+	use PropCheck
   use PropCheck.StateM
   use ExUnit.Case
 	require Logger

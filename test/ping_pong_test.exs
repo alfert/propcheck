@@ -1,7 +1,7 @@
 defmodule PropCheck.Test.PingPongTest do
 
   use ExUnit.Case
-  import PropCheck
+  use PropCheck
   @moduletag capture_log: true
 
   prop_test(PropCheck.Test.MasterStateM)

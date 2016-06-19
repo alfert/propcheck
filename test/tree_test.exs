@@ -1,7 +1,7 @@
 defmodule PropCheck.TreeTest do
 	use ExUnit.Case
 	alias PropCheck.Test.Tree
-	use PropCheck.Properties
+	use PropCheck
 
 	prop_test Tree
 

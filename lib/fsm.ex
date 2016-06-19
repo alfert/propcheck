@@ -7,7 +7,7 @@ defmodule PropCheck.FSM do
   defmacro __using__(_) do
     quote do
       @behaviour :proper_fsm
-      use PropCheck.Properties
+      use PropCheck
       import PropCheck.FSM
     end
   end
