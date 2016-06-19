@@ -1,0 +1,12 @@
+language: elixir
+notifications:
+  recipients:
+    - klaus.alfert@googlemail.com
+otp_release:
+  - 18.2.1
+elixir:
+  - 1.2.2
+before_script:
+  - mix local.hex --force
+  - mix local.rebar
+script: "MIX_ENV=test mix do deps.get, deps.compile, test --cover"

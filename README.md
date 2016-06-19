@@ -4,6 +4,9 @@
 based property testing framework in the spirit of QuickCheck. This project
 is derived from ProperEx, but is mostly completely rewritten.
 
+[![Build Status](https://travis-ci.org/alfert/propcheck.svg?branch=master)](https://travis-ci.org/alfert/propcheck)
+
+
 ## Links to other documentation
 
 The guides for PropEr are an essential set of documents to make use of `PropCheck`
