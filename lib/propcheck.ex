@@ -2,9 +2,9 @@ defmodule PropCheck do
     @moduledoc """
     Provides the macros and functions for property based testing
     using `proper` as base implementation. `PropCheck` supports many
-    features of `proper`, but the automated generation of test data
+    features of `PropEr`, but the automated generation of test data
     generators is only partially supported due to internal features of
-    `proper` focussing of Erlang only.
+    `PropEr` focussing of Erlang only.
 
     ## Using PropCheck
     To use `PropCheck`, you need to add `use PropCheck` to your
@@ -54,6 +54,81 @@ defmodule PropCheck do
     For some actual usage examples, see the code in the examples directory, or
     check out PropEr's site. The testing modules in the tests directory may also
     be of interest.
+
+    ## Program behaviour
+    When running in verbose mode (this is the default), each sucessful test
+    prints a `.` on screen. If a test fails, a `!` is printed, along with the
+    failing test case (the instances of the types in every `forall`) and the
+    cause of the failure, if it was not simply the falsification of the
+    property.
+
+    Then, unless the test was expected to fail, PropEr attempts to produce a
+    minimal test case that fails the property in the same way. This process is
+    called *shrinking*. During shrinking, a `.` is printed for each
+    successful simplification of the failing test case. When PropEr reaches its
+    shrinking limit or realizes that the instance cannot be shrunk further while
+    still failing the test, it prints the minimal failing test case and failure
+    reason and exits.
+
+    The return value of PropEr can be one of the following:
+    * `true`: The property held for all valid produced inputs.
+    * `false`: The property failed for some input.
+    * `{error, type_of_error}`: An error occured; see the {@section Errors}
+     section for more information.<
+
+    To test all properties exported from a module (a property is a 0-arity
+    function whose name begins with `prop_`), you can use `module/1` or
+    `module/2`. This returns a list of all failing properties, represented
+    by MFAs. Testing progress is also printed on screen (unless quiet mode is
+    active). The provided options are passed on to each property, except for
+    `long_result`, which controls the return value format of the `module`
+    function itself.
+
+    ## Counterexamples
+    A counterexample for a property is represented as a list of terms; each such
+    term corresponds to the type in a `forall`. The instances are provided in
+    the same order as the `forall` wrappers in the property, i.e. the instance
+    at the head of the list corresponds to the outermost `forall` etc.
+    Instances generated inside a failing sub-property of a conjunction are
+    marked with the sub-property's tag.
+
+    The last (simplest) counterexample produced by PropEr during a (failing) run
+    can be retrieved after testing has finished, by running
+    `counterexample/0`. When testing a whole module, run
+    `counterexamples/0` to get a counterexample for each failing property,
+    as a list of `{mfa, counterexample}` tuples. To enable this
+    functionality, some information has to remain in the process dictionary
+    even after PropEr has returned. If, for some reason, you want to completely
+    clean up the process dictionary of PropEr-produced entries, run
+    `clean_garbage/0`.
+
+    Counterexamples can also be retrieved by running PropEr in long-result mode,
+    where counterexamples are returned as part of the return value.
+    Specifically, when testing a single property under long-result mode
+    (activated by supplying the option `:long_result`, or by calling
+    `counterexample/1` or `counterexample/2` instead of
+    `quickcheck/1` and `quickcheck/2` respectively), PropEr will
+    return a counterexample in case of failure (instead of simply returning
+    `false`). When testing a whole module under long-result mode (activated by
+    supplying the option `:long_result` to `module/2`), PropEr will return
+    a list of `{mfa(), counterexample}` tuples, one for each failing
+    property.
+
+    You can re-check a specific counterexample against the property that it
+    previously falsified by running `check/2` or `check/3`. This
+    will return one of the following (both in short- and long-result mode):
+
+    * `true`: The property now holds for this test case.
+    `false`: The test case still fails (although not necessarily for the
+      same reason as before).
+    * `{error, type_of_error}`: An error occured - see the {@section Errors}
+      section for more information.
+
+    PropEr will not attempt to shrink the input in case it still fails the
+    property. Unless silent mode is active, PropEr will also print a message on
+    screen, describing the result of the re-checking. Note that PropEr can do
+    very little to verify that the counterexample actually corresponds to the
+    property that it is tested against.
 
     ## Options
     Options can be provided as an extra argument to most testing functions (such

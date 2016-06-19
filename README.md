@@ -18,7 +18,9 @@ Elixir versions of most of PropEr's tutorial material can be found in the
 test folder (https://github.com/alfert/propcheck/tree/master/test).
 
 Jesper Andersen and Robert Aloi blog about their thoughts and experience on
-using QuickCheck which are directly transferable to PropCheck:  
+using QuickCheck which are (mostly) directly transferable to PropCheck (with
+the notable exception of concurrency and the new state machine DSL from
+QuickCheck with the possibility to add requirement tags):
 
 * [QuickCheck Advice](https://medium.com/@jlouis666/quickcheck-advice-c357efb4e7e6#.b9wpla7oi)
 * [Breaking Erlang Maps (4 part series)](https://medium.com/@jlouis666/breaking-erlang-maps-4-4ebc3c64068c#.4d61kua92)
@@ -37,10 +39,13 @@ to be rewritten completely. Jesper Andersen argues in his aforementioned blog
 post eloquently that automatically derived type generators are not needed, even
 more that carefully crafted type generators for specific testing purposes is
 an essential part of the QuickCheck philosophy. Therefore, this missing feature
-is not that bad.
+is not that bad. For the same reason, automatic `@spec`-checking is of limited
+value in PropCheck since type generators for functions specification are also
+generated automatically. 
 
 PropCheck has only very limited support for parallel testing since it introduces
 no new features for concurrency compared to PropEr.
+
 
 ## Contributing
 
