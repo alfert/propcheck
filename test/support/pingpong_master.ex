@@ -27,7 +27,6 @@ defmodule PropCheck.Test.PingPongMaster do
 
   def stop() do
     GenServer.cast(__MODULE__, :stop)
-    Process.unregister __MODULE__
   end
 
   def add_player(name) do
