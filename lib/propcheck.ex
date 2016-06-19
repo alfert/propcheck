@@ -16,6 +16,116 @@ defmodule PropCheck do
     Also availables are the value generators which are imported directly
     from `PropCheck.BasicTypes`.
 
+    ## How to write properties
+    The simplest properties that PropEr can test consist of a single boolean
+    expression (or a statement block that returns a boolean), which is expected
+    to evaluate to `true`. Thus, the test `true` always succeeds, while the test
+    `false` always fails (the failure of a property may also be signified by
+    throwing an exception, error or exit. More complex (and useful) properties
+    can be written by wrapping such a boolean expression with one or more of the
+    following wrappers:
+
+    * `forall/2`
+    * `implies/2`
+    * `when_fail/2`
+    * `trap_exit/1`
+    * `conjunction/1`
+    * `equals/2`
+
+    There are also multiple wrappers that can be used to collect statistics on
+    the distribution of test data:
+
+    * `collect/2`
+    * `collect/3`
+    * `aggregate/2`
+    * `aggregate/3`
+    * `classify/3`
+    * `measure/3`
+
+    A property may also be wrapped with one or more of the following outer-level
+    wrappers, which control the behaviour of the testing subsystem. If an
+    outer-level wrapper appears more than once in a property, the innermost
+    instance takes precedence.
+
+    * `numtests/2`
+    * `fails/1`
+    * `on_output/2`
+
+    For some actual usage examples, see the code in the examples directory, or
+    check out PropEr's site. The testing modules in the tests directory may also
+    be of interest.
+
+    ## Options
+    Options can be provided as an extra argument to most testing functions (such
+      as `quickcheck/1`). A single option can be written stand-alone, or
+    multiple options can be provided in a list. When two settings conflict, the
+    one that comes first in the list takes precedence. Settings given inside
+    external wrappers to a property (see the {@section How to write properties}
+    section) override any conflicting settings provided as options.
+
+    The available options are:
+
+    * `:quiet` <br> Enables quiet mode - no output is printed on screen while PropEr is
+      running.
+    * `:verbose` <br>
+      Enables verbose mode - this is the default mode of operation.
+    * `{:to_file, io_device}` <br>
+     Redirects all of PropEr's output to `io_device`, which should be an
+      IO device associated with a file opened for writing.
+    * `{:on_output, output_function}` <br>
+     PropEr will use the supplied function for all output printing. This
+      function should accept two arguments in the style of `:io.format/2`.<br/>
+      **CAUTION:** The above output control options are incompatible with each
+      other.
+    * `:long_result` <br>
+     Enables long-result mode (see the {@section Counterexamples} section
+      for details).
+    * `{:numtests, positive_number}` or simply `positive_number` <br>
+     This is equivalent to the `numtests/1` property wrapper. Any
+        `numtests/1` wrappers in the actual property will overwrite this
+      setting.
+    * `{:start_size, size}` <br>
+     Specifies the initial value of the `size` parameter (default is 1), see
+      the documentation of the `PropCheck.BasicTypes` module for details.
+    * `{:max_size, size}` <br>
+     Specifies the maximum value of the `size` parameter (default is 42), see
+      the documentation of the `PropCheck.BasicTypes` module for details.
+    * `{:max_shrinks, non_negative_number}` <br>
+     Specifies the maximum number of times a failing test case should be
+      shrunk before returning. Note that the shrinking may stop before so many
+      shrinks are achieved if the shrinking subsystem deduces that it cannot
+      shrink the failing test case further. Default is 500.
+    * `:noshrink` <br>
+     Instructs PropEr to not attempt to shrink any failing test cases.
+    * `{:constraint_tries, positive_number}` <br>
+     Specifies the maximum number of tries before the generator subsystem
+      gives up on producing an instance that satisfies a `such_that`
+      constraint. Default is 50.
+    * `fails` <br>
+       This is equivalent to the `fails/1` property wrapper.
+    * `{:spec_timeout, :infinity | <Non_negative_number>}` <br>
+     When testing a spec, PropEr will consider an input to be failing if the
+      function under test takes more than the specified amount of milliseconds
+      to return for that input.
+    * `:any_to_integer` <br>
+       All generated instances of the type `PropCheck.BasicTypes.any/0` will be
+      integers. This is provided as a means to speed up the testing of specs,
+      where `any` is a commonly used type (see the {@section Spec testing}
+      section for details).
+    * `{:skip_mfas, [mfa]}` <br>
+      When checking a module's specs, PropEr will not test the
+      specified MFAs.  Default is [].
+    * `{false_positive_mfas, ((mfa(), args::[any], {:fail, result::any} |
+      {:error | :exit | :throw, reason::any}) -> boolean) | :undefined` <br>
+      When checking a module's spec(s), PropEr will treat a
+    counterexample as a false positive if the user supplied function
+    returns true.  Otherwise, PropEr will treat the counterexample as
+    it normally does.  The inputs to the user supplied function are
+    the MFA, the arguments passed to the MFA, and the result returned
+    from the MFA or an exception with it's reason.  If needed, the
+      user supplied function can call `:erlang.get_stacktrace/0`.  Default
+      is `:undefined`.
+
     ## Acknowldgements
     Very much of the documentation is immediately taken from the
     `proper` API documentation.
@@ -30,9 +140,39 @@ defmodule PropCheck do
     end
 
     @opaque counterexample :: :proper.counterexample
-    @type result :: :proper.result
-    @type user_opts :: :proper.user_opts
-    @type outer_test :: :proper.outer_test
+    @type user_opts :: [user_opt] | user_opt
+    @opaque outer_test :: :proper.outer_test
+    @type output_fun :: ((char_list,[term]) -> :ok)
+    @type size :: non_neg_integer
+    @type user_opt :: :quiet
+    		  | :verbose
+    		  | {:to_file, :io.device}
+    		  | {:on_output, output_fun}
+    		  | :long_result
+    		  | {:numtests, pos_integer}
+    		  | pos_integer
+    		  | {:start_size, size}
+    		  | {:max_size, size}
+    		  | {:max_shrinks, non_neg_integer}
+    		  | :noshrink
+    		  | {:constraint_tries, pos_integer}
+    		  | :fails
+    		  | :any_to_integer
+    		  | {:spec_timeout, timeout}
+    		  | {:skip_mfas, [mfa]}
+    		  | {:false_positive_mfas, false_positive_mfas}
+    @type false_positive_mfas ::
+      ((mfa(), args::[any], {:fail, result::any} |
+        {:error | :exit | :throw, reason::any}) -> boolean) | :undefined
+    @type error :: {:error, error_reason}
+    @type error_reason :: :arity_limit | :cant_generate | :cant_satisfy
+    		      | :non_boolean_result | :rejected | :too_many_instances
+    		      | :type_mismatch | :wrong_type | {:typeserver, any}
+    		      | {:unexpected, any} | {:unrecognized_option, any}
+
+    @type long_result :: :true | counterexample | error
+    @type short_result :: boolean | error
+    @type result :: long_result | short_result
 
     @doc """
     A property that should hold for all values generated.
@@ -513,13 +653,14 @@ defmodule PropCheck do
     @spec quickcheck(outer_test, user_opts) :: result
     defdelegate quickcheck(outer_test, user_opts), to: :proper
 
-    @equiv quickcheck(outer_test, [long_result])
-    @spec counterexample(outer_test) :: long_result
-    def counterexample(outer_test), do: counterexample(outer_test, []).
+    # @equiv quickcheck(outer_test, [long_result])
+    # @spec counterexample(outer_test) :: long_result
+    # def counterexample(outer_test), do: counterexample(outer_test, [])
 
     @doc "Same as `counterexample/1`, but also accepts a list of options."
     @spec counterexample(outer_test, user_opts) :: long_result
-    defdelegate counterexample(outer_test, user_opts), to: :proper
+    def counterexample(outer_test, user_opts \\ []), do:
+      :proper.counterexample(outer_test, user_opts)
 
 
     # Delegates

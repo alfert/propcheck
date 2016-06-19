@@ -27,7 +27,7 @@ defmodule PropCheck.BasicTypes do
 
   @type frequency :: pos_integer
 
-  @type size :: non_neg_integer
+  @type size :: PropCheck.size
   @type value :: any
 
   @doc """
@@ -380,7 +380,7 @@ defmodule PropCheck.BasicTypes do
   @doc "A function with 4 parameters, i.e. `function(4, ret_type)`"
   @spec function4(type) :: type
   def function4(ret_type), do: function(4, ret_type)
-  
+
   #######################################################
   #
   # Additional type specification functions
