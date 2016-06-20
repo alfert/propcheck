@@ -1,6 +1,6 @@
 defmodule PropCheck.Test.PingPongTest do
 
-  use ExUnit.Case
+  use ExUnit.Case, async: false
   use PropCheck
   @moduletag capture_log: true
 
