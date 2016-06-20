@@ -16,6 +16,9 @@ defmodule PropCheck.BasicTypes do
   @typedoc "Integers extend by infinity"
   @type ext_int :: integer | :inf
 
+  @typedoc "Non negative integers extend by infinity"
+  @type ext_non_neg_integer :: non_neg_integer | :inf
+
   @typedoc "Floats extend by infinity"
   @type ext_float :: float | :inf
 
@@ -250,6 +253,28 @@ defmodule PropCheck.BasicTypes do
   @doc "Char values (16 bit for some reason), i.e. `integer(0, 0xffff)`"
   @spec char() :: type
   def char(), do: integer(0, 0xffff)
+
+
+  @doc """
+  Bounded upper size utf8 binary, `codepoint length =< MaxCodePointSize`.
+
+  Limiting codepoint size can be useful when applications do not accept full
+  unicode range. For example, MySQL in utf8 encoding accepts only 3-byte
+  unicode codepoints in VARCHAR fields.
+
+  If unbounded length is needed, use `:inf` as first argument.
+  """
+  @spec utf8(ext_non_neg_integer, 1..4) :: type
+  def utf8(n, max_codepoint_size), do:
+    :proper_unicode.utf8(n, max_codepoint_size)
+
+  @doc "utf8-encoded unbounded size binary"
+  @spec utf8() :: type
+  def utf8(), do: utf8(:inf, 4)
+
+  @doc "utf8-encoded bounded upper size binary."
+  @spec utf8(ext_non_neg_integer) :: type
+  def utf8(n), do: utf8(n, 4)
 
   @doc "List of any types, i.e. `list(any)`"
   @spec list() :: type
