@@ -26,7 +26,11 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   def stop() do
-    GenServer.cast(__MODULE__, :stop)
+    try do
+      GenServer.cast(__MODULE__, :stop)
+    catch
+      :error, :badarg -> {:already_dead_master, __MODULE__}
+    end
   end
 
   def add_player(name) do
