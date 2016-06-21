@@ -29,7 +29,7 @@ defmodule PropCheck.Test.PingPongMaster do
     try do
       GenServer.cast(__MODULE__, :stop)
     catch
-      :error, :badarg -> {:already_dead_master, __MODULE__}
+      :error, :badarg -> Logger.error "already_dead_master:  #{__MODULE__}"
     end
   end
 
@@ -170,7 +170,7 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   @doc "Terminates all clients"
-  def terminate(reason, scores) do
+  def terminate(_reason, scores) do
     # Logger.info "Terminate Master with scores #{inspect scores}"
     scores
       |> Map.keys
