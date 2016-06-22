@@ -12,7 +12,7 @@ defmodule PropCheck.TypeGen do
 	defmacro __using__(_options) do
 		quote do
 			# we need the Proper Definitions
-			use PropCheck.Properties
+			use PropCheck
 			# use the original module
 			import unquote(__MODULE__)
 			# infer the defined types just before compilation (= code generation)
