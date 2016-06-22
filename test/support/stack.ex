@@ -25,16 +25,4 @@ defmodule PropCheck.Test.Stack do
 	# def stack(type), do: list(type)
 	# def stack(t), do: :proper_types.native_type(__MODULE__, '[t]')
 
-	property "pop(push) = original" do
-		forall {s, x} in {stack(integer), integer} do
-			{_y, t} = s |> push(x) |> pop
-			s == t
-		end
-	end
-
-	property "push make a stack bigger" do
-		forall {s, x} in {stack(integer), integer} do
-			(size(s) + 1) == size(s |> push(x))
-		end
-	end
 end
