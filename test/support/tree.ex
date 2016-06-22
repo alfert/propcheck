@@ -3,7 +3,7 @@ defmodule PropCheck.Test.Tree do
 	The tree implementation of 2013 tutorial, Elixir version.
 	"""
 
-	use PropCheck.Properties
+	use PropCheck
 
 	@type tree(t) :: :leaf | {:node, t, tree(t), tree(t)}
 
@@ -55,14 +55,14 @@ defmodule PropCheck.Test.Tree do
 			{x, tree(default(x, integer))}
 		end
 
-		fails(forall {x, t} in faulty_tree do
+		fails(forall {x, t} <- faulty_tree do
 			not member(delete(t, x), x)
 		end)
 	end
 
 	# delete2 is not faulty
 	property "delete2" do
-		forall {x, t} in {integer, tree(integer)} do
+		forall {x, t} <- {integer, tree(integer)} do
 			not member(delete2(t, x), x)
 		end
 	end
@@ -70,7 +70,7 @@ defmodule PropCheck.Test.Tree do
 	# Example of a PBT strategy: finding two distinct computations that should
 	# result in the same value.
 	property "sum" do
-		forall t in tree(integer) do
+		forall t <- tree(integer) do
 			pre_order(t) |> Enum.sum == tree_sum(t)
 		end
 	end
