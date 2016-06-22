@@ -20,7 +20,19 @@ defmodule PropCheck.Properties do
     or (more usually) the `PropCheck.prop_test/1` macro which generates for
     each property in a file the corresponding `ExUnit` test cases.
     """
-    defmacro property(name, opts) do
+    defmacro property(name, var \\ quote(do: _), do: opts) do
+        block = quote do
+          unquote(opts)
+          true
+        end
+        var   = Macro.escape(var)
+        block = Macro.escape(block, unquote: true)
+        quote bind_quoted: [name: name, block: block, var: var] do
+            prop_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
+            def unquote(prop_name)(unquote(var)), do: unquote(block)
+        end
+    end
+    defmacro old_property(name, opts) do
         prop_name = case name do
             {name, _, _} -> :"prop_#{name}"
             name when is_atom(name) or is_binary(name) or is_list(name) -> :"prop_#{name}"
