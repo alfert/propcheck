@@ -17,11 +17,17 @@ defmodule PropCheck.StateM do
     term, :proper_statem.symbolic_call) ::
     :proper_statem.symbolic_state | :proper_statem.dynamic_state
 
-  defdelegate [command_names(cmds), commands(mod), commands(mod, initial_state),
-    more_commands(n, cmd_type), parallel_commands(mod),
-    parallel_commands(mod, initial_state), run_commands(mod, cmds),
-    run_commands(mod, cmds, env), run_parallel_commands(mod, testcase),
-    run_parallel_commands(mod, x2, env), state_after(mod, cmds),
-    zip(l1, l2)], to: :proper_statem
+  defdelegate command_names(cmds),                   to: :proper_statem
+  defdelegate commands(mod),                         to: :proper_statem
+  defdelegate commands(mod, initial_state),          to: :proper_statem
+  defdelegate more_commands(n, cmd_type),            to: :proper_statem
+  defdelegate parallel_commands(mod),                to: :proper_statem
+  defdelegate parallel_commands(mod, initial_state), to: :proper_statem
+  defdelegate run_commands(mod, cmds),               to: :proper_statem
+  defdelegate run_commands(mod, cmds, env),          to: :proper_statem
+  defdelegate run_parallel_commands(mod, testcase),  to: :proper_statem
+  defdelegate run_parallel_commands(mod, x2, env),   to: :proper_statem
+  defdelegate state_after(mod, cmds),                to: :proper_statem
+  defdelegate zip(l1, l2),                           to: :proper_statem
 
 end
