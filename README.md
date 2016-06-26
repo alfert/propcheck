@@ -41,7 +41,7 @@ more that carefully crafted type generators for specific testing purposes is
 an essential part of the QuickCheck philosophy. Therefore, this missing feature
 is not that bad. For the same reason, automatic `@spec`-checking is of limited
 value in PropCheck since type generators for functions specification are also
-generated automatically. 
+generated automatically.
 
 PropCheck has only very limited support for parallel testing since it introduces
 no new features for concurrency compared to PropEr.
