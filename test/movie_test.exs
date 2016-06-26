@@ -16,8 +16,8 @@ defmodule PropCheck.Test.Movies do
   ### The properties
   #########################################################################
 
-  property_test "server works fine" do
-    forall cmds in commands(__MODULE__) do
+  property "server works fine" do
+    numtests(1_000, forall cmds <- commands(__MODULE__) do
       trap_exit do
         MovieServer.start_link()
         r = run_commands(__MODULE__, cmds)
@@ -29,6 +29,7 @@ defmodule PropCheck.Test.Movies do
           aggregate(command_names(cmds), result == :ok))
       end
     end
+		)
   end
 
   #########################################################################

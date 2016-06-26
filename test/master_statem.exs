@@ -4,7 +4,9 @@ defmodule PropCheck.Test.MasterStateM do
   are called from the test script `ping_pong_test.exs`.
   """
 
+  use PropCheck
   use PropCheck.StateM
+  use ExUnit.Case
   alias PropCheck.Test.PingPongMaster
 
   property "master works fine" do

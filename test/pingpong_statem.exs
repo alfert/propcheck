@@ -5,6 +5,8 @@ defmodule PropCheck.Test.PingPongStateM do
   """
 
   use PropCheck.StateM
+  use PropCheck
+  use ExUnit.Case
   alias PropCheck.Test.PingPongMaster
   require Logger
 

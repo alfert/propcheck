@@ -2,13 +2,27 @@ defmodule PropCheck.Test.PingPongTest do
 
   use ExUnit.Case, async: false
   use PropCheck
+
   @moduletag capture_log: true
 
-  prop_test(PropCheck.Test.MasterStateM)
 
-  prop_test(PropCheck.Test.PingPongStateM)
+  # ensure all player processes are dead
+  defp kill_all_player_processes() do
+    require Logger
+    Process.registered
+    |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
+    |> Enum.each(fn name ->
+      pid = Process.whereis(name)
+      if is_pid(pid) and Process.alive?(pid) do
+        try do
+          Process.exit(pid, :kill)
+        catch
+          _what, _value -> Logger.debug "Already killed process #{name}"
+        end
+      end
+    end)
+  end
 
-  prop_test(PropCheck.Test.PingPongFSM)
 
   test "Strange Call Sequence" do
     PropCheck.Test.PingPongMaster.start_link

@@ -6,6 +6,8 @@ defmodule PropCheck.Test.PingPongFSM do
 
   # State is modelled as tuples of `{state_name, state}`
   use PropCheck.FSM
+  use PropCheck
+  use ExUnit.Case
   alias PropCheck.Test.PingPongMaster
   require Logger
 

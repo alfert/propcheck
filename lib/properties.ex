@@ -14,24 +14,48 @@ defmodule PropCheck.Properties do
     end
 
     @doc """
-    Defines a property.
+    Defines a property a part of ExUnit test.
 
-    The property can be tested by calling the quickcheck function
-    or (more usually) the `PropCheck.prop_test/1` macro which generates for
-    each property in a file the corresponding `ExUnit` test cases.
     """
     defmacro property(name, var \\ quote(do: _), do: opts) do
         block = quote do
           unquote(opts)
-          true
         end
         var   = Macro.escape(var)
         block = Macro.escape(block, unquote: true)
         quote bind_quoted: [name: name, block: block, var: var] do
+            ExUnit.plural_rule("property", "properties")
             prop_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
-            def unquote(prop_name)(unquote(var)), do: unquote(block)
+            def unquote(prop_name)(unquote(var)) do
+              p = unquote(block)
+              should_fail = is_tuple(p) and elem(p, 0) == :fails
+              case PropCheck.quickcheck(p, [:long_result, :quiet]) do
+                true when not should_fail -> true
+                true when should_fail ->
+                  raise ExUnit.AssertionError, [
+                    message:
+                      "#Property {unquote(name)} should fail, but succeeded for all test data :-(",
+                    expr: nil]
+                _counter_example when should_fail -> true
+                counter_example ->
+                  raise ExUnit.AssertionError, [
+                    message: """
+                    Property #{unquote(name)} failed. Counter-Example is:
+                    #{inspect counter_example, pretty: true}
+                    """,
+                        expr: nil]
+              end
+            end
         end
     end
+    @doc false
+    @doc """
+    Defines a property.
+
+    The property is tested by calling the quickcheck function
+    or (more usually) the `PropCheck.prop_test/1` macro which generates for
+    each property in a file the corresponding `ExUnit` test cases.
+    """
     defmacro old_property(name, opts) do
         prop_name = case name do
             {name, _, _} -> :"prop_#{name}"
