@@ -32,7 +32,8 @@ defmodule PropCheck.Test.PingPongTest do
     :timer.sleep(50)
     score = PropCheck.Test.PingPongMaster.get_score :player_73
     PropCheck.Test.PingPongMaster.stop
-
+    kill_all_player_processes()
+    
     assert score <= 2
   end
 
