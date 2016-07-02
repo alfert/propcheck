@@ -28,10 +28,10 @@ defmodule PropCheck.FSM do
 
   defdelegate commands(mod),                        to: :proper_fsm
   defdelegate commands(mod, initial_state),         to: :proper_fsm
-  defdelegate more_commands(n, cmd_type),           to: :proper_fsm
+  defdelegate more_commands(n, cmd_type),           to: :proper_statem
   defdelegate run_commands(mod, cmds),              to: :proper_fsm
   defdelegate run_commands(mod, cmds, env),         to: :proper_fsm
   defdelegate target_states(mod, from, data, call), to: :proper_fsm
   defdelegate state_names(history),                 to: :proper_fsm
-  defdelegate command_names(cmds), to: :proper_statem
+  defdelegate command_names(cmds),                  to: :proper_statem
 end
