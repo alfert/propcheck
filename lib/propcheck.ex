@@ -119,7 +119,7 @@ defmodule PropCheck do
     will return one of the following (both in short- and long-result mode):
 
     * `true`: The property now holds for this test case.
-    `false`: The test case still fails (although not necessarily for the
+    * `false`: The test case still fails (although not necessarily for the
       same reason as before).
     * `{error, type_of_error}`: An error occured - see the {@section Errors}
       section for more information.
@@ -414,6 +414,7 @@ defmodule PropCheck do
     `generator` to return a type - in that case, an instance of the inner
     type is generated recursively.
 
+    An example for `sized` is shown in the documentation of  `let_shrink/2`.
 
     """
     defmacro sized(size, generator) do
@@ -594,19 +595,27 @@ defmodule PropCheck do
     are assigned smaller versions of the tree thus achieving a better
     (or more appropriate) shrinking.
 
-        def tree(g), do: sized(s, tree(s, g))
-        def tree(0, _), do: :leaf
-        def tree(s, g), do:
-        	frequency [
-        		{1, tree(0, g)},
-        		{9, let_shrink([
-    						l <- tree(div(s, 2), g),
-    						r <- tree(div(s, 2), g)
-    					]) do
-        				{:node, g, l, r}
-        			end
-        			}
-        	]
+          iex> use PropCheck
+          iex> tree_gen = fn (0, _, _) -> :leaf
+          ...>               (s, g, tree) ->
+          ...>      frequency [
+          ...>       {1, tree.(0, g, tree)},
+          ...>       {9, let_shrink([
+          ...>         l <- tree.(div(s, 2), g, tree),
+          ...>         r <- tree.(div(s, 2), g, tree)
+          ...>         ]) do
+          ...>           {:node, g, l, r}
+          ...>         end
+          ...>        }
+          ...>   ]
+          ...> end
+          iex> tree = fn(g) -> sized(s, tree_gen.(s, g, tree_gen)) end
+          iex> quickcheck(
+          ...>   forall t <- tree.(int) do
+          ...>     t == :leaf or is_tuple(t)
+          ...>   end
+          ...>)
+          true
 
     """
     defmacro let_shrink({:<-, _, [var, rawtype]}, [do: gen]) do
