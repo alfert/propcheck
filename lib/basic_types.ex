@@ -430,7 +430,8 @@ defmodule PropCheck.BasicTypes do
       iex> really_long = such_that_maybe l <- long_list, when:
       ...>      length(l) > 42
       iex> quickcheck(forall l <- really_long do
-      ...>   measure("List length", length(l), length(l) <= 84)
+      ...>   measure("List length", length(l),
+      ...>    collect(length(l), length(l) <= 84))
       ...> end)
       true
 
