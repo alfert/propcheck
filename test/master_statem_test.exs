@@ -8,6 +8,7 @@ defmodule PropCheck.Test.MasterStateM do
   use PropCheck.StateM
   use ExUnit.Case
   alias PropCheck.Test.PingPongMaster
+	@moduletag capture_log: true
 
   property "master works fine" do
     forall cmds in commands(__MODULE__) do

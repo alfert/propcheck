@@ -9,6 +9,7 @@ defmodule PropCheck.Test.PingPongStateM do
   use ExUnit.Case
   alias PropCheck.Test.PingPongMaster
   require Logger
+  @moduletag capture_log: true
 
   property "ping-pong playing works fine" do
     numtests(3_000, forall cmds in commands(__MODULE__) do
