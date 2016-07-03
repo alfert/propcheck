@@ -1,7 +1,9 @@
 defmodule PropcheckTest do
 	use ExUnit.Case
 	require Logger
+
 	doctest(PropCheck)
+	doctest(PropCheck.StateM)
 
 	@moduletag capture_log: true
 

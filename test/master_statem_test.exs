@@ -11,8 +11,8 @@ defmodule PropCheck.Test.MasterStateM do
 	@moduletag capture_log: true
 
   property "master works fine" do
-    forall cmds in commands(__MODULE__) do
-      trap_exit do
+    numtests(1_00, forall cmds <- more_commands(100, commands(__MODULE__)) do
+      collect(length(cmds), trap_exit do
         kill_all_player_processes()
         PingPongMaster.start_link()
         r = run_commands(__MODULE__, cmds)
@@ -22,8 +22,8 @@ defmodule PropCheck.Test.MasterStateM do
         when_fail(
           IO.puts("History: #{inspect history}\nState: #{inspect state}\nResult: #{inspect result}"),
           aggregate(command_names(cmds), result == :ok))
-      end
-    end
+      end)
+    end)
   end
 
   # ensure all player processes are dead
@@ -104,11 +104,11 @@ defmodule PropCheck.Test.MasterStateM do
   the state *before* the call, the `call` is the symbolic call and `r`
   is the result of the actual call.
   """
-  def postcondition(players, {:call, PingPongMaster, :remove_player, [name]}, r = {:removed, n}) do
+  def postcondition(players, {:call, PingPongMaster, :remove_player, [name]}, _r = {:removed, n}) do
     # IO.puts "postcondition: remove player #{name} => #{inspect r} in state: #{inspect players}"
     (name == n) and (players |> Set.member?(name))
   end
-  def postcondition(players, {:call, PingPongMaster, :get_score, [_name]}, score) do
+  def postcondition(_players, {:call, PingPongMaster, :get_score, [_name]}, score) do
     score == 0
   end
   def postcondition(_state, _call, _result), do: true
