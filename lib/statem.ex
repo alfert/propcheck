@@ -275,8 +275,23 @@ defmodule PropCheck.StateM do
   @doc """
   Increases the expected length of command sequences generated from
   `cmd_type` by a factor `n`.
+
+  **CAVEAT**<br>
+  This function does not work properly. My current guess is that this is
+  a limitation of how PropEr works with sizing an din particular resizing.
+  The commands list generator (`cmd_type`) is not a simple list which can
+  be sized easily, but a complex construct where the rather simple approach
+  of resizing does not work as expected.
+
   """
-  defdelegate more_commands(n, cmd_type), to: :proper_statem
+  def more_commands(n, cmd_type) do
+    require PropCheck
+    require PropCheck.BasicTypes
+    require Logger
+
+    Logger.debug("cmd_type = #{inspect cmd_type}")
+    PropCheck.sized(size, PropCheck.BasicTypes.resize(size * n, cmd_type))
+  end
 
   @doc """
   A special PropEr type which generates parallel testcases,
