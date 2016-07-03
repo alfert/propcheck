@@ -158,7 +158,12 @@ defmodule PropCheck.StateM do
   For PropEr to be able to detect race conditions, the code of the system
   under test should be instrumented with `erlang:yield/0` calls to the
   scheduler.
+
+  ## Acknowldgements
+  Very much of the documentation is immediately taken from the
+  `proper` API documentation.
   """
+
   defmacro __using__(_) do
     quote do
       @behaviour :proper_statem
