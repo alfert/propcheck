@@ -60,7 +60,7 @@ defmodule Propcheck.Mixfile do
     [
       {:dialyze, "0.2.0", only: [:dev, :test]},
       {:coverex, "~> 1.4", only: :test},
-      {:ex_doc, "~>0.11.0", only: :dev},
+      {:ex_doc, "~>0.12.0", only: :dev},
       {:earmark, ">= 0.2.1", only: :dev},
       # {:proper, git: "../../erlang/proper/proper"}
       # {:proper, github: "manopapad/proper", ref: "fa58f8" } # from 26.05.2015
