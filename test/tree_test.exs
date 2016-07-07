@@ -3,8 +3,6 @@ defmodule PropCheck.TreeTest do
 	alias PropCheck.Test.Tree
 	use PropCheck
 
-	# prop_test Tree
-
 	################################
 	### Properties of the tree
 
@@ -48,69 +46,69 @@ defmodule PropCheck.TreeTest do
 					{:node, g, tree1(g), tree1(g)}
 				])
 
-		@doc "Erlang is eager: we need to enforce lazy evaluation to avoid infinite recursion"
-		def tree2(g), do:
-			union([
-				:leaf,
-				lazy {:node, g, tree2(g), tree2(g)}
-			])
+	@doc "Erlang is eager: we need to enforce lazy evaluation to avoid infinite recursion"
+	def tree2(g), do:
+		union([
+			:leaf,
+			lazy {:node, g, tree2(g), tree2(g)}
+		])
 
-		@doc """
-		Generation might not terminate: we need to introduce a bound on the number
-		of recursive calls (and thus the size of the produced term), by handling the
-		`size` parameter manually.
+	@doc """
+	Generation might not terminate: we need to introduce a bound on the number
+	of recursive calls (and thus the size of the produced term), by handling the
+	`size` parameter manually.
 
-		The base case is delegated to the 0-size clause.
-		All non-recursive cases are replaced by fallbacks to that clause.
-		"""
-		def tree3(g), do: sized(s, tree3(s, g))
-		def tree3(0, _), do: :leaf
-		def tree3(s, g), do:
-			union([
-				tree3(0, g),
-				lazy {:node, g, tree3(s, g), tree3(s, g)}
-			])
+	The base case is delegated to the 0-size clause.
+	All non-recursive cases are replaced by fallbacks to that clause.
+	"""
+	def tree3(g), do: sized(s, tree3(s, g))
+	def tree3(0, _), do: :leaf
+	def tree3(s, g), do:
+		union([
+			tree3(0, g),
+			lazy {:node, g, tree3(s, g), tree3(s, g)}
+		])
 
-		@doc """
-		50% of the time, the tree is empty: we should set the weights in the union
-		to ensure a satisfactory average size of produced instances.
-		"""
-		def tree4(g), do: sized(s, tree4(s, g))
-		def tree4(0, _), do: :leaf
-		def tree4(s, g), do:
-			frequency [
-				{1, tree4(0, g)},
-				{9, lazy {:node, g, tree4(s, g), tree4(s, g)}}
-			]
+	@doc """
+	50% of the time, the tree is empty: we should set the weights in the union
+	to ensure a satisfactory average size of produced instances.
+	"""
+	def tree4(g), do: sized(s, tree4(s, g))
+	def tree4(0, _), do: :leaf
+	def tree4(s, g), do:
+		frequency [
+			{1, tree4(0, g)},
+			{9, lazy {:node, g, tree4(s, g), tree4(s, g)}}
+		]
 
-		@doc """
-		The trees grow too fast: we should distribute the size evenly to all subtrees
-		"""
-		def tree5(g), do: sized(s, tree5(s, g))
-		def tree5(0, _), do: :leaf
-		def tree5(s, g), do:
-			frequency [
-				{1, tree5(0, g)},
-				{9, lazy {:node, g, tree5(div(s, 2), g), tree5(div(s, 2), g)}}
-			]
+	@doc """
+	The trees grow too fast: we should distribute the size evenly to all subtrees
+	"""
+	def tree5(g), do: sized(s, tree5(s, g))
+	def tree5(0, _), do: :leaf
+	def tree5(s, g), do:
+		frequency [
+			{1, tree5(0, g)},
+			{9, lazy {:node, g, tree5(div(s, 2), g), tree5(div(s, 2), g)}}
+		]
 
-		@doc """
-		Finally, we set up a more efficient shrinking strategy: pick each of the
-		subtrees in place of the tree that fails the property.
-		"""
-		def tree6(g), do: sized(s, tree6(s, g))
-		def tree6(0, _), do: :leaf
-		def tree6(s, g), do:
-			frequency [
-				{1, tree6(0, g)},
-				{9, let_shrink([
-						l <- tree6(div(s, 2), g),
-						r <- tree6(div(s, 2), g)
-					]) do
-						{:node, g, l, r}
-					end
-					}
-			]
+	@doc """
+	Finally, we set up a more efficient shrinking strategy: pick each of the
+	subtrees in place of the tree that fails the property.
+	"""
+	def tree6(g), do: sized(s, tree6(s, g))
+	def tree6(0, _), do: :leaf
+	def tree6(s, g), do:
+		frequency [
+			{1, tree6(0, g)},
+			{9, let_shrink([
+					l <- tree6(div(s, 2), g),
+					r <- tree6(div(s, 2), g)
+				]) do
+					{:node, g, l, r}
+				end
+				}
+		]
 
 
 end
