@@ -108,10 +108,21 @@ defmodule PropCheck.FSM do
     end
   end
 
+  @type mod_name :: atom
   @type state_name :: atom | tuple
   @type state_data :: any
-  @type symb_call :: :proper_statem.symb_call
+  @type symb_call :: PropCheck.StateM.symb_call
+  @type symb_var :: PropCheck.StateM.symb_var
+  @type fsm_state()    :: {state_name, state_data}
+  @type transition()   :: {state_name, symb_call}
+  @type history()      :: [{fsm_state,cmd_result}]
+
   @type result :: :proper_statem.statem_result
+  @type fsm_result :: result
+  @type cmd_result :: any
+  @type command  :: {:set ,symb_var,symb_call} | {:init, fsm_state()}
+  @type command_list:: [command]
+
 
   @doc """
   Specifies the initial state of the finite state machine. As with
@@ -159,6 +170,7 @@ defmodule PropCheck.FSM do
   @callback next_state_data(from :: state_name, target:: state_name,
     state_data :: state_data, result :: result, call :: symb_call) :: state_data
 
+
   @doc """
   A special PropEr type which generates random command sequences,
   according to a finite state machine specification.
@@ -168,6 +180,7 @@ defmodule PropCheck.FSM do
   The initial state is computed by
   `{mod.initial_state/0, mod:initial_state_data/0}`.
   """
+  @spec commands(mod_name) :: PropCheck.type
   def commands(mod), do: :proper_fsm.commands(mod)
 
   @doc """
@@ -179,6 +192,7 @@ defmodule PropCheck.FSM do
   state every time the command sequence is run (i.e. during normal execution,
   while shrinking and when checking a counterexample).
   """
+  @spec commands(mod_name, fsm_state) :: PropCheck.type
   def commands(mod, initial_state), do: :proper_fsm.commands(mod, initial_state)
 
   defdelegate more_commands(n, cmd_type),           to: PropCheck.StateM
@@ -190,6 +204,7 @@ defmodule PropCheck.FSM do
   The result is a triple of the form `{history, fsm_state, result}`,
   similar to `PropCheck.StateM.run_commands/2`.
   """
+  @spec run_commands(mod_name, command_list) :: {history,fsm_state,fsm_result}
   def run_commands(mod, cmds), do: :proper_fsm.run_commands(mod, cmds)
 
   @doc """
@@ -197,6 +212,8 @@ defmodule PropCheck.FSM do
   used for symbolic variable evaluation, exactly as described in
   `PropCheck.StateM.run_commands/3`.
   """
+  @spec run_commands(mod_name, command_list, :proper_symb.var_values) ::
+           {history,fsm_state,fsm_result}
   def run_commands(mod, cmds, env), do: :proper_fsm.run_commands(mod, cmds, env)
 
   @doc """
@@ -206,6 +223,7 @@ defmodule PropCheck.FSM do
   in order to collect statistics about state transitions during command
   execution.
   """
+  @spec state_names(history) :: [state_name]
   def state_names(history), do: :proper_fsm.state_names(history)
 
   defdelegate command_names(cmds), to: PropCheck.StateM

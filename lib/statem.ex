@@ -71,11 +71,11 @@ defmodule PropCheck.StateM do
    * `command(s::symbolic_state) :: proper_types:type`
    * `precondition(s::symbolic_state, call::symb_call :: boolean`
    * `postcondition(s::dynamic_state,
-                     call::symbolic_call,
+                     call::symb_call,
                      res::term :: boolean`
    * `next_state(s::symbolic_state |dynamic_stat,
                   res::term,
-                  call::symbolic_call) ::
+                  call::symb_call) ::
                   symbolic_state | dynamic_state`
 
 
@@ -173,6 +173,9 @@ defmodule PropCheck.StateM do
   end
 
   @type symb_var :: :proper_statem.symb_var
+  @type symbolic_state :: any
+  @type dynamic_state :: any
+  @type symb_call :: :proper_statem.symb_call
   @type command :: :proper_statem.command
 
   @doc """
@@ -186,7 +189,7 @@ defmodule PropCheck.StateM do
   counterexample). For this reason, it should be deterministic and
   self-contained.
   """
-  @callback initial_state() :: :proper_statem.symbolic_state
+  @callback initial_state() :: symbolic_state
 
   @doc """
   Generates a symbolic call to be included in the command sequence,
@@ -197,7 +200,7 @@ defmodule PropCheck.StateM do
   function will be repeatedly called to produce the next call to be
   included in the test case.
   """
-  @callback command(s :: :proper_statem.symbolic_state) :: :proper_types.type
+  @callback command(s :: symbolic_state) :: PropCheck.BasicTypes.type
 
   @doc """
   Specifies the precondition that should hold so that `call` can be
@@ -216,7 +219,7 @@ defmodule PropCheck.StateM do
   usually attempt to perform a call with the system being in a state
   different from the state it was when initially running the test.
   """
-  @callback precondition(s :: :proper_statem.symbolic_state, call :: :proper_statem.symb_call) :: boolean
+  @callback precondition(s :: symbolic_state, call :: symb_call) :: boolean
 
   @doc """
   Specifies the postcondition that should hold about the result `res` of
@@ -226,8 +229,8 @@ defmodule PropCheck.StateM do
   This function is called during
   runtime, this is why the state is dynamic.
   """
-  @callback postcondition(s :: :proper_statem.dynamic_state,
-    call:: :proper_types.symbolic_call, res :: term) :: boolean
+  @callback postcondition(s :: dynamic_state,
+    call:: symb_call, res :: term) :: boolean
 
   @doc """
   Specifies the next state of the abstract state machine, given the
@@ -236,9 +239,9 @@ defmodule PropCheck.StateM do
   in order to update the model state, therefore the state `s` and the
   result `Res` can be either symbolic or dynamic.
   """
-  @callback next_state(:proper_statem.symbolic_state | :proper_statem.dynamic_state,
-    term, :proper_statem.symbolic_call) ::
-    :proper_statem.symbolic_state | :proper_statem.dynamic_state
+  @callback next_state(symbolic_state | dynamic_state,
+    term, symb_call) ::
+    symbolic_state | dynamic_state
 
   @doc """
   Extracts the names of the commands from a given command sequence, in
