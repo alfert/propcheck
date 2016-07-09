@@ -47,16 +47,24 @@ defmodule PropCheck do
     outer-level wrapper appears more than once in a property, the innermost
     instance takes precedence.
 
-    * `numtests/2`
-    * `fails/1`
-    * `on_output/2`
+        * `numtests/2`
+        * `fails/1`
+        * `on_output/2`
+
+    `PropCheck` follows the Elixir idioms that for fluent API the first
+    parameter flows through a pipeline of functions. Therefore, in `PropCheck`
+    the wrapper functions have the property as first argument allowing to
+    use the `|>` to concatenate wrapper functions. It helps to distinguish
+    between the property to test and those wrappers which beautify the
+    results or the collection information about the test values. This is a
+    significant derivation of the API of both, PropEr and QuickCheck. 
 
     For some actual usage examples, see the code in the examples directory, or
     check out PropEr's site. The testing modules in the tests directory may also
     be of interest.
 
     ## Program behaviour
-    When running in verbose mode (this is the default), each sucessful test
+    When running in verbose mode (this is the default for `quickcheck`), each sucessful test
     prints a `.` on screen. If a test fails, a `!` is printed, along with the
     failing test case (the instances of the types in every `forall`) and the
     cause of the failure, if it was not simply the falsification of the
@@ -132,7 +140,7 @@ defmodule PropCheck do
 
     ## Options
     Options can be provided as an extra argument to most testing functions (such
-      as `quickcheck/1`). A single option can be written stand-alone, or
+    as `quickcheck/1`). A single option can be written stand-alone, or
     multiple options can be provided in a list. When two settings conflict, the
     one that comes first in the list takes precedence. Settings given inside
     external wrappers to a property (see the {@section How to write properties}
@@ -322,8 +330,15 @@ defmodule PropCheck do
     In case this test fails, `action` will be executed. Note that the output
     of such actions is not affected by the verbosity setting of the main
     application.
+
+        iex> use PropCheck
+        iex> quickcheck(
+        ...>   when_fail(false, IO.puts "when_fail: Property failed")
+        ...>)
+        false
+
     """
-    defmacro when_fail(action, prop) do
+    defmacro when_fail(prop, action) do
         quote do
             :proper.whenfail(delay(unquote(action)), delay(unquote(prop)))
         end
@@ -716,11 +731,7 @@ defmodule PropCheck do
     @spec quickcheck(outer_test, user_opts) :: result
     defdelegate quickcheck(outer_test, user_opts), to: :proper
 
-    # @equiv quickcheck(outer_test, [long_result])
-    # @spec counterexample(outer_test) :: long_result
-    # def counterexample(outer_test), do: counterexample(outer_test, [])
-
-    @doc "Same as `counterexample/1`, but also accepts a list of options."
+    @doc "Equivalent to `quickcheck/2`, also accepting a list of options."
     @spec counterexample(outer_test, user_opts) :: long_result
     def counterexample(outer_test, user_opts \\ []), do:
       :proper.counterexample(outer_test, user_opts)
@@ -786,15 +797,16 @@ defmodule PropCheck do
     wrappers are allowed in a single property, in which case the percentages for
     each `collect` wrapper are printed separately.
     """
-    @spec collect(any, test) :: test
-    def collect(category, property), do: collect(with_title(''), category, property)
+    @spec collect(test, any) :: test
+    def collect(property, category), do:
+      collect(property, with_title(''), category)
 
     @doc """
     Same as `collect/2`, but also accepts a fun `printer` to be used
     as the stats printer.
     """
-    @spec collect(stats_printer, any, test) :: test
-    def collect(printer, category, property), do:
+    @spec collect(test, stats_printer, any ) :: test
+    def collect(property, printer, category), do:
         aggregate(printer, [category], property)
 
     @doc """
@@ -831,11 +843,12 @@ defmodule PropCheck do
     collected sample are printed at the end of testing (in case no test fails),
     prepended with `title`, which should be an atom or string.
     """
-    @spec measure(title, number | [number], test) :: test
-    def measure(title, num, test) when is_binary(title) do
-      measure(String.to_char_list(title), num, test)
+    @spec measure(test, title, number | [number]) :: test
+    def measure(test, title, num) when is_binary(title) do
+      measure(test, String.to_char_list(title), num)
     end
-    def measure(title, num, test), do: :proper.measure(title, num, test)
+    def measure(test, title, num), do:
+      :proper.measure(title, num, test)
 
     @doc """
     A custom property that evaluates to `true` only if `a === b`, else
