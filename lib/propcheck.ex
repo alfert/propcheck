@@ -663,36 +663,6 @@ defmodule PropCheck do
       quote do: is_tuple(unquote(x)) and elem(unquote(x), 0) == :"$type"
     end
 
-    @doc """
-    Generates an `ExUnit` testcase for each property of the given module.
-    Reporting of failures is then done via the usual `ExUnit` mechanism.
-    """
-    defmacro prop_test(mod) do
-      props = mod |> Macro.expand(__CALLER__) |> extract_props
-      props |> Enum.map(fn {f, 0} ->
-        prop_name = "#{f}"
-        quote do
-          test unquote(prop_name) do
-            exec_property(unquote(mod), unquote(f))
-          end
-        end
-      end)
-    end
-
-    defmacro property_test(p, do: body) when is_binary(p)  do
-      prop = p |> Macro.expand(__CALLER__)
-      mod = __CALLER__.module
-      f = "prop_#{prop}" |> String.to_atom
-      quote do
-        test unquote(prop) do
-          exec_property(unquote(mod), unquote(f))
-        end
-        property unquote(prop) do
-          unquote(body)
-        end
-      end
-    end
-
     @doc "Runs the property as part of an `ExUnit` test case."
     def exec_property(m, f ) do
       p = apply(m, f, [])
