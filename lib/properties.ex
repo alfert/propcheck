@@ -1,35 +1,40 @@
 defmodule PropCheck.Properties do
 
   @moduledoc """
-  This module defined the `property/2` macro. It is automatically available
+  This module defined the `property/4` macro. It is automatically available
   by `using PropCheck`.
   """
 
-    defmacro __using__(_) do
-        quote do
-            import PropCheck
-            import PropCheck.Properties
-            import :proper_types, except: [lazy: 1, to_binary: 1, function: 2]
-        end
-    end
-
     @doc """
-    Defines a property a part of ExUnit test.
+    Defines a property as part of ExUnit test.
 
+    The property macro takes at minimum a name and a `do`-block containing
+    the code of the property to be tested. The property code is encapsulated
+    as ean `ExUnit` test case of category `property`, which is released as
+    part of Elixir 1.3 and allows a nice mix of regular unit test and property
+    based testing. This is the reason for the third parameter taking an
+    environment of variables defined in a test setup function.
+
+    The second parameter sets options for Proper (see `PropCheck`). The default
+    is `:quit` such that execution during ExUnit runs are silent, as normal
+    unit tests are. You can change it e.g. to `:verbose` or setting the
+    maximum size of the test data generated or what ever may be helpful. For
+    seeing the result of wrapper functions `PropCheck.aggregate/2` etc, the
+    verbose mode is required.
     """
-    defmacro property(name, var \\ quote(do: _), do: opts) do
+    defmacro property(name, opts \\ [:quiet], var \\ quote(do: _), do: p_block) do
         block = quote do
-          unquote(opts)
+          unquote(p_block)
         end
         var   = Macro.escape(var)
         block = Macro.escape(block, unquote: true)
-        quote bind_quoted: [name: name, block: block, var: var] do
+        quote bind_quoted: [name: name, block: block, var: var, opts: opts] do
             ExUnit.plural_rule("property", "properties")
             prop_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
             def unquote(prop_name)(unquote(var)) do
               p = unquote(block)
               should_fail = is_tuple(p) and elem(p, 0) == :fails
-              case PropCheck.quickcheck(p, [:long_result, :quiet]) do
+              case PropCheck.quickcheck(p, [:long_result] ++ unquote(opts)) do
                 true when not should_fail -> true
                 true when should_fail ->
                   raise ExUnit.AssertionError, [
