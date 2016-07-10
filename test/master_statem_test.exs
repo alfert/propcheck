@@ -10,20 +10,26 @@ defmodule PropCheck.Test.MasterStateM do
   alias PropCheck.Test.PingPongMaster
 	@moduletag capture_log: true
 
-  property "master works fine" do
-    numtests(1_00, forall cmds <- more_commands(100, commands(__MODULE__)) do
-      collect(length(cmds), trap_exit do
+  property "master works fine", [:verbose, max_size: 100] do
+    forall cmds <- more_commands(100, commands(__MODULE__)) do
+      trap_exit do
         kill_all_player_processes()
         PingPongMaster.start_link()
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         PingPongMaster.stop
-        #IO.puts "Property finished. result is: #{inspect r}"
-        when_fail(
-          IO.puts("History: #{inspect history}\nState: #{inspect state}\nResult: #{inspect result}"),
-          aggregate(command_names(cmds), result == :ok))
-      end)
-    end)
+        # IO.puts "Property finished. result is: #{inspect r}"
+        (result == :ok)
+        |> when_fail(
+            IO.puts """
+            History: #{inspect history, pretty: true}
+            State: #{inspect state, pretty: true}
+            Result: #{inspect result, pretty: true}
+            """)
+        |> aggregate(command_names cmds)
+        |> collect(length cmds)
+      end
+    end
   end
 
   # ensure all player processes are dead

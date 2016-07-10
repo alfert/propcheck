@@ -24,9 +24,14 @@ defmodule PropCheck.Test.Movies do
         {history, state, result} = r
         MovieServer.stop
         #IO.puts "Property finished. result is: #{inspect r}"
-        when_fail(
-					IO.puts("History: #{inspect history}\nState: #{inspect state}\nResult: #{inspect result}"),
-          aggregate(command_names(cmds), result == :ok))
+				(result == :ok)
+				|> when_fail(
+						IO.puts """
+						History: #{inspect history, pretty: true}
+						State: #{inspect state, pretty: true}
+						Result: #{inspect result, pretty: true}
+						""")
+        |> aggregate(command_names cmds)
       end
     end
 		)

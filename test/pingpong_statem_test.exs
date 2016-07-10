@@ -20,13 +20,14 @@ defmodule PropCheck.Test.PingPongStateM do
         {history, state, result} = r
         PingPongMaster.stop
         #IO.puts "Property finished. result is: #{inspect r}"
-        when_fail(
-          IO.puts("""
-          History: #{inspect history, pretty: true}\n
-          State: #{inspect state, pretty: true}\n
-          Result: #{inspect result, pretty: true}
-          """),
-          aggregate(command_names(cmds), result == :ok))
+        (result == :ok)
+        |> when_fail(
+            IO.puts """
+            History: #{inspect history, pretty: true}
+            State: #{inspect state, pretty: true}
+            Result: #{inspect result, pretty: true}
+            """)
+        |> aggregate(command_names cmds)
       end
     end)
   end
