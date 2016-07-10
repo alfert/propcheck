@@ -57,7 +57,7 @@ defmodule PropCheck do
     use the `|>` to concatenate wrapper functions. It helps to distinguish
     between the property to test and those wrappers which beautify the
     results or the collection information about the test values. This is a
-    significant derivation of the API of both, PropEr and QuickCheck. 
+    significant derivation of the API of both, PropEr and QuickCheck.
 
     For some actual usage examples, see the code in the examples directory, or
     check out PropEr's site. The testing modules in the tests directory may also
@@ -807,23 +807,23 @@ defmodule PropCheck do
     """
     @spec collect(test, stats_printer, any ) :: test
     def collect(property, printer, category), do:
-        aggregate(printer, [category], property)
+        aggregate(property, printer, [category])
 
     @doc """
     Same as `collect/2`, but accepts a list of categories under which
     to classify the produced test case.
     """
-    @spec aggregate(sample, test) :: test
-    def aggregate(sample, property) do
-        aggregate(with_title(''), sample, property)
+    @spec aggregate(test, sample) :: test
+    def aggregate(property, sample) do
+        aggregate(property, with_title(''), sample)
     end
 
     @doc """
     Same as `collect/3`, but accepts a list of categories under which
     to classify the produced test case.
     """
-    @spec aggregate(stats_printer(), sample(), test()) ::  test()
-    def aggregate(printer, sample, property), do:
+    @spec aggregate(test, stats_printer, sample) ::  test
+    def aggregate(property, printer, sample), do:
         {:sample, sample, printer, property}
 
     @doc """
@@ -833,8 +833,8 @@ defmodule PropCheck do
     `count` is a boolean flag: when `false`, the particular
     test case will not be counted.
     """
-    @spec classify(boolean, any | sample, test):: test
-    defdelegate classify(count, sample, test), to: :proper
+    @spec classify(test, boolean, any | sample):: test
+    defdelegate classify(test, count, sample), to: :proper
 
     @doc """
     A function that collects numeric statistics on the produced instances.
