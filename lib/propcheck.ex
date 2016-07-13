@@ -9,7 +9,8 @@ defmodule PropCheck do
     ## Using PropCheck
     To use `PropCheck`, you need to add `use PropCheck` to your
     Elixir files. This gives you access to the functions and macros
-    defined here as well as to the `property` macros. In most examples shown
+    defined here as well as to the `property` macro, defined in
+    `PropCheck.Properties.property/4`. In most examples shown
     here, we directly use the `quickcheck` function, but typically you
     use the `property` macro instead to define test cases for `ExUnit`.
 
@@ -47,9 +48,9 @@ defmodule PropCheck do
     outer-level wrapper appears more than once in a property, the innermost
     instance takes precedence.
 
-        * `numtests/2`
-        * `fails/1`
-        * `on_output/2`
+    * `numtests/2`
+    * `fails/1`
+    * `on_output/2`
 
     `PropCheck` follows the Elixir idioms that for fluent API the first
     parameter flows through a pipeline of functions. Therefore, in `PropCheck`
@@ -82,7 +83,7 @@ defmodule PropCheck do
     * `true`: The property held for all valid produced inputs.
     * `false`: The property failed for some input.
     * `{error, type_of_error}`: An error occured; see the {@section Errors}
-     section for more information.<
+     section for more information.
 
     To test all properties exported from a module (a property is a 0-arity
     function whose name begins with `prop_`), you can use `module/1` or
@@ -206,11 +207,58 @@ defmodule PropCheck do
     it normally does.  The inputs to the user supplied function are
     the MFA, the arguments passed to the MFA, and the result returned
     from the MFA or an exception with it's reason.  If needed, the
-      user supplied function can call `:erlang.get_stacktrace/0`.  Default
-      is `:undefined`.
+    user supplied function can call `:erlang.get_stacktrace/0`.  Default
+    is `:undefined`.
+
+   ## Errors
+   The following errors may be encountered during testing. The term provided
+   for each error is the error type returned by `quickcheck/2` in case such
+   an error occurs. Normaly, a message is also printed on screen describing
+   the error.
+
+   * `:arity_limit`<br>
+     The random instance generation subsystem has failed to produce
+     a function of the desired arity. Please recompile PropEr with a suitable
+     value for `?MAX_ARITY` (defined in `proper_internal.hrl`). This error
+     should only be encountered during normal operation.
+   * `:cant_generate`<br>
+     The random instance generation subsystem has failed to
+     produce an instance that satisfies some `such_that/2` constraint. You
+     should either increase the `:constraint_tries` limit, loosen the failing
+     constraint, or make it non-strict. This error should only be encountered
+     during normal operation.
+   * `:cant_satisfy`<br>
+     All the tests were rejected because no produced test case
+     would pass all `implies/2` checks. You should loosen the failing `implies/2`
+     constraint(s). This error should only be encountered during normal
+     operation.
+   * `:non_boolean_result`<br>
+     The property code returned a non-boolean result. Please
+     fix your property.
+   * `:rejected`<br>
+     Only encountered during re-checking, the counterexample does not
+     match the property, since the counterexample doesn't pass an `implies/2`
+     check.
+   * `:too_many_instances`<br>
+     Only encountered during re-checking, the counterexample
+     does not match the property, since the counterexample contains more
+     instances than there are `forall/2`s in the property.
+   * `:type_mismatch`<br>
+     The variables' and types' structures inside a `forall/2` don't
+     match. Please check your properties.
+   * `{:typeserver, sub_error}`<br>
+     The typeserver encountered an error. The `sub_error` field contains
+     specific information regarding the error.
+   * `{:unexpected, result}`<br>
+     A test returned an unexpected result during normal operation. If you
+     ever get this error, it means that you have found a bug in PropEr
+     - please send an error report to the maintainers and remember to include
+     both the failing test case and the output of the program, if possible.
+   * `{:unrecognized_option, option}`<br>
+     `option` is not an option that PropEr understands.
 
     ## Acknowldgements
-    Very much of the documentation is immediately taken from the
+    Very much of the documentation is directly taken from the
     `proper` API documentation.
     """
     defmacro __using__(_) do
@@ -650,8 +698,8 @@ defmodule PropCheck do
   end
 
     @doc "Runs all properties of a module and return the list of succeeded and failed properties."
-    def run(target), do: run(target, [report: true, output: true])
-    def run(target, opts) do
+    defp run(target), do: run(target, [report: true, output: true])
+    defp run(target, opts) do
        PropCheck.Result.start_link
        on_output =
          fn(msg, args) ->
@@ -678,8 +726,9 @@ defmodule PropCheck do
       quote do: is_tuple(unquote(x)) and elem(unquote(x), 0) == :"$type"
     end
 
-    @doc "Runs the property as part of an `ExUnit` test case."
-    def exec_property(m, f ) do
+    @doc false
+    # Runs the property as part of an `ExUnit` test case.
+    defp exec_property(m, f ) do
       p = apply(m, f, [])
       should_fail = is_tuple(p) and elem(p, 0) == :fails
       case PropCheck.quickcheck(p, [:long_result]) do
@@ -764,7 +813,8 @@ defmodule PropCheck do
     Specifies the number `N` of tests to run when testing the property
     `property`.
 
-    Default is 100.
+    Default is 100. This function only changes the number of the tests, but
+    not the size of a test.
     """
     @spec numtests(pos_integer, outer_test) :: outer_test
     def numtests(n, property), do: {:numtests, n, property}
@@ -783,8 +833,8 @@ defmodule PropCheck do
 
     This wrapper is equivalent to the `on_output` option.
     """
-    @spec on_output(output_fun, outer_test) :: outer_test
-    def on_output(print, property), do: {:on_output, print, property}
+    @spec on_output(outer_test, output_fun) :: outer_test
+    def on_output(property, print), do: {:on_output, print, property}
 
     @doc """
     Specifies that test cases produced by this property should be
@@ -834,7 +884,7 @@ defmodule PropCheck do
     test case will not be counted.
     """
     @spec classify(test, boolean, any | sample):: test
-    defdelegate classify(test, count, sample), to: :proper
+    def classify(test, count, sample), do: :proper.classify(count, sample, test)
 
     @doc """
     A function that collects numeric statistics on the produced instances.
@@ -856,7 +906,9 @@ defmodule PropCheck do
     """
     @spec equals(any, any) :: test
     def equals(a, b), do:
-        when_fail(:io.format('~w != ~w~n', [a, b]), a === b)
+        (a === b)
+        |> when_fail(IO.puts("#{inspect a, :pretty} != #{inspect b, :pretty}"))
+
 
     @doc """
     A predefined function that accepts an atom or string and returns a
