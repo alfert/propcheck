@@ -82,7 +82,7 @@ defmodule PropCheck do
     The return value of PropEr can be one of the following:
     * `true`: The property held for all valid produced inputs.
     * `false`: The property failed for some input.
-    * `{error, type_of_error}`: An error occured; see the {@section Errors}
+    * `{error, type_of_error}`: An error occured; see the section Errors
      section for more information.
 
     To test all properties exported from a module (a property is a 0-arity
@@ -130,7 +130,7 @@ defmodule PropCheck do
     * `true`: The property now holds for this test case.
     * `false`: The test case still fails (although not necessarily for the
       same reason as before).
-    * `{error, type_of_error}`: An error occured - see the {@section Errors}
+    * `{error, type_of_error}`: An error occured - see the section Errors
       section for more information.
 
     PropEr will not attempt to shrink the input in case it still fails the
@@ -144,8 +144,8 @@ defmodule PropCheck do
     as `quickcheck/1`). A single option can be written stand-alone, or
     multiple options can be provided in a list. When two settings conflict, the
     one that comes first in the list takes precedence. Settings given inside
-    external wrappers to a property (see the {@section How to write properties}
-    section) override any conflicting settings provided as options.
+    external wrappers to a property (see the section on How to write properties)
+    override any conflicting settings provided as options.
 
     The available options are:
 
@@ -162,7 +162,7 @@ defmodule PropCheck do
       **CAUTION:** The above output control options are incompatible with each
       other.
     * `:long_result` <br>
-     Enables long-result mode (see the {@section Counterexamples} section
+     Enables long-result mode (see the section Counterexamples
       for details).
     * `{:numtests, positive_number}` or simply `positive_number` <br>
      This is equivalent to the `numtests/1` property wrapper. Any
@@ -194,11 +194,12 @@ defmodule PropCheck do
     * `:any_to_integer` <br>
        All generated instances of the type `PropCheck.BasicTypes.any/0` will be
       integers. This is provided as a means to speed up the testing of specs,
-      where `any` is a commonly used type (see the {@section Spec testing}
-      section for details).
+      where `any` is a commonly used type. Remark: PropCheck does not support
+      spec-testing.
     * `{:skip_mfas, [mfa]}` <br>
       When checking a module's specs, PropEr will not test the
-      specified MFAs.  Default is [].
+      specified MFAs.  Default is []. Remark: PropCheck does not support
+      spec-testing.
     * `{false_positive_mfas, ((mfa(), args::[any], {:fail, result::any} |
       {:error | :exit | :throw, reason::any}) -> boolean) | :undefined` <br>
       When checking a module's spec(s), PropEr will treat a
@@ -208,7 +209,8 @@ defmodule PropCheck do
     the MFA, the arguments passed to the MFA, and the result returned
     from the MFA or an exception with it's reason.  If needed, the
     user supplied function can call `:erlang.get_stacktrace/0`.  Default
-    is `:undefined`.
+    is `:undefined`. Remark: PropCheck does not support
+    spec-testing.
 
    ## Errors
    The following errors may be encountered during testing. The term provided
@@ -556,16 +558,15 @@ defmodule PropCheck do
     percentage of instances of `type` pass the test - it will take a lot of
     tries for the instance generation subsystem to randomly produce a valid
     instance. This will result in slower testing, and testing may even be
-    stopped short, in case the `constraint_tries` limit is reached (see the
-    "Options" section in the documentation of the {@link proper} module).
+    stopped short, in case the `:constraint_tries` limit is reached (see the
+    "Options" section).
 
     If this is the case, it would be more appropriate to generate valid instances
     of the specialized type using the `let` macro. Also make sure that even
     small instances can satisfy the constraint, since PropEr will only try
     small instances at the start of testing. If this is not possible, you can
     instruct PropEr to start at a larger size, by supplying a suitable value
-    for the `start_size` option (see the "Options" section in the
-    documentation of the {@link proper} module).
+    for the `:start_size` option (see the "Options" section).
 
         iex> use PropCheck
         iex> even = such_that n <- nat, when: rem(n, 2) == 0
@@ -589,7 +590,7 @@ defmodule PropCheck do
 
     @doc """
     Equivalent to the `such_that` macro, but the constraint `condition`
-    is considered non-strict: if the `constraint_tries` limit is reached, the
+    is considered non-strict: if the `:constraint_tries` limit is reached, the
     generator will just return an instance of `type` instead of failing,
     even if that instance doesn't satisfy the constraint.
 
@@ -697,7 +698,12 @@ defmodule PropCheck do
       end
   end
 
-    @doc "Runs all properties of a module and return the list of succeeded and failed properties."
+    #doc "Runs all properties of a module and return the list of succeeded and failed properties."
+    #
+    #
+    # This function could serve as an example for storing results of quickcheck
+    # and to do samething with them afterwards, e.g. storing counterexamples
+    # to disk for a second run.
     defp run(target), do: run(target, [report: true, output: true])
     defp run(target, opts) do
        PropCheck.Result.start_link
@@ -724,38 +730,6 @@ defmodule PropCheck do
 
     defmacro is_property(x) do
       quote do: is_tuple(unquote(x)) and elem(unquote(x), 0) == :"$type"
-    end
-
-    @doc false
-    # Runs the property as part of an `ExUnit` test case.
-    defp exec_property(m, f ) do
-      p = apply(m, f, [])
-      should_fail = is_tuple(p) and elem(p, 0) == :fails
-      case PropCheck.quickcheck(p, [:long_result]) do
-        true when not should_fail -> true
-        true when should_fail ->
-          raise ExUnit.AssertionError, [
-            message:
-              "Property #{inspect m}.#{f} should fail, but succeeded for all test data :-(",
-            expr: nil]
-        _counter_example when should_fail -> true
-        counter_example ->
-          raise ExUnit.AssertionError, [
-            message: """
-            Property #{inspect m}.#{f} failed. Counter-Example is:
-            #{inspect counter_example, pretty: true}
-            """,
-                expr: nil]
-      end
-    end
-
-    @doc "Extracs all properties of module."
-    @spec extract_props(atom) :: [{atom, arity}]
-    def extract_props(mod) do
-      apply(mod,:__info__, [:functions])
-        |> Stream.filter(
-          fn {f, 0} -> f |> Atom.to_string |> String.starts_with?( "prop_")
-                  _ -> false end)
     end
 
     @doc """
