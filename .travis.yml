@@ -8,4 +8,4 @@ elixir:
   - 1.3.0
 before_script:
   - mix local.hex --force
-script: "MIX_ENV=test mix do deps.get, deps.compile, test --cover"
+script: "MIX_ENV=test mix do deps.get, deps.compile, test --cover --trace"
