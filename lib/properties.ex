@@ -53,23 +53,7 @@ defmodule PropCheck.Properties do
             end
         end
     end
-    @doc false
-    @doc """
-    Defines a property.
 
-    The property is tested by calling the quickcheck function
-    or (more usually) the `PropCheck.prop_test/1` macro which generates for
-    each property in a file the corresponding `ExUnit` test cases.
-    """
-    defmacro old_property(name, opts) do
-        prop_name = case name do
-            {name, _, _} -> :"prop_#{name}"
-            name when is_atom(name) or is_binary(name) or is_list(name) -> :"prop_#{name}"
-        end
-        quote do
-            def unquote(prop_name)(), unquote(opts)
-        end
-    end
 
     @doc false
     def print_mod_as_erlang(mod) when is_atom(mod) do
