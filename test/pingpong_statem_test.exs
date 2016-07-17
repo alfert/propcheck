@@ -16,6 +16,7 @@ defmodule PropCheck.Test.PingPongStateM do
       trap_exit do
         kill_all_player_processes()
         PingPongMaster.start_link()
+        :ok = :sys.trace(PingPongMaster, true)
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         PingPongMaster.stop
