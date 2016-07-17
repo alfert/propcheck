@@ -4,23 +4,26 @@ defmodule PropCheck.Test.PingPongFSM do
   understand the difference between both approaches.
   """
 
-  # State is modelled as tuples of `{state_name, state}`
   use PropCheck.FSM
   use PropCheck
   use ExUnit.Case
   alias PropCheck.Test.PingPongMaster
   require Logger
-	@moduletag capture_log: true
+	# @moduletag capture_log: true
 
   property "ping-pong FSM works properly" do
-    numtests(1_000, forall cmds in commands(__MODULE__) do
+    numtests(100, forall cmds in commands(__MODULE__) do
       trap_exit do
         kill_all_player_processes()
-        PingPongMaster.start_link()
+        {:ok, pid} = PingPongMaster.start_link()
+        # :ok = :sys.install(PingPongMaster, {&log_message/3, :no_state})
+        :ok = :sys.trace(PingPongMaster, true)
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
+        # {:ok, messages} = :sys.log(PingPongMaster, :get)
         PingPongMaster.stop
-        #IO.puts "Property finished. result is: #{inspect r}"
+        # Logger.info "Property finished. result is: #{inspect r}"
+        # IO.puts "Property finished. result is: #{inspect r}"
         (result == :ok)
         |> when_fail(
             IO.puts """
@@ -33,8 +36,25 @@ defmodule PropCheck.Test.PingPongFSM do
     end)
   end
 
+  defp log_message(log_state, {:in, msg}, proc_state) do
+    Logger.debug("Got message #{inspect msg, :pretty} in state #{inspect proc_state, :pretty}")
+    log_state
+  end
+  defp log_message(log_state, {:in, msg, client}, proc_state) do
+    Logger.debug("Got message #{inspect msg, :pretty} from client #{inspect client} in state #{inspect proc_state, :pretty}")
+    log_state
+  end
+  defp log_message(log_state, {:out, msg, client}, proc_state) do
+    Logger.error("Send message #{inspect msg, :pretty} to client #{inspect client} in state #{inspect proc_state, :pretty}")
+    log_state
+  end
+  defp log_message(log_state, any, proc_state) do
+    Logger.debug("Got unknown message #{inspect any, :pretty} in state #{inspect proc_state, :pretty}")
+    log_state
+  end
 
 
+  # State is modelled as tuples of `{state_name, state}`
   defstruct players: [], scores: %{}
 
   @max_players 100
