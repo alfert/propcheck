@@ -22,7 +22,7 @@ defmodule PropCheck.Test.PingPongMaster do
   # -------------------------------------------------------------------
 
   def start_link() do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__, opts: [:debug])
+    GenServer.start_link(__MODULE__, [], [name: __MODULE__])
   end
 
   def stop() do
