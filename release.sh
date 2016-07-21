@@ -10,12 +10,12 @@
 # set -x
 
 # CONFIGURATION
-old="0.0.1."
+old="0.0.1"
 new="0.0.2"
 # do not set any variables beyond this line
 
 # check that old and new version differ
-if [ "$old" == "$new"]
+if [ "$old" == "$new" ]
 then
 	echo "old and new version must differ, please edit script"
 	exit 1
@@ -34,6 +34,9 @@ if [ 1 -eq $? ]; then
 	exit 1
 fi
 
+echo "Development version = $old_version"
+echo "Release version     = $release_version"
+echo "New version         = $new_version"
 read -p "Check the variables. Press Ctrl-C for exit, return for continuing"
 
 # update version in mix.exs
@@ -59,3 +62,6 @@ git commit -m "bump version to $new_version" mix.exs
 
 # push to github
 git push origin master --tags
+
+# call for action
+echo "Release created. Please edit $script_name and mix.exs for the next version!"
