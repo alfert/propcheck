@@ -11,15 +11,16 @@ defmodule PropCheck.Test.PingPongStateM do
   require Logger
   @moduletag capture_log: true
 
-  property "ping-pong playing works fine" do
+  property "ping-pong playing works fine", [:verbose] do
     numtests(3_000, forall cmds in commands(__MODULE__) do
       trap_exit do
         kill_all_player_processes()
         PingPongMaster.start_link()
-        :ok = :sys.trace(PingPongMaster, true)
+        #:ok = :sys.trace(PingPongMaster, true)
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         PingPongMaster.stop
+        wait_for_master_to_stop()
         #IO.puts "Property finished. result is: #{inspect r}"
         (result == :ok)
         |> when_fail(
@@ -33,6 +34,13 @@ defmodule PropCheck.Test.PingPongStateM do
     end)
   end
 
+  defp wait_for_master_to_stop() do
+    pid = Process.whereis(PingPongMaster)
+    if is_pid(pid) and Process.alive?(pid) do
+      :timer.sleep(1)
+      wait_for_master_to_stop()
+    end
+  end
 
   # ensure all player processes are dead
   defp kill_all_player_processes() do

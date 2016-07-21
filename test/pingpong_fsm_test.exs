@@ -11,29 +11,38 @@ defmodule PropCheck.Test.PingPongFSM do
   require Logger
 	# @moduletag capture_log: true
 
-  property "ping-pong FSM works properly" do
-    numtests(100, forall cmds in commands(__MODULE__) do
+  property "ping-pong FSM works properly", [:quiet] do
+    numtests(1_000, forall cmds in commands(__MODULE__) do
       trap_exit do
         kill_all_player_processes()
         {:ok, pid} = PingPongMaster.start_link()
         # :ok = :sys.install(PingPongMaster, {&log_message/3, :no_state})
-        :ok = :sys.trace(PingPongMaster, true)
+        # :ok = :sys.trace(PingPongMaster, true)
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         # {:ok, messages} = :sys.log(PingPongMaster, :get)
         PingPongMaster.stop
+        wait_for_master_to_stop()
         # Logger.info "Property finished. result is: #{inspect r}"
         # IO.puts "Property finished. result is: #{inspect r}"
         (result == :ok)
+        |> aggregate(command_names cmds)
         |> when_fail(
             IO.puts """
             History: #{inspect history, pretty: true}
             State: #{inspect state, pretty: true}
             Result: #{inspect result, pretty: true}
             """)
-        |> aggregate(command_names cmds)
       end
     end)
+  end
+
+  defp wait_for_master_to_stop() do
+    pid = Process.whereis(PingPongMaster)
+    if is_pid(pid) and Process.alive?(pid) do
+      :timer.sleep(1)
+      wait_for_master_to_stop()
+    end
   end
 
   defp log_message(log_state, {:in, msg}, proc_state) do
