@@ -1,15 +1,31 @@
 #!/bin/bash
-# release.sh old new
-set -x
+# Creates a release including
+#   * git tags
+#   * creating and publishing the hex packages
+#   * creating and publishing the hex documentation
+#   * patch mix.exs and release.sh towards the new version
+# development version have always the "-dev" suffix in their
+# version name.
 
-# old is always with -dev
+# set -x
+
+# CONFIGURATION
 old="0.0.1."
-new="0.0.2-dev"
+new="0.0.2"
 # do not set any variables beyond this line
+
+# check that old and new version differ
+if [ "$old" == "$new"]
+then
+	echo "old and new version must differ, please edit script"
+	exit 1
+fi
+
 old_version="$old-dev"
 release_version="$old"
-new_version="$new"
+new_version="$new-dev"
 tag_name=v$release_version
+script_name="`basename $0`"
 set +x
 
 git branch | grep '* master' > /dev/null
@@ -35,6 +51,8 @@ mix hex.docs
 
 # update version in mix.exs
 sed -i "" "s/\(version: \"\)$release_version\",/\\1$new_version\",/" mix.exs
+# update in release.sh
+sed -i "" "s/\(old=\"\)$old_version\",/\\1$new\",/" $script_name
 
 # add to git
 git commit -m "bump version to $new_version" mix.exs
