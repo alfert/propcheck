@@ -55,7 +55,7 @@ mix hex.docs
 # update version in mix.exs
 sed -i "" "s/\(version: \"\)$release_version\",/\\1$new_version\",/" mix.exs
 # update in release.sh
-sed -i "" "s/\(old=\"\)$old_version\",/\\1$new\",/" $script_name
+sed -i "" "s/\(old=\"\)$old_version\"/\\1$new\"/" $script_name
 
 # add to git
 git commit -m "bump version to $new_version" mix.exs
