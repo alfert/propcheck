@@ -19,8 +19,8 @@ defmodule PropCheck.FSM do
 
   ## The states of the finite state machine
   Following the convention used in `gen_fsm behaviour`, the state is
-  separated into a `state_name::state_name` and some
-  `state_data::state_data`. `state_name` is used to denote a state
+  separated into types `t:state_name/0` and some
+  `t:state_data/0`. `state_name` is used to denote a state
   of the finite state machine and `state_data` is any relevant information
   that has to be stored in the model state. States are fully
   represented as tuples `{state_name, state_data}`.
@@ -34,7 +34,7 @@ defmodule PropCheck.FSM do
   `state_data` can be an arbitrary term, but is usually a record.
 
   ## Transitions between states
-  A transition `t:transition` is represented as a tuple
+  A transition `t:transition/0` is represented as a tuple
   `{target_state, {:call, m, f, a}}`. This means that performing the specified
   symbolic call at the current state of the fsm will lead to `target_state`.
   The atom `:history` can be used as `target_state` to denote that a transition
@@ -45,19 +45,20 @@ defmodule PropCheck.FSM do
   implementing the finite state machine:
 
   * `c:initial_state/0`
-  * `c:initial_state_data/0`
+  * `c:initial_data/0`
   * `c:precondition/4`
   * `c:postcondition/5`
   * `c:next_state_data/5`
+  * `c:weight/3`
 
   In addition to these functions, we also need functions for each
-  state
+  state:
 
   * `state_name(s::state_data) ::[transition]`
     <br>There should be one instance of this function for each reachable
     state `state_name` of the finite state machine. In case `state_name` is a
     tuple the function takes a different form, described just below. The
-    function returns a list of possible transitions (`transition`)
+    function returns a list of possible transitions (`t:transition/0` )
     from the current state.
 
     At command generation time, the instance of this function with the same
@@ -70,19 +71,12 @@ defmodule PropCheck.FSM do
     Note also that PropEr detects transitions that would raise an exception
     of class `<error>` at generation time (not earlier) and does not choose
     them. This feature can be used to include conditional transitions that
-    depend on the `state_data`.
+    depend on the `t:state_data/0`.
   * `state_name(attr1::any, ..., attrN::any,
                   s::type state_data) :: [transition]`
     <br>There should be one instance of this function for each reachable state
     `{state_name, attr1, ..., attrN}` of the finite state machine. The function
     has similar beaviour to `state_name/1`, described above.
-  * `weight(from::state_name, target::state_name, call::symb_call) :: integer`
-    <br>This is an optional callback. When it is not defined (or not exported),
-    transitions are chosen with equal probability. When it is defined, it
-    assigns an integer weight to transitions from `from` to `target`
-    triggered by symbolic call `call`. In this case, each transition is chosen
-    with probability proportional to the weight assigned.
-
 
   ## The property used
   This is an example of a property that can be used to test a
@@ -94,7 +88,7 @@ defmodule PropCheck.FSM do
          forall cmds <- commands(__MODULE__) do
            {_history, _state, result} = run_commands(__MODULE__, cmds)
            cleanup()
-          result == :ok
+           result == :ok
         end
       end
 
@@ -170,6 +164,15 @@ defmodule PropCheck.FSM do
   @callback next_state_data(from :: state_name, target:: state_name,
     state_data :: state_data, result :: result, call :: symb_call) :: state_data
 
+  @doc """
+  This is an optional callback. When it is not defined (or not exported),
+  transitions are chosen with equal probability. When it is defined, it
+  assigns an integer weight to transitions from `from` to `target`
+  triggered by symbolic call `call`. In this case, each transition is chosen
+  with probability proportional to the weight assigned.
+  """
+  @callback weight(from::state_name, target::state_name, call::symb_call) :: integer
+  @optional_callbacks weight: 3
 
   @doc """
   A special PropEr type which generates random command sequences,
