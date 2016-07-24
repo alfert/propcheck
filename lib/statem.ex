@@ -24,8 +24,8 @@ defmodule PropCheck.StateM do
     repeatable testcases, which is essential for correct shrinking.
 
   Since the actual results of symbolic calls are not known at generation time,
-  we use symbolic variables (`t:symb_var()`) to refer to them.
-  A command (`t:command()`) is a symbolic term, used to bind a symbolic
+  we use symbolic variables of type `t:symb_var/0` to refer to them.
+  A command of type `t:command/0` is a symbolic term, used to bind a symbolic
   variable to the result of a symbolic call. For example:
 
       [{:set, {:var, 1}, {:call, :erlang, :put, [:a, 42]}},
@@ -67,16 +67,10 @@ defmodule PropCheck.StateM do
   implementing the abstract state machine:
 
    * `c:initial_state/0`
-   * `initial_state() :: symbolic_state`
-   * `command(s::symbolic_state) :: proper_types:type`
-   * `precondition(s::symbolic_state, call::symb_call :: boolean`
-   * `postcondition(s::dynamic_state,
-                     call::symb_call,
-                     res::term :: boolean`
-   * `next_state(s::symbolic_state |dynamic_stat,
-                  res::term,
-                  call::symb_call) ::
-                  symbolic_state | dynamic_state`
+   * `c:command/1`
+   * `c:precondition/2`
+   * `c:postcondition/3`
+   * `c:next_state/3`
 
 
   ## The property used
@@ -114,7 +108,7 @@ defmodule PropCheck.StateM do
   state machine when commands are executed sequentially, it is possible to
   move to parallel testing. The same state machine can be used to generate
   command sequences that will be executed in parallel to test for race
-  conditions. A parallel testcase (`t:parallel_testcase`) consists of
+  conditions. A parallel testcase (`t:parallel_testcase/0` ) consists of
   a sequential and a parallel component. The sequential component is a
   command sequence that is run first to put the system in a random state.
   The parallel component is a list containing 2 command sequences to be
@@ -177,6 +171,8 @@ defmodule PropCheck.StateM do
   @type dynamic_state :: any
   @type symb_call :: :proper_statem.symb_call
   @type command :: :proper_statem.command
+  @type parallel_testcase :: {command_list,[command_list]}
+  @type command_list :: [command]
 
   @doc """
   Specifies the symbolic initial state of the state machine.
