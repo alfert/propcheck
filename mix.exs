@@ -9,13 +9,13 @@ defmodule Propcheck.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      test_coverage: [tool: Coverex.Task, console_log: true],
-     package: package,
+     package: package(),
      name: "PropCheck - Property Testing",
      source_url: "https://github.com/alfert/propcheck",
      homepage_url: "https://github.com/alfert/propcheck",
      docs: [extras: ["README.md"], extra_section: "Overview"],
-     description: description,
-     deps: deps]
+     description: description(),
+     deps: deps()]
   end
 
   # Hex Package description
