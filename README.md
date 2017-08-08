@@ -6,6 +6,16 @@ is derived from ProperEx, but is mostly completely rewritten.
 
 [![Build Status](https://travis-ci.org/alfert/propcheck.svg?branch=master)](https://travis-ci.org/alfert/propcheck)
 
+## Installation
+To use PropCheck with your project, add it as a dependency to `mix.exs`:
+
+```elixir
+defp deps do
+  [
+    {:propcheck, "~> 0.0.1", only: :test, runtime: false}
+  ]
+end
+```
 
 ## Links to other documentation
 
