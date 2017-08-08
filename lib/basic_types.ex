@@ -278,15 +278,15 @@ defmodule PropCheck.BasicTypes do
 
   @doc "List of any types, i.e. `list(any)`"
   @spec list() :: type
-  def list(), do: list(any)
+  def list(), do: list(any())
 
   @doc "Tuples of any types, i.e. `loose_tuple(any)`"
   @spec tuple() :: type
-  def tuple(), do: loose_tuple(any)
+  def tuple(), do: loose_tuple(any())
 
   @doc "An Erlang string, i.e. `list(char)`"
   @spec char_list() :: type
-  def char_list(), do: list(char)
+  def char_list(), do: list(char())
 
   @doc "weighted_union(FreqChoices)"
   @spec wunion([{frequency,raw_type},...]) :: type
@@ -294,7 +294,7 @@ defmodule PropCheck.BasicTypes do
 
   @doc "Term is a synonym for `any`"
   @spec term() :: type
-  def term(), do: any
+  def term(), do: any()
 
   @doc "timeout values, i.e. `union([non_neg_integer() | :infinity])`"
   @spec timeout() :: type
@@ -329,15 +329,15 @@ defmodule PropCheck.BasicTypes do
 
   @doc "Large_int is equivalent to `integer`"
   @spec large_int() :: type
-  def large_int(), do: integer
+  def large_int(), do: integer()
 
   @doc "real is equivalent to `float`"
   @spec real() :: type
-  def real(), do: float
+  def real(), do: float()
 
   @doc "bool is equivalent to `boolean`"
   @spec bool() :: type
-  def bool(), do: boolean
+  def bool(), do: boolean()
 
   @doc "choose is equivalent to `integer(low, high)`"
   @spec choose(ext_int, ext_int) :: type
