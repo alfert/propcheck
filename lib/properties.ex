@@ -16,7 +16,7 @@ defmodule PropCheck.Properties do
     environment of variables defined in a test setup function.
 
     The second parameter sets options for Proper (see `PropCheck`). The default
-    is `:quit` such that execution during ExUnit runs are silent, as normal
+    is `:quiet` such that execution during ExUnit runs are silent, as normal
     unit tests are. You can change it e.g. to `:verbose` or setting the
     maximum size of the test data generated or what ever may be helpful. For
     seeing the result of wrapper functions `PropCheck.aggregate/2` etc, the
