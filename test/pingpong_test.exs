@@ -12,6 +12,8 @@ defmodule PropCheck.Test.PingPongTest do
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
     |> Enum.each(fn name ->
+      # nice idea from José Valim: Monitor the process ...
+      ref = Process.monitor(name)
       pid = Process.whereis(name)
       if is_pid(pid) and Process.alive?(pid) do
         try do
@@ -19,6 +21,10 @@ defmodule PropCheck.Test.PingPongTest do
         catch
           _what, _value -> Logger.debug "Already killed process #{name}"
         end
+      end
+      # ... and wait for the DOWN message.
+      receive do
+        {:DOWN, ^ref, :process, _object, _reason} -> :ok
       end
     end)
   end
@@ -33,7 +39,7 @@ defmodule PropCheck.Test.PingPongTest do
     score = PropCheck.Test.PingPongMaster.get_score :player_73
     PropCheck.Test.PingPongMaster.stop
     kill_all_player_processes()
-    
+
     assert score <= 2
   end
 

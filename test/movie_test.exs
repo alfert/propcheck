@@ -19,7 +19,9 @@ defmodule PropCheck.Test.Movies do
   property "server works fine" do
     numtests(1_000, forall cmds <- commands(__MODULE__) do
       trap_exit do
-        MovieServer.start_link()
+				Logger.debug "Start another test"
+        {:ok, _pid} = MovieServer.start_link()
+				Logger.debug "Fresh MovieSever is started."
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         MovieServer.stop
@@ -65,7 +67,7 @@ defmodule PropCheck.Test.Movies do
   # first components holds the return value of create_account,
   # the second components holds the rented movies
   defstruct users: [],
-    rented: HashDict.new
+    rented: %{}
 
   @doc """
   Generate only valid passwords, i.e those from existing users.
@@ -84,16 +86,16 @@ defmodule PropCheck.Test.Movies do
 
   @doc "Set of all allowed commands"
   def command(_state = %__MODULE__{users: []}) do
-      frequency([{1, {:call, MovieServer, :create_account, [name]}},
+      frequency([{1, {:call, MovieServer, :create_account, [name()]}},
            {1, {:call, MovieServer, :ask_for_popcorn, []}}
 					 ])
   end
   def command(state = %__MODULE__{rented: rented}) do
-		movies_rented = 0 < (rented |> Dict.values() |> List.flatten() |> Enum.count())
-		std_calls = [{1, {:call, MovieServer, :create_account, [name]}},
+		movies_rented = 0 < (rented |> Map.values() |> List.flatten() |> Enum.count())
+		std_calls = [{1, {:call, MovieServer, :create_account, [name()]}},
            {1, {:call, MovieServer, :ask_for_popcorn, []}},
            {1, {:call, MovieServer, :delete_account, [password(state)]}},
-           {1, {:call, MovieServer, :rent_dvd, [password(state), movie]}}]
+           {1, {:call, MovieServer, :rent_dvd, [password(state), movie()]}}]
 		calls = if (movies_rented) do
 				pms = user_movie_pairs(rented)
 				#IO.puts "User/movie pairs: #{inspect pms}"
@@ -109,8 +111,8 @@ defmodule PropCheck.Test.Movies do
   end
 
 	def user_movie_pairs(rented) do
-		k = rented |> Dict.keys()
-		k |> Enum.map(&(make_pairs(&1, rented |> Dict.fetch!(&1))))
+		k = rented |> Map.keys()
+		k |> Enum.map(&(make_pairs(&1, rented |> Map.fetch!(&1))))
 			|> List.flatten()
 	end
 	def make_pairs(password, movies) do
@@ -125,30 +127,30 @@ defmodule PropCheck.Test.Movies do
   def next_state(s = %__MODULE__{users: users}, v, {:call, _, :create_account, [_name]}), do:
     %__MODULE__{s | users: [v | users]}
   def next_state(s = %__MODULE__{rented: rented, users: users}, _v, {:call, _, :delete_account, [password]}) do
-		case rented |> Dict.get(password, []) do
+		case rented |> Map.get(password, []) do
 			[]    -> %__MODULE__{s | users: List.delete(users, password),
-															 rented: rented |> Dict.delete(password)}
+															 rented: rented |> Map.delete(password)}
 			_any  ->	s
 		end
 	end
   def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :rent_dvd, [password, movie]}) do
     case is_available(s, movie) do
-      true  -> %__MODULE__{s | rented: rented |> Dict.update(password, [movie], &([movie | &1]))}
+      true  -> %__MODULE__{s | rented: rented |> Map.update(password, [movie], &([movie | &1]))}
       false -> s
     end
   end
   def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :return_dvd, [password, movie]}), do:
-    %__MODULE__{s | rented: Dict.update!(rented, password, &(&1 |> List.delete(movie))) }
+    %__MODULE__{s | rented: Map.update!(rented, password, &(&1 |> List.delete(movie))) }
   def next_state(s, _v, {:call, _, :ask_for_popcorn, []}), do: s
 
   @doc "Don't return dvds, which are not rented and ensure that the user exists"
   def precondition(state, {:call, _, :return_dvd, [password, movie]}) do
-    state.rented |> Dict.has_key?(password) and
-			state.rented |> Dict.fetch!(password) |> Enum.member?(movie)
+    state.rented |> Map.has_key?(password) and
+			state.rented |> Map.fetch!(password) |> Enum.member?(movie)
   end
 	def precondition(state, {:call, _, :rent_dvd, [password, movie]}) do
 		state.users |> Enum.member?(password) and
-		not (state.rented |> Dict.get(password, []) |> Enum.member?(movie))
+		not (state.rented |> Map.get(password, []) |> Enum.member?(movie))
 	end
 	def precondition(state, {:call, _, :delete_account, [password]}) do
 		state.users |> Enum.member?(password)
@@ -162,7 +164,7 @@ defmodule PropCheck.Test.Movies do
   end
   def postcondition(%__MODULE__{rented: rented}, {:call, _, :delete_account,[passwd]}, result) do
     # deletion does not work always
-		case rented |> Dict.get(passwd, []) do
+		case rented |> Map.get(passwd, []) do
     	[] -> result == :account_deleted
 			_any_movie ->  result == :return_movies_first
 		end
@@ -187,7 +189,7 @@ defmodule PropCheck.Test.Movies do
   def is_available(%__MODULE__{rented: rented}, movie) do
     max_av = @available_movies |> Keyword.get(movie, -1)
 		available = max_av - (rented
-			|> Dict.values()
+			|> Map.values()
 			|> List.flatten()
 			|> Stream.filter(&(&1 == movie))
 			|> Enum.count())

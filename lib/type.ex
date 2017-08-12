@@ -26,7 +26,7 @@ defmodule PropCheck.Type do
 
 	defmodule TypeExpr do
 		@moduledoc false
-		
+
 		@typedoc """
 		Various type constructors, `:ref` denote a reference to an existing type or
 		parameter, `:literal` means a literal value, in many cases, this will be an atom value.
@@ -164,7 +164,7 @@ defmodule PropCheck.Type do
 	@spec is_recursive(mfa, env ) :: boolean
 	def is_recursive({_m, _f, _a} = t, env) do
 		# ensure that t is defined in env, otherwise we cannot check anything
-		{:ok, type} = env |> Dict.fetch(t)
+		{:ok, type} = env |> Map.fetch(t)
 		%__MODULE__{} = type
 		is_recursive(t, type, env)
 	end
@@ -196,7 +196,7 @@ defmodule PropCheck.Type do
 			_ -> # anything other must be present in the environment
 				#
 				# Hmm, what about types of other modules (=mfa) or parameterized types?
-				{:ok, t} = env |> Dict.fetch(type)
+				{:ok, t} = env |> Map.fetch(type)
 				is_recursive(mfa, t, env)
 		end
 	end

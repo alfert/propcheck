@@ -11,8 +11,8 @@ defmodule PropCheck.TreeTest do
 		# the faulty tree has a default-value, which occurs more often#
 		# than other values. We also delete this default-value, hence
 		# the buggy delete method should fail.
-		faulty_tree = let x <- integer do
-			{x, tree(default(x, integer))}
+		faulty_tree = let x <- integer() do
+			{x, tree(default(x, integer()))}
 		end
 
 		fails(forall {x, t} <- faulty_tree do
@@ -23,7 +23,7 @@ defmodule PropCheck.TreeTest do
 
 	# delete2 is not faulty
 	property "delete2", [:verbose, {:max_size, 20}]  do
-		forall {x, t} <- {integer, tree(integer)} do
+		forall {x, t} <- {integer(), tree(integer())} do
 				tsize = t |> Tree.pre_order |> Enum.count
 				(not Tree.member(Tree.delete2(t, x), x))
 				|> collect(tsize)
@@ -34,7 +34,7 @@ defmodule PropCheck.TreeTest do
 	# Example of a PBT strategy: finding two distinct computations that should
 	# result in the same value.
 	property "sum" do
-		forall t <- tree(integer) do
+		forall t <- tree(integer()) do
 			Tree.pre_order(t) |> Enum.sum == Tree.tree_sum(t)
 		end
 	end
