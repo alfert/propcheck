@@ -276,7 +276,7 @@ defmodule PropCheck do
     @type user_opts :: [user_opt] | user_opt
     @type outer_test :: :proper.outer_test
     @type test :: :proper.test
-    @type output_fun :: ((char_list,[term]) -> :ok)
+    @type output_fun :: ((charlist,[term]) -> :ok)
     @type size :: non_neg_integer
     @type user_opt :: :quiet
     		  | :verbose
@@ -312,7 +312,7 @@ defmodule PropCheck do
     @type module_result :: long_module_result | short_module_result
 
     @type sample :: [any]
-    @type title :: char_list | atom | String.t
+    @type title :: charlist | atom | String.t
     @type stats_printer :: ((sample) -> :ok)
     		       | ((sample, output_fun) -> :ok)
 
@@ -869,7 +869,7 @@ defmodule PropCheck do
     """
     @spec measure(test, title, number | [number]) :: test
     def measure(test, title, num) when is_binary(title) do
-      measure(test, String.to_char_list(title), num)
+      measure(test, String.to_charlist(title), num)
     end
     def measure(test, title, num), do:
       :proper.measure(title, num, test)
@@ -890,7 +890,7 @@ defmodule PropCheck do
     the given title `title` above the statistics.
     """
     @spec with_title(title) :: stats_printer
-    def with_title(title) when is_binary(title), do: with_title(String.to_char_list(title))
+    def with_title(title) when is_binary(title), do: with_title(String.to_charlist(title))
     def with_title(title), do: :proper.with_title(title)
 
     @doc """
