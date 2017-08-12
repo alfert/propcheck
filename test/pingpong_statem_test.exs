@@ -35,18 +35,20 @@ defmodule PropCheck.Test.PingPongStateM do
   end
 
   defp wait_for_master_to_stop() do
-    pid = Process.whereis(PingPongMaster)
-    if is_pid(pid) and Process.alive?(pid) do
-      :timer.sleep(1)
-      wait_for_master_to_stop()
+    ref = Process.monitor(PingPongMaster)
+    receive do
+      {:DOWN, ^ref, :process, _object, _reason} -> :ok
     end
   end
+
 
   # ensure all player processes are dead
   defp kill_all_player_processes() do
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
     |> Enum.each(fn name ->
+      # nice idea from José Valim: Monitor the process ...
+      ref = Process.monitor(name)
       pid = Process.whereis(name)
       if is_pid(pid) and Process.alive?(pid) do
         try do
@@ -54,6 +56,10 @@ defmodule PropCheck.Test.PingPongStateM do
         catch
           _what, _value -> Logger.debug "Already killed process #{name}"
         end
+      end
+      # ... and wait for the DOWN message.
+      receive do
+        {:DOWN, ^ref, :process, _object, _reason} -> :ok
       end
     end)
   end

@@ -38,10 +38,9 @@ defmodule PropCheck.Test.PingPongFSM do
   end
 
   defp wait_for_master_to_stop() do
-    pid = Process.whereis(PingPongMaster)
-    if is_pid(pid) and Process.alive?(pid) do
-      :timer.sleep(1)
-      wait_for_master_to_stop()
+    ref = Process.monitor(PingPongMaster)
+    receive do
+      {:DOWN, ^ref, :process, _object, _reason} -> :ok
     end
   end
 

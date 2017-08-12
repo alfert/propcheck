@@ -39,12 +39,18 @@ defmodule PropCheck.Test.MasterStateM do
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
     |> Enum.each(fn name ->
       pid = Process.whereis(name)
+      # nice idea from José Valim: Monitor the process ...
+      ref = Process.monitor(name)
       if is_pid(pid) and Process.alive?(pid) do
         try do
           Process.exit(pid, :kill)
         catch
           _what, _value -> Logger.debug "Already killed process #{name}"
         end
+      end
+      # ... and wait for the DOWN message.
+      receive do
+        {:DOWN, ^ref, :process, _object, _reason} -> :ok
       end
     end)
   end
