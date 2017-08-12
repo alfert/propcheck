@@ -50,7 +50,6 @@ git tag -a -m "new release version v$release_version" v$release_version
 
 # Upload to Hex.PM
 mix hex.publish
-mix hex.docs
 
 # update version in mix.exs
 sed -i "" "s/\(version: \"\)$release_version\",/\\1$new_version\",/" mix.exs
