@@ -1,11 +1,8 @@
 language: elixir
-notifications:
-  recipients:
-    - klaus.alfert@googlemail.com
-otp_release:
-  - 18.2.1
 elixir:
-  - 1.3.0
+  - 1.3
+  - 1.4
+  - 1.5
 before_script:
   - mix local.hex --force
 script: "MIX_ENV=test mix do deps.get, deps.compile, test --cover --trace"
