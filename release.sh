@@ -49,6 +49,7 @@ git commit -m "bump version to $release_version" mix.exs
 git tag -a -m "new release version v$release_version" v$release_version
 
 # Upload to Hex.PM
+echo "Publish to Hex.pm"
 mix hex.publish
 
 # update version in mix.exs
