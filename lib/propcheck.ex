@@ -913,9 +913,9 @@ defmodule PropCheck do
       us2time(:binary.decode_unsigned(hash))
     end
 
-    defp time2us({ms, s, us}), do: ms*tera + s*mega + us
+    defp time2us({ms, s, us}), do: ms*tera() + s*mega() + us
     defp us2time(n) do
-      {rem(div(n, tera), mega), rem(div(n, mega), mega), rem(n, mega)}
+      {rem(div(n, tera()), mega()), rem(div(n, mega()), mega()), rem(n, mega())}
     end
 
     defp syntax_error(err), do: raise(ArgumentError, "Usage: " <> err)
