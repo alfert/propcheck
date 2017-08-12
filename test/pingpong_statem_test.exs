@@ -80,10 +80,10 @@ defmodule PropCheck.Test.PingPongStateM do
   def name(%__MODULE__{players: player_list}), do: elements player_list
 
   def command(%__MODULE__{players: []}), do:
-    {:call, PingPongMaster, :add_player, [name]}
+    {:call, PingPongMaster, :add_player, [name()]}
   def command(state) do
     oneof([
-      {:call, PingPongMaster, :add_player, [name]},
+      {:call, PingPongMaster, :add_player, [name()]},
       {:call, PingPongMaster, :remove_player, [name(state)]},
       {:call, PingPongMaster, :get_score, [name(state)]},
       {:call, PingPongMaster, :play_ping_pong,[name(state)]},

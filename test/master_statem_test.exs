@@ -61,14 +61,14 @@ defmodule PropCheck.Test.MasterStateM do
 
   def command(players) do
     if (Enum.count(players) > 0) do
-      player_list = players |> Set.to_list
+      player_list = players |> MapSet.to_list
       oneof([
-        {:call, PingPongMaster, :add_player, [name]},
+        {:call, PingPongMaster, :add_player, [name()]},
         {:call, PingPongMaster, :remove_player, [oneof(player_list)]},
         {:call, PingPongMaster, :get_score, [oneof(player_list)]}
         ])
     else
-      {:call, PingPongMaster, :add_player, [name]}
+      {:call, PingPongMaster, :add_player, [name()]}
     end
   end
 
@@ -80,7 +80,7 @@ defmodule PropCheck.Test.MasterStateM do
   #####################################################
 
   @doc "initial model state of the state machine"
-  def initial_state(), do: HashSet.new
+  def initial_state(), do: MapSet.new
 
   @doc """
   Update the model state after a successful call. The `state` parameter has
@@ -89,11 +89,11 @@ defmodule PropCheck.Test.MasterStateM do
   """
   def next_state(state, _value, {:call, PingPongMaster, :add_player, [name]}) do
     #IO.puts "next_state: add player #{name} in model #{inspect state}"
-    state |> Set.put(name)
+    state |> MapSet.put(name)
   end
   def next_state(state, _value, {:call, PingPongMaster, :remove_player, [name]}) do
     #IO.puts "next_state: remove player #{name} in model #{inspect state}"
-    s = state |> Set.delete(name)
+    s = state |> MapSet.delete(name)
     #IO.puts "next_state: the new state is #{inspect s}"
     s
   end
@@ -101,7 +101,7 @@ defmodule PropCheck.Test.MasterStateM do
 
   @doc "can the call in the current state be made?"
   def precondition(players, {:call, PingPongMaster, :remove_player, [name]}) do
-    players |> Set.member?(name)
+    players |> MapSet.member?(name)
   end
   def precondition(_state, _call),  do: true
 
@@ -112,7 +112,7 @@ defmodule PropCheck.Test.MasterStateM do
   """
   def postcondition(players, {:call, PingPongMaster, :remove_player, [name]}, _r = {:removed, n}) do
     # IO.puts "postcondition: remove player #{name} => #{inspect r} in state: #{inspect players}"
-    (name == n) and (players |> Set.member?(name))
+    (name == n) and (players |> MapSet.member?(name))
   end
   def postcondition(_players, {:call, PingPongMaster, :get_score, [_name]}, score) do
     score == 0

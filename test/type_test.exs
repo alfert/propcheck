@@ -189,9 +189,9 @@ defmodule PropCheck.Test.TypeTest do
 
 		env = PropCheck.Type.create_environment(types, mod)
 
-		assert env |> Dict.has_key?({mod, :any_fun, 0})
-		assert env |> Dict.has_key?({mod, :my_non_empty_list, 1})
-		assert env |> Dict.has_key?({mod, :safe_stack, 1})
+		assert env |> Map.has_key?({mod, :any_fun, 0})
+		assert env |> Map.has_key?({mod, :my_non_empty_list, 1})
+		assert env |> Map.has_key?({mod, :safe_stack, 1})
 	end
 
 	test "check non-recursive types" do
@@ -220,7 +220,7 @@ defmodule PropCheck.Test.TypeTest do
 		mod = PropCheck.Test.Types
 		types = PropCheck.Test.Types.__type_debug__()
 		assert length(types) > 0
-		env = Type.create_environment(types, mod)
+		_env = Type.create_environment(types, mod)
 
 	 	# assert Type.is_recursive({mod, :t_nat, 0}, env)
 	 	Logger.error "No support yet, thus: testing check mutual recursive types is not executed!"
@@ -233,14 +233,14 @@ defmodule PropCheck.Test.TypeTest do
 		env = Type.create_environment(types, mod)
 
 		type_mfa = {mod, :my_numbers, 0}
-		ast = Type.type_generator(type_mfa, env |> Dict.get(type_mfa))
+		_ast = Type.type_generator(type_mfa, env |> Map.get(type_mfa))
 	end
 
 	test "all to be generated functions are there" do
 		mod = PropCheck.Test.Types
 		types = PropCheck.Test.Types.__type_debug__()
 		assert length(types) > 0
-		env = Type.create_environment(types, mod)
+		_env = Type.create_environment(types, mod)
 
 		mod.my_numbers()
 	end
