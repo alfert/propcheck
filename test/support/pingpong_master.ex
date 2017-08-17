@@ -148,8 +148,15 @@ defmodule PropCheck.Test.PingPongMaster do
     case Process.whereis(name) do
       nil -> Logger.debug("Process #{name} is unknown / not running")
       pid ->
+        ref = Process.monitor(pid) # monitoring a pid always works
         if Process.alive? pid do
           Process.exit(pid, :kill)
+          # Ensure that we wait for the process to die
+          receive do
+            {:DOWN, ref, :process, pid, _} -> :ok
+          after 1000 ->
+            raise Error, "timeout while waiting for :DOWN message"
+          end
         else
           Logger.debug "player #{name} with pid #{pid} is not alive any longer"
         end
