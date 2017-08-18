@@ -65,7 +65,7 @@ defmodule Propcheck.Mixfile do
       {:earmark, ">= 0.2.1", only: :dev},
       # {:proper, git: "../../erlang/proper/proper"}
       # {:proper, github: "manopapad/proper", ref: "fa58f8" } # from 26.05.2015
-      {:proper, "~> 1.1.1-beta"}
+      {:proper, "~> 1.2.0"}
     ]
   end
 end
