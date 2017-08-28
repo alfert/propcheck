@@ -60,7 +60,7 @@ defmodule Propcheck.Mixfile do
     [
       {:dialyxir, "~> 0.5.1", only: [:dev, :test]},
       {:coverex, "~> 1.4", only: :test},
-      {:ex_doc, "~>0.13.0", only: :dev},
+      {:ex_doc, "~>0.16", only: :dev},
       {:earmark, ">= 0.2.1", only: :dev},
       {:proper, "~> 1.2.0"}
     ]
