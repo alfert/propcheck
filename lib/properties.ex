@@ -15,7 +15,7 @@ defmodule PropCheck.Properties do
     based testing. This is the reason for the third parameter taking an
     environment of variables defined in a test setup function.
 
-    The second parameter sets options for Proper (see `PropCheck`). The default
+    The second parameter sets options for Proper (see `PropCheck` ). The default
     is `:quiet` such that execution during ExUnit runs are silent, as normal
     unit tests are. You can change it e.g. to `:verbose` or setting the
     maximum size of the test data generated or what ever may be helpful. For
@@ -53,6 +53,19 @@ defmodule PropCheck.Properties do
             end
         end
     end
+
+
+    #####################
+    # TODO:
+    # * Create an ETS store for counterexamples, keyed by property name
+    # * Store / Load the counterexamples during start/stop via :ets.tab2file
+    # * property checks for a counterexample and runs it instead of the property
+    # * extract property and counterexample handling from the macro for better testing
+    # * provide a switch for mix to only run the counterexamples (true by default)
+    # * provide a switch for mix where to store the counterexamples
+    #
+    #####################
+
 
 
     @doc false
