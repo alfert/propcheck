@@ -12,27 +12,36 @@ defmodule PropCheck.CounterStrike do
   """
 
   use GenServer
+  require Logger
 
-  defstruct [ets: nil, dets: nil]
+  defstruct [counter_examples: %{}, dets: nil]
 
-  @ets_name :old_CEs
-  @dets_name :new_CEs
+  #################################################
+  ##
+  ## Das funktioniert so nicht:
+  ## - ETS und DETS sind globale benannte Resourcen,
+  ##   lokale (erneute) Erstellung kann zu Fehlern führen
+  ## - Identifikation ist so mehrdeutig
+  ##
+  ##
+  #################################################
 
-  def start_link(filename \\ 'propcheck.dets')
-  def start_link(filename) when is_binary(filename), do: start_link(String.to_charlist(filename))
-  def start_link(filename) when is_list(filename) do
-    GenServer.start_link(__MODULE__, [filename], name: __MODULE__)
+  def start_link(filename \\ 'propcheck.dets', opts \\[])
+  def start_link(filename, opts) when is_binary(filename), do: start_link(String.to_charlist(filename), opts)
+  def start_link(filename, opts) when is_list(filename) do
+    Logger.info "Filename: #{filename}, options: #{inspect opts}"
+    GenServer.start_link(__MODULE__, [filename], opts)
   end
 
-  def stop() do
-    GenServer.stop(__MODULE__, :normal)
+  def stop(pid \\ __MODULE__) do
+    GenServer.stop(pid, :normal)
   end
 
   @doc """
   Stores a new counter examples into the DETS
   """
-  def add_counter_example(mfa, counterexample) do
-    GenServer.call(__MODULE__, {:add, mfa, counterexample})
+  def add_counter_example(pid \\ __MODULE__, mfa, counterexample) do
+    GenServer.call(pid, {:add, mfa, counterexample})
   end
 
   @doc """
@@ -41,46 +50,54 @@ defmodule PropCheck.CounterStrike do
   only other properties have counter examples and `{:ok, counter_example}`
   if a counter example exists for the given property.
   """
-  @spec counter_example(mfa) :: :none | :others | {:ok, any}
-  def counter_example(mfa) do
-    if :ets.first(@ets_name) == :"$end_of_table" do
+  @spec counter_example(GenServer.server, mfa) :: :none | :others | {:ok, any}
+  def counter_example(pid \\ __MODULE__, mfa) do
+    GenServer.call(pid, {:counter_example, mfa})
+  end
+
+  def init([filename]) do
+    dets_name = String.to_atom("#{inspect self()}")
+    {:ok, new_ces} = :dets.open_file(dets_name, [file: filename, auto_save: 500])
+    counter_examples = load_existing_counter_examples(%{}, new_ces)
+    {:ok, %__MODULE__{counter_examples: counter_examples, dets: new_ces}}
+  end
+
+  def handle_call({:add, mfa, counter_example}, _from, state) do
+    true = :dets.insert_new(state.dets, {mfa, counter_example})
+    {:reply, :ok, state}
+  end
+  def handle_call({:counter_example, mfa}, _from, state) do
+    {:reply, check_counter_example(state.counter_examples, mfa), state}
+  end
+
+  defp check_counter_example(counter_examples, mfa) do
+    Logger.debug "Asked for mfa #{inspect mfa} in #{inspect counter_examples}"
+    if (Enum.count(counter_examples) == 0) do
       :none
     else
-      case :ets.lookup(@ets_name, mfa) do
-        [] -> :others
-        [{^mfa, counter_example}] -> {:ok, counter_example}
+      case Map.fetch(counter_examples, mfa) do
+        :error -> :others
+        found -> found
       end
     end
   end
 
   @doc """
   Loads the counter examples from DETS file and stores them
-  into the ETS. Afterwards the DETS is emptied to prepare for
+  into the map. Afterwards the DETS is emptied to prepare for
   storing new counter examples.
   """
-  @spec load_existing_counter_examples(:ets.tid, :dets.tid) :: boolean
-  def load_existing_counter_examples(ets, dets) do
-    with true <- :ets.from_dets(ets, dets) do
-      :ok = :dets.delete_all_objects(dets)
-      true
-    end
+  @spec load_existing_counter_examples(%{mfa => any}, :dets.tid) :: %{mfa => any}
+  defp load_existing_counter_examples(ce, dets) do
+    Logger.debug "Loading existing examples from #{inspect dets}"
+    new_ce = :dets.foldl(fn {mfa, example}, ces -> Map.put_new(ces, mfa, example) end, ce, dets)
+    Logger.debug "Found examples: #{inspect new_ce}"
+    :ok = :dets.delete_all_objects(dets)
+    new_ce
   end
 
-  def init([filename]) do
-    {:ok, new_ces} = :dets.open_file(:new_CEs, [file: filename, auto_save: 500])
-    old_ces = :ets.new(@ets_name, [:named_table, :protected])
-    @ets_name = old_ces
-    true = load_existing_counter_examples(old_ces, new_ces)
-    {:ok, %__MODULE__{ets: old_ces, dets: new_ces}}
-  end
-
-  def handle_call({:add, mfa, counter_example}, _from, state) do
-    true = :dets.insert_new(@dets_name, {mfa, counter_example})
-    {:reply, :ok, state}
-  end
-
-  def terminate(_reason, _state) do
+  def terminate(_reason, state) do
     # IO.puts "Terminating Counter Strike"
-    :dets.close(@dets_name)
+    :dets.close(state.dets)
   end
 end

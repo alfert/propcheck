@@ -15,22 +15,22 @@ defmodule PropCheck.Test.CounterStrikeTest do
     {:ok, %{pid: pid, path: path}}
   end
 
-  test "no files means no counter example", _context do
-    assert :none == CounterStrike.counter_example({:foo, :bar, 0})
+  test "no files means no counter example", %{pid: pid} do
+    assert :none == CounterStrike.counter_example(pid, {:foo, :bar, 0})
   end
 
   test "an existing files suggests counter examples", %{path: path, pid: org_pid} do
-    assert :none == CounterStrike.counter_example({:foo, :bar, 0})
-    assert :ok = CounterStrike.add_counter_example({:foo, :bar, 0}, [])
+    assert :none == CounterStrike.counter_example(org_pid, {:foo, :bar, 0})
+    assert :ok = CounterStrike.add_counter_example(org_pid, {:foo, :bar, 0}, [])
     ref = Process.monitor(org_pid)
-    CounterStrike.stop()
+    CounterStrike.stop(org_pid)
     wait_for_stop(ref)
-    
+
     {:ok, pid} = CounterStrike.start_link(path)
-    assert :others == CounterStrike.counter_example({:foo, :bar, 1})
-    assert {:ok, []} == CounterStrike.counter_example({:foo, :bar, 0})
+    assert :others == CounterStrike.counter_example(pid, {:foo, :bar, 1})
+    assert {:ok, []} == CounterStrike.counter_example(pid, {:foo, :bar, 0})
     ref = Process.monitor(pid)
-    CounterStrike.stop()
+    CounterStrike.stop(pid)
     wait_for_stop(ref)
   end
 
