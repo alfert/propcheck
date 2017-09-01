@@ -33,27 +33,32 @@ defmodule PropCheck.Properties do
             prop_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
             def unquote(prop_name)(unquote(var)) do
               p = unquote(block)
-              should_fail = is_tuple(p) and elem(p, 0) == :fails
-              case PropCheck.quickcheck(p, [:long_result] ++ unquote(opts)) do
-                true when not should_fail -> true
-                true when should_fail ->
-                  raise ExUnit.AssertionError, [
-                    message:
-                      "#Property {unquote(name)} should fail, but succeeded for all test data :-(",
-                    expr: nil]
-                _counter_example when should_fail -> true
-                counter_example ->
-                  raise ExUnit.AssertionError, [
-                    message: """
-                    Property #{unquote(name)} failed. Counter-Example is:
-                    #{inspect counter_example, pretty: true}
-                    """,
-                        expr: nil]
-              end
+              property_body(p, unquote(name), unquote(opts))
             end
         end
     end
 
+    # this this the body of a property execution under ExUnit
+    def property_body(p, name, opts) do
+      should_fail = is_tuple(p) and elem(p, 0) == :fails
+      case PropCheck.quickcheck(p, [:long_result] ++opts) do
+        true when not should_fail -> true
+        true when should_fail ->
+          raise ExUnit.AssertionError, [
+            message:
+              "#Property {unquote(name)} should fail, but succeeded for all test data :-(",
+            expr: nil]
+        _counter_example when should_fail -> true
+        counter_example ->
+          raise ExUnit.AssertionError, [
+            message: """
+            Property #{name} failed. Counter-Example is:
+            #{inspect counter_example, pretty: true}
+            """,
+                expr: nil]
+      end
+
+    end
 
     #####################
     # TODO:
