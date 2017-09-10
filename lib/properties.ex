@@ -53,8 +53,9 @@ defmodule PropCheck.Properties do
       :none -> property_body(p, name, opts)
       :others -> true # ignore the current property
       {:ok, counter_example} ->
-        Logger.debug "Found for counter example #{inspect counter_example}"
-        PropCheck.check(p, counter_example, [:long_result] ++opts)
+        Logger.debug "Found counter example #{inspect counter_example}"
+        result = PropCheck.check(p, counter_example, [:long_result] ++opts)
+        if result == false, do: counter_example, else: result
     end
     |> handle_check_results(name, should_fail)
   end
