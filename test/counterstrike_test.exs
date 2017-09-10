@@ -2,6 +2,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
 
   use ExUnit.Case
   use PropCheck
+  require Logger
 
   alias PropCheck.CounterStrike
 
@@ -37,6 +38,13 @@ defmodule PropCheck.Test.CounterStrikeTest do
   def wait_for_stop(ref) do
     receive do
       {:DOWN, ^ref, :process, _pid, _} -> :ok
+    end
+  end
+
+  property "often_failing" do
+    Logger.debug "Lets ask counter_strike: #{CounterStrike.counter_example({:a, :b, []})}"
+    forall l in list(integer()) do
+      l == List.reverse(l)
     end
   end
 end
