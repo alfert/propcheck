@@ -41,6 +41,7 @@ defmodule PropCheck.Properties do
             p = unquote(block)
             mfa = {unquote(module), unquote(prop_name), []}
             execute_property(p, mfa, unquote(opts))
+            :ok
           end
       end
   end
