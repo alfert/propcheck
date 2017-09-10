@@ -43,7 +43,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
 
   property "often_failing" do
     Logger.debug "Lets ask counter_strike: #{CounterStrike.counter_example({:a, :b, []})}"
-    forall l in list(integer()) do
+    forall l <- list(integer()) do
       l == List.reverse(l)
     end
   end
