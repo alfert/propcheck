@@ -46,7 +46,7 @@ defmodule PropCheck.CounterStrike do
 
   @doc """
   Retrieves the counter example for the given property. Returns
-  `:none` if there are now counterexamples at all, `:others` if
+  `:none` if there are no counterexamples at all, `:others` if
   only other properties have counter examples and `{:ok, counter_example}`
   if a counter example exists for the given property.
   """
@@ -63,7 +63,9 @@ defmodule PropCheck.CounterStrike do
   end
 
   def handle_call({:add, mfa, counter_example}, _from, state) do
+    Logger.debug "add for #{inspect mfa} the example: #{inspect counter_example}"
     true = :dets.insert_new(state.dets, {mfa, counter_example})
+    :ok = :dets.sync(state.dets)
     {:reply, :ok, state}
   end
   def handle_call({:counter_example, mfa}, _from, state) do
@@ -71,7 +73,7 @@ defmodule PropCheck.CounterStrike do
   end
 
   defp check_counter_example(counter_examples, mfa) do
-    Logger.debug "Asked for mfa #{inspect mfa} in #{inspect counter_examples}"
+    Logger.debug "#{inspect self()}: Asked for mfa #{inspect mfa} in #{inspect counter_examples}"
     if (Enum.count(counter_examples) == 0) do
       :none
     else
@@ -90,9 +92,11 @@ defmodule PropCheck.CounterStrike do
   @spec load_existing_counter_examples(%{mfa => any}, :dets.tid) :: %{mfa => any}
   defp load_existing_counter_examples(ce, dets) do
     Logger.debug "Loading existing examples from #{inspect dets}"
-    new_ce = :dets.foldl(fn {mfa, example}, ces -> Map.put_new(ces, mfa, example) end, ce, dets)
+    new_ce = :dets.foldl(fn {mfa, example}, ces ->
+      Map.put_new(ces, mfa, example) end, ce, dets)
     Logger.debug "Found examples: #{inspect new_ce}"
     :ok = :dets.delete_all_objects(dets)
+    :ok = :dets.sync(dets)
     new_ce
   end
 
