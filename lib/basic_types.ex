@@ -421,12 +421,12 @@ defmodule PropCheck.BasicTypes do
   using the test-wide value of `size`. One use of this function is to modify
   types to produce instances that grow faster or slower, like so:
 
-      iex> quickcheck(forall l <- list(integer) do
+      iex> quickcheck(forall l <- list(integer()) do
       ...>   length(l) <= 42
       ...> end)
       true
 
-      iex> long_list = sized(size, resize(size * 2, list(integer)))
+      iex> long_list = sized(size, resize(size * 2, list(integer())))
       iex> really_long = such_that_maybe l <- long_list, when:
       ...>      length(l) > 42
       iex> quickcheck(forall l <- really_long do

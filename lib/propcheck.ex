@@ -321,7 +321,7 @@ defmodule PropCheck do
 
         iex> use PropCheck
         iex> quickcheck(
-        ...> forall n <- nat do
+        ...> forall n <- nat() do
         ...>   n >= 0
         ...> end)
         true
@@ -331,7 +331,7 @@ defmodule PropCheck do
 
         iex> use PropCheck
         iex> quickcheck(
-        ...> forall [n, l] <- [nat, list(nat)] do
+        ...> forall [n, l] <- [nat(), list(nat())] do
         ...>   n * Enum.sum(l) >= 0
         ...> end
         ...>)
@@ -360,7 +360,7 @@ defmodule PropCheck do
         iex> use PropCheck
         iex> require Integer
         iex> quickcheck(
-        ...> forall n <- nat do
+        ...> forall n <- nat() do
         ...>    implies rem(n,2) == 0, do: Integer.is_even n
         ...> end
         ...>)
@@ -403,7 +403,7 @@ defmodule PropCheck do
 
         iex> use PropCheck
         iex> quickcheck(
-        ...>   trap_exit(forall n <- nat do
+        ...>   trap_exit(forall n <- nat() do
         ...>     # this must fail
         ...>     pid = spawn_link(fn() -> n / 0 end)
         ...>     # wait for arrivial of the dieing linked process signal
@@ -435,7 +435,7 @@ defmodule PropCheck do
 
         iex> use PropCheck
         iex> quickcheck(
-        ...>   timeout(100, forall n <- nat do
+        ...>   timeout(100, forall n <- nat() do
         ...>     :ok == :timer.sleep(n*100)
         ...>   end)
         ...> )
@@ -499,7 +499,7 @@ defmodule PropCheck do
     generated recursively.
 
         iex> use PropCheck
-        iex> even = let n <- nat do
+        iex> even = let n <- nat() do
         ...>  n * 2
         ...> end
         iex> quickcheck(
@@ -512,7 +512,7 @@ defmodule PropCheck do
     into a list as shown in the example below.
 
         iex> use PropCheck
-        iex> even_factor = let [n <- nat, m <- nat] do
+        iex> even_factor = let [n <- nat(), m <- nat()] do
         ...>  n * m * 2
         ...> end
         iex> quickcheck(
@@ -569,7 +569,7 @@ defmodule PropCheck do
     for the `:start_size` option (see the "Options" section).
 
         iex> use PropCheck
-        iex> even = such_that n <- nat, when: rem(n, 2) == 0
+        iex> even = such_that n <- nat(), when: rem(n, 2) == 0
         iex> quickcheck(
         ...>   forall n <- even do
         ...>     rem(n, 2) == 0
@@ -595,7 +595,7 @@ defmodule PropCheck do
     even if that instance doesn't satisfy the constraint.
 
         iex> use PropCheck
-        iex> even = such_that_maybe n <- nat, when: rem(n, 2) == 0
+        iex> even = such_that_maybe n <- nat(), when: rem(n, 2) == 0
         iex> quickcheck(
         ...>   forall n <- even do
         ...>     rem(n, 2) == 0
@@ -629,7 +629,7 @@ defmodule PropCheck do
 
             iex> use PropCheck
             iex> quickcheck(
-            ...>   forall n <- shrink(pos_integer, [0]) do
+            ...>   forall n <- shrink(pos_integer(), [0]) do
             ...>     rem(n, 2) == 0
             ...>   end)
             false
@@ -675,7 +675,7 @@ defmodule PropCheck do
           ...> end
           iex> tree = fn(g) -> sized(s, tree_gen.(s, g, tree_gen)) end
           iex> quickcheck(
-          ...>   forall t <- tree.(int) do
+          ...>   forall t <- tree.(int()) do
           ...>     t == :leaf or is_tuple(t)
           ...>   end
           ...>)
