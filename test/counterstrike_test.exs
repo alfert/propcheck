@@ -41,6 +41,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
     end
   end
 
+  @tag will_fail: true
   property "often_failing" do
     Logger.debug "Lets ask counter_strike: #{CounterStrike.counter_example({:a, :b, []})}"
     forall l <- list(integer()) do
