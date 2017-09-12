@@ -36,7 +36,9 @@ defmodule PropCheck.Properties do
           ExUnit.plural_rule("property", "properties")
           prop_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
           %{module: module} = __ENV__
-          # mfa = {module, prop_name, []}
+          if tag_property({module, prop_name, []}) do
+            @tag failing_prop: true
+          end
           def unquote(prop_name)(unquote(var)) do
             p = unquote(block)
             mfa = {unquote(module), unquote(prop_name), []}
@@ -46,12 +48,25 @@ defmodule PropCheck.Properties do
       end
   end
 
+  def tag_property(mfa) do
+    case CounterStrike.counter_example(mfa) do
+      {:ok, _} ->
+        Logger.debug "Found failing property #{inspect mfa}"
+        true
+      _ -> false
+    end
+  end
+
+  @doc """
+  Executes the body `p` of property `name` with PropEr options `opts`
+  by ExUnit.
+  """
   def execute_property(p, name, opts) do
     should_fail = is_tuple(p) and elem(p, 0) == :fails
     Logger.debug "Execute property #{inspect name} "
     case CounterStrike.counter_example(name) do
-      :none -> property_body(p, name, opts)
-      :others -> true # ignore the current property
+      :none -> PropCheck.quickcheck(p, [:long_result] ++opts)
+      :others -> true # ignore the current property, but no ExUnit reporting is done
       {:ok, counter_example} ->
         Logger.debug "Found counter example #{inspect counter_example}"
         result = PropCheck.check(p, counter_example, [:long_result] ++opts)
@@ -60,7 +75,10 @@ defmodule PropCheck.Properties do
     |> handle_check_results(name, should_fail)
   end
 
-  # this this the body of a property execution under ExUnit
+  @doc """
+  Handles the result of executing quick check or a re-check of a counter example.
+  In this method a new found counter example is added to `CounterStrike`.
+  """
   def handle_check_results(results, name, should_fail) do
     case results do
       true when not should_fail -> true
@@ -79,41 +97,18 @@ defmodule PropCheck.Properties do
           """,
               expr: nil]
     end
-
   end
 
-  # this this the body of a property execution under ExUnit
-  def property_body(p, name, opts) do
-    should_fail = is_tuple(p) and elem(p, 0) == :fails
-    case PropCheck.quickcheck(p, [:long_result] ++opts) do
-      true when not should_fail -> true
-      true when should_fail ->
-        raise ExUnit.AssertionError, [
-          message:
-            "#Property {mfa_to_string unquote(name)} should fail, but succeeded for all test data :-(",
-          expr: nil]
-      _counter_example when should_fail -> true
-      counter_example ->
-        CounterStrike.add_counter_example(name, counter_example)
-        raise ExUnit.AssertionError, [
-          message: """
-          Property #{mfa_to_string name} failed. Counter-Example is:
-          #{inspect counter_example, pretty: true}
-          """,
-              expr: nil]
-    end
-  end
-
-  def mfa_to_string({m, f, []}) do
+  defp mfa_to_string({m, f, []}) do
     "#{m}.#{f}()"
   end
 
   #####################
   # TODO:
-  # * Create an ETS store for counterexamples, keyed by property name
-  # * Store / Load the counterexamples during start/stop via :ets.tab2file
-  # * property checks for a counterexample and runs it instead of the property
-  # * extract property and counterexample handling from the macro for better testing
+  # x Create an ETS store for counterexamples, keyed by property name
+  # x Store / Load the counterexamples during start/stop via :ets.tab2file
+  # x property checks for a counterexample and runs it instead of the property
+  # x extract property and counterexample handling from the macro for better testing
   # * provide a switch for mix to only run the counterexamples (true by default)
   # * provide a switch for mix where to store the counterexamples
   #
