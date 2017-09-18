@@ -34,11 +34,10 @@ defmodule PropCheck.Properties do
       block = Macro.escape(block, unquote: true)
       quote bind_quoted: [name: name, block: block, var: var, opts: opts] do
           ExUnit.plural_rule("property", "properties")
-          prop_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
           %{module: module} = __ENV__
-          if tag_property({module, prop_name, []}) do
-            @tag failing_prop: true
-          end
+          # @tag failing_prop: tag_property({module, prop_name, []})
+          tags = [[failing_prop: tag_property({module, name, []})]]
+          prop_name = ExUnit.Case.register_test(__ENV__, :property, name, tags)
           def unquote(prop_name)(unquote(var)) do
             p = unquote(block)
             mfa = {unquote(module), unquote(prop_name), []}
@@ -48,7 +47,14 @@ defmodule PropCheck.Properties do
       end
   end
 
-  def tag_property(mfa) do
+  @doc """
+  Returns the `failing_prop` tag value for the property. The `property_`
+  prefix is added to the function name. The value is determined by
+  looking up the `counter_example` in `CounterStrike` for the property.
+  """
+  @spec tag_property(mfa) :: boolean
+  def tag_property({m, f, a}) do
+    mfa = {m, String.to_atom("property_#{f}"), a}
     case CounterStrike.counter_example(mfa) do
       {:ok, _} ->
         Logger.debug "Found failing property #{inspect mfa}"
