@@ -57,7 +57,7 @@ defmodule PropCheck.Properties do
     mfa = {m, String.to_atom("property_#{f}"), a}
     case CounterStrike.counter_example(mfa) do
       {:ok, _} ->
-        Logger.debug "Found failing property #{inspect mfa}"
+        # Logger.debug "Found failing property #{inspect mfa}"
         true
       _ -> false
     end
@@ -69,12 +69,12 @@ defmodule PropCheck.Properties do
   """
   def execute_property(p, name, opts) do
     should_fail = is_tuple(p) and elem(p, 0) == :fails
-    Logger.debug "Execute property #{inspect name} "
+    # Logger.debug "Execute property #{inspect name} "
     case CounterStrike.counter_example(name) do
       :none -> PropCheck.quickcheck(p, [:long_result] ++opts)
       :others -> true # ignore the current property, but no ExUnit reporting is done
       {:ok, counter_example} ->
-        Logger.debug "Found counter example #{inspect counter_example}"
+        # Logger.debug "Found counter example #{inspect counter_example}"
         result = PropCheck.check(p, counter_example, [:long_result] ++opts)
         if result == false, do: counter_example, else: result
     end
