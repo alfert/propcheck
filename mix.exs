@@ -22,7 +22,7 @@ defmodule Propcheck.Mixfile do
   defp description do
     """
     PropCheck provides property based testing and is an Elixir layer around
-    PropEr. It is also inspired by Quuvic's QuickCheck Elixir library.
+    PropEr. It is also inspired by Quvic's QuickCheck Elixir library.
     """
   end
 
@@ -58,13 +58,10 @@ defmodule Propcheck.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:dialyze, "0.2.0", only: [:dev, :test]},
+      {:dialyxir, "~> 0.5.1", only: [:dev, :test]},
       {:coverex, "~> 1.4", only: :test},
-      {:ex_doc, "~>0.13.0", only: :dev},
-      # {:ex_doc, path: "../ex_doc", only: :dev},
+      {:ex_doc, "~>0.16", only: :dev},
       {:earmark, ">= 0.2.1", only: :dev},
-      # {:proper, git: "../../erlang/proper/proper"}
-      # {:proper, github: "manopapad/proper", ref: "fa58f8" } # from 26.05.2015
       {:proper, "~> 1.2.0"}
     ]
   end

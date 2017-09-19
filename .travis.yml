@@ -5,4 +5,4 @@ elixir:
   - 1.5
 before_script:
   - mix local.hex --force
-script: "MIX_ENV=test mix do deps.get, deps.compile, test --cover --trace"
+script: "MIX_ENV=test mix do deps.get, deps.compile, test --cover --trace --exclude will_fail:true"

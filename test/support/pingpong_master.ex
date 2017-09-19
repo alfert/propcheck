@@ -81,7 +81,7 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Start playing football"
   def play_football(player) do
-    case robust_send(player, {:football, self}) do
+    case robust_send(player, {:football, self()}) do
       :ok ->
         receive do
           reply -> reply
@@ -93,7 +93,7 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Start playing football"
   def play_football_eager(player) do
-    send(player, {:football, self})
+    send(player, {:football, self()})
     receive do
       reply -> reply
     after 500 -> "Football timeout!"
@@ -102,7 +102,7 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Start playing tennis"
   def play_tennis(player) do
-    case robust_send(player, {:tennis, self}) do
+    case robust_send(player, {:tennis, self()}) do
       :ok ->
         receive do
           reply -> reply
@@ -153,9 +153,9 @@ defmodule PropCheck.Test.PingPongMaster do
           Process.exit(pid, :kill)
           # Ensure that we wait for the process to die
           receive do
-            {:DOWN, ref, :process, pid, _} -> :ok
+            {:DOWN, ^ref, :process, _pid, _} -> :ok
           after 1000 ->
-            raise Error, "timeout while waiting for :DOWN message"
+            raise RuntimeError, "timeout while waiting for :DOWN message"
           end
         else
           Logger.debug "player #{name} with pid #{pid} is not alive any longer"
