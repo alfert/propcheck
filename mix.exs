@@ -15,6 +15,8 @@ defmodule Propcheck.Mixfile do
      homepage_url: "https://github.com/alfert/propcheck",
      docs: [extras: ["README.md"], extra_section: "Overview"],
      description: description(),
+     propcheck: [counter_examples: "_build/propcheck.ctx"],
+     aliases: aliases(),
      deps: deps()]
   end
 
@@ -46,6 +48,10 @@ defmodule Propcheck.Mixfile do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_),     do: ["lib"]
 
+
+  def aliases() do
+    [clean: ["clean", "propcheck.clean"]]
+  end
 
   # Dependencies can be Hex packages:
   #

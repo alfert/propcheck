@@ -181,7 +181,7 @@ defmodule PropCheck.BasicTypes do
 
   @doc """
   All lists whose i-th element is an instance of the type at index i of
- ``list_of_types`. Also written simply as a list of types.
+  `list_of_types`. Also written simply as a list of types.
   """
   @spec fixed_list([raw_type()]) :: type
   defdelegate fixed_list(list_of_types), to: :proper_types
