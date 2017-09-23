@@ -51,8 +51,9 @@ defmodule PropCheck.Properties do
   prefix is added to the function name. The value is determined by
   looking up the `counter_example` in `CounterStrike` for the property.
   """
+  @doc false
   @spec tag_property(mfa) :: boolean
-  defp tag_property({m, f, a}) do
+  def tag_property({m, f, a}) do
     mfa = {m, String.to_atom("property_#{f}"), a}
     case CounterStrike.counter_example(mfa) do
       {:ok, _} ->
@@ -66,7 +67,8 @@ defmodule PropCheck.Properties do
   Executes the body `p` of property `name` with PropEr options `opts`
   by ExUnit.
   """
-  defp execute_property(p, name, opts) do
+  @doc false
+  def execute_property(p, name, opts) do
     should_fail = is_tuple(p) and elem(p, 0) == :fails
     # Logger.debug "Execute property #{inspect name} "
     case CounterStrike.counter_example(name) do
