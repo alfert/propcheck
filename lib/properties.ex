@@ -4,9 +4,12 @@ defmodule PropCheck.Properties do
   This module defined the `property/4` macro. It is automatically available
   by `using PropCheck`.
   """
+  alias PropCheck.CounterStrike
+  require Logger
+
 
   @doc """
-  Defines a property as part of ExUnit test.
+  Defines a property as part of an ExUnit test.
 
   The property macro takes at minimum a name and a `do`-block containing
   the code of the property to be tested. The property code is encapsulated
@@ -22,10 +25,6 @@ defmodule PropCheck.Properties do
   seeing the result of wrapper functions `PropCheck.aggregate/2` etc, the
   verbose mode is required.
   """
-
-  alias PropCheck.CounterStrike
-  require Logger
-
   defmacro property(name, opts \\ [:quiet], var \\ quote(do: _), do: p_block) do
       block = quote do
         unquote(p_block)
@@ -53,7 +52,7 @@ defmodule PropCheck.Properties do
   looking up the `counter_example` in `CounterStrike` for the property.
   """
   @spec tag_property(mfa) :: boolean
-  def tag_property({m, f, a}) do
+  defp tag_property({m, f, a}) do
     mfa = {m, String.to_atom("property_#{f}"), a}
     case CounterStrike.counter_example(mfa) do
       {:ok, _} ->
@@ -67,7 +66,7 @@ defmodule PropCheck.Properties do
   Executes the body `p` of property `name` with PropEr options `opts`
   by ExUnit.
   """
-  def execute_property(p, name, opts) do
+  defp execute_property(p, name, opts) do
     should_fail = is_tuple(p) and elem(p, 0) == :fails
     # Logger.debug "Execute property #{inspect name} "
     case CounterStrike.counter_example(name) do
@@ -85,7 +84,7 @@ defmodule PropCheck.Properties do
   Handles the result of executing quick check or a re-check of a counter example.
   In this method a new found counter example is added to `CounterStrike`.
   """
-  def handle_check_results(results, name, should_fail) do
+  defp handle_check_results(results, name, should_fail) do
     case results do
       true when not should_fail -> true
       true when should_fail ->
@@ -108,19 +107,6 @@ defmodule PropCheck.Properties do
   defp mfa_to_string({m, f, []}) do
     "#{m}.#{f}()"
   end
-
-  #####################
-  # TODO:
-  # x Create an ETS store for counterexamples, keyed by property name
-  # x Store / Load the counterexamples during start/stop via :ets.tab2file
-  # x property checks for a counterexample and runs it instead of the property
-  # x extract property and counterexample handling from the macro for better testing
-  # * provide a switch for mix to only run the counterexamples (true by default)
-  # * provide a switch for mix where to store the counterexamples
-  #
-  #####################
-
-
 
   @doc false
   def print_mod_as_erlang(mod) when is_atom(mod) do
