@@ -11,20 +11,12 @@ defmodule PropCheck.CounterStrike do
   afterwards.
   """
 
+  @moduledoc false
+
   use GenServer
   require Logger
 
   defstruct [counter_examples: %{}, dets: nil]
-
-  #################################################
-  ##
-  ## Das funktioniert so nicht:
-  ## - ETS und DETS sind globale benannte Resourcen,
-  ##   lokale (erneute) Erstellung kann zu Fehlern führen
-  ## - Identifikation ist so mehrdeutig
-  ##
-  ##
-  #################################################
 
   def start_link(filename \\ 'propcheck.dets', opts \\[])
   def start_link(filename, opts) when is_binary(filename), do: start_link(String.to_charlist(filename), opts)
@@ -45,7 +37,9 @@ defmodule PropCheck.CounterStrike do
   end
 
   @doc """
-  Retrieves the counter example for the given property. Returns
+  Retrieves the counter example for the given property.
+
+  Returns
   `:none` if there are no counterexamples at all, `:others` if
   only other properties have counter examples and `{:ok, counter_example}`
   if a counter example exists for the given property.
