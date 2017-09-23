@@ -3,7 +3,7 @@ defmodule PropCheck.Mix do
   @moduledoc false
   def counter_example_file() do
     Mix.Project.config()
-    |> Keyword.get(:propcheck, [counter_examples: "counterexamples.dets"])
+    |> Keyword.get(:propcheck, [counter_examples: "_build/propcheck.ctex"])
     |> Keyword.get(:counter_examples)
   end
 end
