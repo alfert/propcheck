@@ -1,6 +1,7 @@
 defmodule PropCheck.App do
   use Application
 
+  alias PropCheck.Mix
   @moduledoc false
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
@@ -11,7 +12,8 @@ defmodule PropCheck.App do
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Propcheck.Worker, [arg1, arg2, arg3])
-      worker(PropCheck.CounterStrike, ["counterexamples.dets", [name: PropCheck.CounterStrike]])
+      worker(PropCheck.CounterStrike,
+        [Mix.counter_example_file(), [name: PropCheck.CounterStrike]])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
