@@ -1,7 +1,9 @@
 defmodule PropCheck.Mix do
 
   def counter_example_file() do
-    "counterexamples.dets"
+    Mix.Project.config()
+    |> Keyword.get(:propcheck, [counter_examples: "counterexamples.dets"])
+    |> Keyword.get(:counter_examples)
   end
 end
 defmodule Mix.Tasks.Propcheck do
@@ -28,13 +30,17 @@ defmodule Mix.Tasks.Propcheck do
 
     def run(_args) do
       filename = PropCheck.Mix.counter_example_file() |> String.to_charlist()
-      {:ok, ctx} = :dets.open_file(filename)
-      fn {{m, f, _a}, counter_example}, counter ->
-        prop = "#{m}.#{f}()"
-        Mix.Shell.IO.info "##{counter}: Property #{prop}: #{inspect counter_example}"
-        counter + 1
+      case :dets.open_file(filename) do
+        {:ok, ctx} ->
+          fn {{m, f, _a}, counter_example}, counter ->
+            prop = "#{m}.#{f}()"
+            Mix.Shell.IO.info "##{counter}: Property #{prop}: #{inspect counter_example}"
+            counter + 1
+          end
+          |> :dets.foldl(1, ctx)
+
+        _ -> Mix.Shell.IO.error("Could not open counter examples file #{filename}")
       end
-      |> :dets.foldl(1, ctx)
     end
 
   end
