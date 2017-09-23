@@ -37,12 +37,12 @@ end
 ```
 
 Per default, the counter examples file is stored in the build directory (`_build`),
-independent from the build environment. 
+independent from the build environment.
 
 
 ## Links to other documentation
 
-The guides for PropEr are an essential set of documents to make use of `PropCheck`
+The guides for PropEr are an essential set of documents to make full use of `PropCheck`
 
 * http://proper.softlab.ntua.gr/index.html
 * http://proper.softlab.ntua.gr/Tutorials/
