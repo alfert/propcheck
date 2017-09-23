@@ -12,10 +12,33 @@ To use PropCheck with your project, add it as a dependency to `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:propcheck, "~> 0.0.1", only: :test, runtime: false}
+    {:propcheck, "~> 0.0.3", only: :test, runtime: false}
   ]
 end
 ```
+
+## Basic Usage and Build Configuration
+PropCheck allows to define properties, which automatically executed via `ExUnit`
+when running `mix test`. Details about the `property` macro are found in
+`PropCheck.Properties`,  details about how to specify the property conditions
+are documented in `PropCheck`, the basic data generators are found in
+`PropCheck.BasicTypes`.
+
+For PropCheck, there is only one configuration option. All found counter examples
+are stored in a file, the name of which is configurable in `mix.exs` as part of
+the `project` configuration:
+
+```elixir
+def project() do
+  [ # many other options
+    propcheck: [counter_examples: "filename"]
+  ]
+end
+```
+
+Per default, the counter examples file is stored in the build directory, independent
+from the build environment.
+
 
 ## Links to other documentation
 
