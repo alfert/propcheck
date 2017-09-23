@@ -24,6 +24,16 @@ defmodule PropCheck.Properties do
   maximum size of the test data generated or what ever may be helpful. For
   seeing the result of wrapper functions `PropCheck.aggregate/2` etc, the
   verbose mode is required.
+
+  ## Counter Examples
+  If a property fails, the counter example is in a file. The next time this
+  property is checked again, only the counter example is used to ensure that
+  the property now behaves correctly. Additionally, a property with an existing
+  counter example is embellished with the tag `failing_prop`. You can skip all
+  other tests and property by running `mix test --only failing_prop`. In this case
+  only the properties with counter example are run. Another option is to use
+  the `--stale` option of `ExUnit` to reduce the amount of tests and properties
+  while fixing the code tested by a property.
   """
   defmacro property(name, opts \\ [:quiet], var \\ quote(do: _), do: p_block) do
       block = quote do
@@ -73,7 +83,10 @@ defmodule PropCheck.Properties do
     # Logger.debug "Execute property #{inspect name} "
     case CounterStrike.counter_example(name) do
       :none -> PropCheck.quickcheck(p, [:long_result] ++opts)
-      :others -> true # ignore the current property, but no ExUnit reporting is done
+      :others ->
+        # since the tag is set, we execute everything. You can limit
+        # the amount of checks by using either --stale or --only failing_prop
+        PropCheck.quickcheck(p, [:long_result] ++opts)
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
         result = PropCheck.check(p, counter_example, [:long_result] ++opts)
