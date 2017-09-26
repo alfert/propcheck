@@ -1,6 +1,9 @@
 # PropCheck Changelog
 
-## 0.0.3
+## 1.0.1
+* Bugfix for Mix integration in Umbrella projects, thanks to https://github.com/evnu
+
+## 1.0.0
 * Counter examples are automatically stored and reapplied until the properties work
   or the counter examples are deleted. See https://github.com/alfert/propcheck/pull/18
 * Mix configuration for counter examples file and for inspecting and cleaning
