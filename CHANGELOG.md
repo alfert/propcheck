@@ -1,5 +1,11 @@
 # PropCheck Changelog
 
+## 1.0.3
+* Removed debug log output.
+
+## 1.0.2
+* only labeled, never released...
+
 ## 1.0.1
 * Bugfix for Mix integration in Umbrella projects, thanks to https://github.com/evnu
 
