@@ -10,8 +10,8 @@
 # set -x
 
 # CONFIGURATION
-old="1.0.0"
-new="1.0.1"
+old="1.0.1"
+new="1.0.2"
 # do not set any variables beyond this line
 
 # check that old and new version differ
