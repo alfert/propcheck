@@ -1,15 +1,14 @@
 defmodule PropCheck.CounterStrike do
-  @moduledoc """
-  A GenServer storing and retrieving counter examples. It helps to focus on
-  resolving failing properties with the same counterexamples until they are
-  resolved.
 
-  To be able to do a fast look of an existing counter example, we use
-  ETS store. Every new recorded counterexample from a failing property
-  is written to a DETS, store it properly when the Erlang system shuts down.
-  The ETS table is filled from DETS during startup and remains immutable
-  afterwards.
-  """
+  # A GenServer storing and retrieving counter examples. It helps to focus on
+  # resolving failing properties with the same counterexamples until they are
+  # resolved.
+  #
+  # To be able to do a fast look of an existing counter example, we use
+  # ETS store. Every new recorded counterexample from a failing property
+  # is written to a DETS, store it properly when the Erlang system shuts down.
+  # The ETS table is filled from DETS during startup and remains immutable
+  # afterwards.
 
   @moduledoc false
 
@@ -78,11 +77,9 @@ defmodule PropCheck.CounterStrike do
     end
   end
 
-  @doc """
-  Loads the counter examples from DETS file and stores them
-  into the map. Afterwards the DETS is emptied to prepare for
-  storing new counter examples.
-  """
+  # Loads the counter examples from DETS file and stores them
+  # into the map. Afterwards the DETS is emptied to prepare for
+  # storing new counter examples.
   @spec load_existing_counter_examples(%{mfa => any}, :dets.tid) :: %{mfa => any}
   defp load_existing_counter_examples(ce, dets) do
     Logger.debug "Loading existing examples from #{inspect dets}"
