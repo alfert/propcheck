@@ -20,7 +20,7 @@ defmodule PropCheck.CounterStrike do
   def start_link(filename \\ 'propcheck.dets', opts \\[])
   def start_link(filename, opts) when is_binary(filename), do: start_link(String.to_charlist(filename), opts)
   def start_link(filename, opts) when is_list(filename) do
-    Logger.info "Filename: #{filename}, options: #{inspect opts}"
+    # Logger.info "Filename: #{filename}, options: #{inspect opts}"
     GenServer.start_link(__MODULE__, [filename], opts)
   end
 
@@ -56,7 +56,7 @@ defmodule PropCheck.CounterStrike do
   end
 
   def handle_call({:add, mfa, counter_example}, _from, state) do
-    Logger.debug "add for #{inspect mfa} the example: #{inspect counter_example}"
+    # Logger.debug "add for #{inspect mfa} the example: #{inspect counter_example}"
     true = :dets.insert_new(state.dets, {mfa, counter_example})
     :ok = :dets.sync(state.dets)
     {:reply, :ok, state}
@@ -66,7 +66,7 @@ defmodule PropCheck.CounterStrike do
   end
 
   defp check_counter_example(counter_examples, mfa) do
-    Logger.debug "#{inspect self()}: Asked for mfa #{inspect mfa} in #{inspect counter_examples}"
+    # Logger.debug "#{inspect self()}: Asked for mfa #{inspect mfa} in #{inspect counter_examples}"
     if (Enum.count(counter_examples) == 0) do
       :none
     else
@@ -82,10 +82,10 @@ defmodule PropCheck.CounterStrike do
   # storing new counter examples.
   @spec load_existing_counter_examples(%{mfa => any}, :dets.tid) :: %{mfa => any}
   defp load_existing_counter_examples(ce, dets) do
-    Logger.debug "Loading existing examples from #{inspect dets}"
+    # Logger.debug "Loading existing examples from #{inspect dets}"
     new_ce = :dets.foldl(fn {mfa, example}, ces ->
       Map.put_new(ces, mfa, example) end, ce, dets)
-    Logger.debug "Found examples: #{inspect new_ce}"
+    # Logger.debug "Found examples: #{inspect new_ce}"
     :ok = :dets.delete_all_objects(dets)
     :ok = :dets.sync(dets)
     new_ce
