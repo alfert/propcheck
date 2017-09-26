@@ -2,8 +2,12 @@ defmodule PropCheck.Mix do
 
   @moduledoc false
   def counter_example_file() do
+    default_path =
+      Mix.Project.build_path()
+      |> Path.dirname()
+      |> Path.join("propcheck.ctex")
     Mix.Project.config()
-    |> Keyword.get(:propcheck, [counter_examples: "_build/propcheck.ctex"])
+    |> Keyword.get(:propcheck, [counter_examples: default_path])
     |> Keyword.get(:counter_examples)
   end
 end
