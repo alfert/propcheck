@@ -698,32 +698,6 @@ defmodule PropCheck do
       end
   end
 
-    #doc "Runs all properties of a module and return the list of succeeded and failed properties."
-    #
-    #
-    # This function could serve as an example for storing results of quickcheck
-    # and to do samething with them afterwards, e.g. storing counterexamples
-    # to disk for a second run.
-    defp run(target), do: run(target, [report: true, output: true])
-    defp run(target, opts) do
-       PropCheck.Result.start_link
-       on_output =
-         fn(msg, args) ->
-            PropCheck.Result.message(msg, args)
-            opts[:output] && :io.format(msg, args)
-            :ok
-         end
-       module(target, [:long_result, {:on_output, on_output}])
-       {tests, errors} = PropCheck.Result.status
-       passes = length(tests)
-       failures = length(errors)
-       PropCheck.Result.stop
-       if opts[:report] do
-         IO.puts "#{inspect passes} properties, #{inspect failures} failures."
-       end
-       {tests, errors}
-    end
-
     @doc """
     Sample values from a generator `gen`.
 
