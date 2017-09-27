@@ -56,12 +56,10 @@ defmodule PropCheck.Properties do
       end
   end
 
-  @doc """
-  Returns the `failing_prop` tag value for the property. The `property_`
-  prefix is added to the function name. The value is determined by
-  looking up the `counter_example` in `CounterStrike` for the property.
-  """
   @doc false
+  # Returns the `failing_prop` tag value for the property. The `property_`
+  # prefix is added to the function name. The value is determined by
+  # looking up the `counter_example` in `CounterStrike` for the property.
   @spec tag_property(mfa) :: boolean
   def tag_property({m, f, a}) do
     mfa = {m, String.to_atom("property_#{f}"), a}
@@ -73,11 +71,9 @@ defmodule PropCheck.Properties do
     end
   end
 
-  @doc """
-  Executes the body `p` of property `name` with PropEr options `opts`
-  by ExUnit.
-  """
   @doc false
+  # Executes the body `p` of property `name` with PropEr options `opts`
+  # by ExUnit.
   def execute_property(p, name, opts) do
     should_fail = is_tuple(p) and elem(p, 0) == :fails
     # Logger.debug "Execute property #{inspect name} "
@@ -95,10 +91,8 @@ defmodule PropCheck.Properties do
     |> handle_check_results(name, should_fail)
   end
 
-  @doc """
-  Handles the result of executing quick check or a re-check of a counter example.
-  In this method a new found counter example is added to `CounterStrike`.
-  """
+  # Handles the result of executing quick check or a re-check of a counter example.
+  # In this method a new found counter example is added to `CounterStrike`.
   defp handle_check_results(results, name, should_fail) do
     case results do
       true when not should_fail -> true
@@ -129,5 +123,4 @@ defmodule PropCheck.Properties do
       {:ok, {_, [{:abstract_code, {_, ac}}]}} = :beam_lib.chunks(beam, [:abstract_code])
       ac |> Enum.map(&:erl_pp.form/1) |> List.flatten |> IO.puts
   end
-
 end
