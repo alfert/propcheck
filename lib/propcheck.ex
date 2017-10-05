@@ -724,8 +724,21 @@ defmodule PropCheck do
        {tests, errors}
     end
 
-    def produce(gen, seed \\ :undefined) do
-      :proper_gen.pick(gen, 10, fork_seed(seed))
+    @doc """
+    Sample values from a generator `gen`.
+
+    ## Example
+
+      iex> use PropCheck
+      iex> produce(1)
+      {:ok, 1}
+      iex> nat() |> produce() |> Kernel.elem(1) |> is_integer()
+      true
+      iex> nat() |> list() |> produce() |> Kernel.elem(1) |> is_list()
+      true
+    """
+    def produce(gen, size \\ 10, seed \\ :os.timestamp()) do
+      :proper_gen.pick(gen, size, seed)
     end
 
     defmacro is_property(x) do
@@ -905,20 +918,6 @@ defmodule PropCheck do
     def conjunction(sub_properties), do: {:conjunction, sub_properties}
 
     # Helper functions
-    defmacrop mega, do: 1_000_0000
-    defmacrop tera, do: 1_000_0000_000_0000
-    defp fork_seed(:undefined = u), do: u
-    defp fork_seed(time) do
-      hash = :crypto.hash(:md5, :binary.encode_unsigned(time2us(time)))
-      us2time(:binary.decode_unsigned(hash))
-    end
-
-    defp time2us({ms, s, us}), do: ms*tera() + s*mega() + us
-    defp us2time(n) do
-      {rem(div(n, tera()), mega()), rem(div(n, mega()), mega()), rem(n, mega())}
-    end
 
     defp syntax_error(err), do: raise(ArgumentError, "Usage: " <> err)
-
-
 end
