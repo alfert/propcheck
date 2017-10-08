@@ -57,7 +57,7 @@ QuickCheck with the possibility to add requirement tags):
 
 * [QuickCheck Advice](https://medium.com/@jlouis666/quickcheck-advice-c357efb4e7e6#.b9wpla7oi)
 * [Breaking Erlang Maps (4 part series)](https://medium.com/@jlouis666/breaking-erlang-maps-4-4ebc3c64068c#.4d61kua92)
-* http://roberto-aloi.com/erlang/notes-on-erlang-quickcheck/
+* http://roberto-aloi.com/erlang/notes-on-erlang-quickcheck
 
 ## What is not available
 
