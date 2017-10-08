@@ -1,5 +1,10 @@
 # PropCheck Changelog
 
+## 1.0.4
+* `produce` has now a valid default parameter
+* Removed several lazy compiler warnings
+* Link in README corrected.
+
 ## 1.0.3
 * Removed debug log output.
 
