@@ -1,5 +1,7 @@
 defmodule PropcheckTest do
 	use ExUnit.Case
+
+	import ExUnit.CaptureIO
 	require Logger
 
 	doctest(PropCheck)
@@ -16,6 +18,16 @@ defmodule PropcheckTest do
 		refute nil == types
 
 		Logger.debug(inspect types, pretty: true)
+	end
+
+	test "equals/2 outputs on error" do
+	  use PropCheck
+	  assert capture_io(fn ->
+	    quickcheck(
+	      forall x <- :not_ok do
+		equals(:ok, x)
+	      end)
+	  end) =~ ":ok != :not_ok"
 	end
 
   def recode_vars({:var, line, n}), do:
