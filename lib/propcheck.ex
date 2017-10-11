@@ -864,11 +864,32 @@ defmodule PropCheck do
     @doc """
     A custom property that evaluates to `true` only if `a === b`, else
     evaluates to `false` and prints `"A != B"` on the screen.
+
+    ## Examples
+
+        iex> use PropCheck
+        iex> quickcheck(equals(:ok, :ok))
+        :true
+
+        iex> use PropCheck
+        iex> quickcheck(
+        ...> forall x <- :ok do
+        ...>   equals(:ok, x)
+        ...> end)
+        :true
+
+        iex> use PropCheck
+        iex> quickcheck(
+        ...> forall x <- :not_ok do
+        ...>   equals(:ok, x)
+        ...> end)
+        :false
     """
     @spec equals(any, any) :: test
-    def equals(a, b), do:
-        (a === b)
-        |> when_fail(IO.puts("#{inspect a, :pretty} != #{inspect b, :pretty}"))
+    def equals(a, b) do
+      when_fail(
+        a === b, IO.puts("#{inspect a, [pretty: true]} != #{inspect b, [pretty: true]}"))
+    end
 
 
     @doc """
