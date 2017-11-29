@@ -16,7 +16,8 @@ defmodule PropCheck.Properties do
   as ean `ExUnit` test case of category `property`, which is released as
   part of Elixir 1.3 and allows a nice mix of regular unit test and property
   based testing. This is the reason for the third parameter taking an
-  environment of variables defined in a test setup function.
+  environment of variables defined in a test setup function. In `ExUnit`, this
+  is referred to as a test's "context".
 
   The second parameter sets options for Proper (see `PropCheck` ). The default
   is `:quiet` such that execution during ExUnit runs are silent, as normal
@@ -34,6 +35,7 @@ defmodule PropCheck.Properties do
   only the properties with counter example are run. Another option is to use
   the `--stale` option of `ExUnit` to reduce the amount of tests and properties
   while fixing the code tested by a property.
+
   """
   defmacro property(name, opts \\ [:quiet], var \\ quote(do: _), do: p_block) do
       block = quote do
