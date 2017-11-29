@@ -9,7 +9,7 @@ defmodule PropCheck.Properties do
 
 
   @doc """
-  Defines a property as part of an ExUnit test.
+  Defines a property as part of an ExUnit test.
 
   The property macro takes at minimum a name and a `do`-block containing
   the code of the property to be tested. The property code is encapsulated
