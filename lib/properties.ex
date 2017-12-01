@@ -13,7 +13,7 @@ defmodule PropCheck.Properties do
 
   The property macro takes at minimum a name and a `do`-block containing
   the code of the property to be tested. The property code is encapsulated
-  as ean `ExUnit` test case of category `property`, which is released as
+  as an `ExUnit` test case of category `property`, which is released as
   part of Elixir 1.3 and allows a nice mix of regular unit test and property
   based testing. This is the reason for the third parameter taking an
   environment of variables defined in a test setup function.
