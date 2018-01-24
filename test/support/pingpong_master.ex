@@ -26,10 +26,14 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   def stop() do
+    ref = Process.monitor(__MODULE__)
     try do
       GenServer.cast(__MODULE__, :stop)
     catch
       :error, :badarg -> Logger.error "already_dead_master:  #{__MODULE__}"
+    end
+    receive do
+      {:DOWN, ^ref, :process, _object, _reason} -> :ok
     end
   end
 
