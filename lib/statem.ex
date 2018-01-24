@@ -230,13 +230,13 @@ defmodule PropCheck.StateM do
 
   @doc """
   Specifies the next state of the abstract state machine, given the
-  current state `s`, the symbolic `call` chosen and its result `Res`. This
+  current state `s`, the symbolic `call` chosen and its result `res`. This
   function is called both at command generation and command execution time
   in order to update the model state, therefore the state `s` and the
   result `Res` can be either symbolic or dynamic.
   """
-  @callback next_state(symbolic_state | dynamic_state,
-    term, symb_call) ::
+  @callback next_state(s :: symbolic_state | dynamic_state,
+    res :: term, call :: symb_call) ::
     symbolic_state | dynamic_state
 
   @doc """

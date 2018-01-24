@@ -26,10 +26,14 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   def stop() do
+    ref = Process.monitor(__MODULE__)
     try do
       GenServer.cast(__MODULE__, :stop)
     catch
       :error, :badarg -> Logger.error "already_dead_master:  #{__MODULE__}"
+    end
+    receive do
+      {:DOWN, ^ref, :process, _object, _reason} -> :ok
     end
   end
 
@@ -64,6 +68,8 @@ defmodule PropCheck.Test.PingPongMaster do
           ping(name)
       {:tennis, from}   -> send(from, :maybe_later)
       {:football, from} -> send(from, :no_way)
+      msg -> Logger.error "Player #{inspect name} got invalid message #{inspect msg}".
+        exit(:kill)
     end
     # Logger.debug "Player #{inspect name} is recursive"
     ping_pong_player(name, counter + 1)
@@ -134,12 +140,12 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   def handle_call({:add_player, name}, _from, scores) do
-    case Map.get(scores, name) do
-      nil ->
+    case Map.fetch(scores, name) do
+      :error ->
           pid = spawn(fn() -> ping_pong_player(name) end)
           true = Process.register(pid, name)
           {:reply, :ok, scores |> Map.put(name, 0)}
-      s when is_integer(s) ->
+      {:ok, _} ->
           Logger.debug "add_player: player #{name} already exists!"
           {:reply, :ok, scores}
     end
@@ -147,19 +153,7 @@ defmodule PropCheck.Test.PingPongMaster do
   def handle_call({:remove_player, name}, _from, scores) do
     case Process.whereis(name) do
       nil -> Logger.debug("Process #{name} is unknown / not running")
-      pid ->
-        ref = Process.monitor(pid) # monitoring a pid always works
-        if Process.alive? pid do
-          Process.exit(pid, :kill)
-          # Ensure that we wait for the process to die
-          receive do
-            {:DOWN, ^ref, :process, _pid, _} -> :ok
-          after 1000 ->
-            raise RuntimeError, "timeout while waiting for :DOWN message"
-          end
-        else
-          Logger.debug "player #{name} with pid #{pid} is not alive any longer"
-        end
+      pid -> kill_process(pid)
     end
     # Process.whereis(name) |> Process.exit(:kill)
     {:reply, {:removed, name}, scores |> Map.delete(name)}
@@ -181,9 +175,20 @@ defmodule PropCheck.Test.PingPongMaster do
     # Logger.info "Terminate Master with scores #{inspect scores}"
     scores
       |> Map.keys
-      |> Enum.each(&(case Process.whereis(&1) do
-          nil -> :ok # "terminate: Process #{&1} does not exist"
-          pid -> Process.exit(pid, :kill)
-        end))
+      |> Enum.each(&kill_process(&1))
   end
+
+  defp kill_process(pid) when is_pid(pid) do
+    # monitoring works for already killed processes
+    ref = Process.monitor(pid)
+    Process.exit(pid, :kill)
+    # ... and wait for the DOWN message.
+    receive do
+      {:DOWN, ^ref, :process, _object, _reason} -> :ok
+    end
+  end
+  defp kill_process(name) do
+    kill_process(Process.whereis(name))
+  end
+
 end
