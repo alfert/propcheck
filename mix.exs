@@ -13,7 +13,7 @@ defmodule Propcheck.Mixfile do
      name: "PropCheck - Property Testing",
      source_url: "https://github.com/alfert/propcheck",
      homepage_url: "https://github.com/alfert/propcheck",
-     docs: [extras: ["README.md"], extra_section: "Overview"],
+     docs: [main: "readme", extras: ["README.md"], extra_section: "Overview"],
      description: description(),
      propcheck: [counter_examples: "_build/propcheck.ctx"],
      aliases: aliases(),
