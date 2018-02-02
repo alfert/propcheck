@@ -101,7 +101,7 @@ defmodule PropCheck.Properties do
       true when should_fail ->
         raise ExUnit.AssertionError, [
           message:
-            "#Property #{mfa_to_string name} should fail, but succeeded for all test data :-(",
+            "Property #{mfa_to_string name} should fail, but succeeded for all test data :-(",
           expr: nil]
       _counter_example when should_fail -> true
       counter_example ->
