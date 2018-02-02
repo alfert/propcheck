@@ -97,14 +97,20 @@ defmodule PropCheck.Properties do
   # In this method a new found counter example is added to `CounterStrike`.
   defp handle_check_results(results, name, should_fail) do
     case results do
+      error = {:error, _} ->
+        raise ExUnit.AssertionError, [
+          message:
+            "Property #{mfa_to_string name} failed with an error: #{inspect(error)}",
+          expr: nil
+        ]
       true when not should_fail -> true
       true when should_fail ->
         raise ExUnit.AssertionError, [
           message:
             "Property #{mfa_to_string name} should fail, but succeeded for all test data :-(",
           expr: nil]
-      _counter_example when should_fail -> true
-      counter_example ->
+      counter_example when is_list(counter_example) and should_fail -> true
+      counter_example when is_list(counter_example) ->
         CounterStrike.add_counter_example(name, counter_example)
         raise ExUnit.AssertionError, [
           message: """
