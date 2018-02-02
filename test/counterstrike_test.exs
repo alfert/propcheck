@@ -48,4 +48,34 @@ defmodule PropCheck.Test.CounterStrikeTest do
       l == List.reverse(l)
     end
   end
+
+  test "PropEr error is not stored" do
+    # Check that an invalid counterexample is not stored. PropEr returns
+    # {:error, _} on internal errors such as inability to generate a
+    # value instance. Such errors cannot be used as counterexamples in
+    # subsequent runs.
+
+    defmodule Helper do
+      use ExUnit.Case
+      use PropCheck
+
+      @tag :skip # will be run manually
+      property "cant_generate" do
+        # Check that no counterexample is stored if PropEr reported an error
+        gen = such_that b <- false, when: b
+        forall b <- gen do
+          b
+        end
+      end
+    end
+
+    assert_raise ExUnit.AssertionError, ~r/cant_generate/, fn ->
+      apply(Helper, :"property cant_generate", [[]])
+    end
+
+    # Run a second time to ensure that no counterexample was stored.
+    assert_raise ExUnit.AssertionError, ~r/cant_generate/, fn ->
+      apply(Helper, :"property cant_generate", [[]])
+    end
+  end
 end
