@@ -13,6 +13,9 @@ defmodule PropCheck.Mix do
 end
 
 defmodule Mix.Tasks.Propcheck do
+  use Mix.Task
+
+  @shortdoc "Print PropCheck help information"
 
   @moduledoc """
   PropCheck runs property checking as part of ExUnit test and
@@ -27,6 +30,11 @@ defmodule Mix.Tasks.Propcheck do
   With `mix propcheck.inspect` you can inspect the found counter examples,
   with `mix propcheck.clean` the file is deleted afterwards.
   """
+
+  def run(_) do
+    Mix.shell.info("Available PropCheck tasks:\n")
+    Mix.Tasks.Help.run(["--search", "propcheck."])
+  end
 
   defmodule Clean do
     use Mix.Task
