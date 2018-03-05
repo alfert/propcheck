@@ -94,7 +94,7 @@ defmodule PropCheck.BasicTypes do
   defdelegate bitstring(), to: :proper_types
 
   @doc """
-  All bitstrings with a byte size of `length`.
+  All bitstrings with a bit size of `length`.
 
   `length` must be an Elixir expression that evaluates to a non-negative integer.
   Instances shrink towards bitstrings of zeroes.
