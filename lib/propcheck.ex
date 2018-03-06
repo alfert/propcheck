@@ -715,6 +715,14 @@ defmodule PropCheck do
       :proper_gen.pick(gen, size, seed)
     end
 
+    @doc """
+    Generates a random instance of Type, of size Size, then shrinks it as far as it goes. The value
+    produced on each step of the shrinking process is printed on the screen.
+    """
+    def sample_shrink(gen, size \\ 10) do
+      :proper_gen.sampleshrink(gen, size)
+    end
+
     defmacro is_property(x) do
       quote do: is_tuple(unquote(x)) and elem(unquote(x), 0) == :"$type"
     end
