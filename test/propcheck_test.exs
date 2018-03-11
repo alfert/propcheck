@@ -30,6 +30,18 @@ defmodule PropcheckTest do
 	  end) =~ ":ok != :not_ok"
 	end
 
+  test "sample_shrink/2" do
+    use PropCheck
+
+    assert capture_io(fn ->
+      assert :ok == sample_shrink(1)
+    end) == "1\n"
+
+    assert capture_io(fn ->
+      assert :ok == sample_shrink([1, 2, 3])
+    end) == "[1,2,3]\n"
+  end
+
   def recode_vars({:var, line, n}), do:
 		{:var, line, n |> Atom.to_string |> String.upcase |> String.to_atom}
   def recode_vars({t, l, sub_t, expr}), do: {t, l, recode_vars(sub_t), recode_vars(expr)}
