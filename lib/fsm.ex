@@ -119,19 +119,19 @@ defmodule PropCheck.FSM do
 
 
   @doc """
-  Specifies the initial state of the finite state machine. As with
+  Specifies the initial state of the finite state machine. As with
   `PropCheck.StateM.initial_state/0`, its result should be deterministic.
   """
   @callback initial_state() :: state_name
 
   @doc """
-  Specifies what the state data should initially contain. Its result
+  Specifies what the state data should initially contain. Its result
   should be deterministic.
   """
   @callback initial_data() :: state_data
 
   @doc """
-  Similar to `PropCheck.StateM.precondition/2`.
+  Similar to `PropCheck.StateM.precondition/2`.
 
   Specifies the
   precondition that should hold about `state_data` so that `call` can be
@@ -148,7 +148,7 @@ defmodule PropCheck.FSM do
     state_data :: state_data, call :: symb_call) :: boolean
 
   @doc """
-  Similar to `PropCheck.StateM.postcondition/3`. Specifies the
+  Similar to `PropCheck.StateM.postcondition/3`. Specifies the
   postcondition that should hold about the result `res` of the evaluation
   of `call`.
   """
@@ -156,7 +156,7 @@ defmodule PropCheck.FSM do
     state_data :: state_data, call :: symb_call, result :: result) :: boolean
 
   @doc """
-  Similar to `PropCheck.StateM.next_state/3`. Specifies how the
+  Similar to `PropCheck.StateM.next_state/3`. Specifies how the
   transition from `from` to `target` triggered by `call` affects the
   `state_data`. `res` refers to the result of `call` and can be either
   symbolic or dynamic.
@@ -165,7 +165,7 @@ defmodule PropCheck.FSM do
     state_data :: state_data, result :: result, call :: symb_call) :: state_data
 
   @doc """
-  This is an optional callback. When it is not defined (or not exported),
+  This is an optional callback. When it is not defined (or not exported),
   transitions are chosen with equal probability. When it is defined, it
   assigns an integer weight to transitions from `from` to `target`
   triggered by symbolic call `call`. In this case, each transition is chosen
@@ -175,7 +175,7 @@ defmodule PropCheck.FSM do
   @optional_callbacks weight: 3
 
   @doc """
-  A special PropEr type which generates random command sequences,
+  A special PropEr type which generates random command sequences,
   according to a finite state machine specification.
 
   The function takes as
@@ -187,7 +187,7 @@ defmodule PropCheck.FSM do
   def commands(mod), do: :proper_fsm.commands(mod)
 
   @doc """
-  Similar to `commands/1`, but generated command sequences always
+  Similar to `commands/1`, but generated command sequences always
   start at a given state.
 
   In this case, the first command is always
@@ -201,7 +201,7 @@ defmodule PropCheck.FSM do
   defdelegate more_commands(n, cmd_type),           to: PropCheck.StateM
 
   @doc """
-  Evaluates a given symbolic command sequence `cmds` according to the
+  Evaluates a given symbolic command sequence `cmds` according to the
   finite state machine specified in `mod`.
 
   The result is a triple of the form `{history, fsm_state, result}`,
@@ -220,7 +220,7 @@ defmodule PropCheck.FSM do
   def run_commands(mod, cmds, env), do: :proper_fsm.run_commands(mod, cmds, env)
 
   @doc """
-  Extracts the names of the states from a given command execution history.
+  Extracts the names of the states from a given command execution history.
 
   It is useful in combination with functions such as `PropCheck.aggregate/2`
   in order to collect statistics about state transitions during command
