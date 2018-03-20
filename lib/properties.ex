@@ -1,7 +1,7 @@
 defmodule PropCheck.Properties do
 
   @moduledoc """
-  This module defined the `property/4` macro. It is automatically available
+  This module defined the `property/4` macro. It is automatically available
   by `use PropCheck`.
   """
   alias PropCheck.CounterStrike

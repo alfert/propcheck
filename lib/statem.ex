@@ -218,7 +218,7 @@ defmodule PropCheck.StateM do
   @callback precondition(s :: symbolic_state, call :: symb_call) :: boolean
 
   @doc """
-  Specifies the postcondition that should hold about the result `res` of
+  Specifies the postcondition that should hold about the result `res` of
   performing `call`, given the dynamic state `s` of the abstract state
   machine prior to command execution.
 
@@ -229,7 +229,7 @@ defmodule PropCheck.StateM do
     call:: symb_call, res :: term) :: boolean
 
   @doc """
-  Specifies the next state of the abstract state machine, given the
+  Specifies the next state of the abstract state machine, given the
   current state `s`, the symbolic `call` chosen and its result `res`. This
   function is called both at command generation and command execution time
   in order to update the model state, therefore the state `s` and the
@@ -240,7 +240,7 @@ defmodule PropCheck.StateM do
     symbolic_state | dynamic_state
 
   @doc """
-  Extracts the names of the commands from a given command sequence, in
+  Extracts the names of the commands from a given command sequence, in
   the form of MFAs.
 
   It is useful in combination with functions such as
@@ -250,7 +250,7 @@ defmodule PropCheck.StateM do
   defdelegate command_names(cmds), to: :proper_statem
 
   @doc """
-  A special PropEr type which generates random command sequences,
+  A special PropEr type which generates random command sequences,
   according to an absract state machine specification.
 
   The function takes as
@@ -260,7 +260,7 @@ defmodule PropCheck.StateM do
   defdelegate commands(mod), to: :proper_statem
 
   @doc """
-  Similar to `commands/1`, but generated command sequences always
+  Similar to `commands/1`, but generated command sequences always
   start at a given state.
 
   In this case, the first command is always
@@ -272,7 +272,7 @@ defmodule PropCheck.StateM do
   defdelegate commands(mod, initial_state), to: :proper_statem
 
   @doc """
-  Increases the expected length of command sequences generated from
+  Increases the expected length of command sequences generated from
   `cmd_type` by a factor `n`.
 
   **CAVEAT**<br>
@@ -293,7 +293,7 @@ defmodule PropCheck.StateM do
   end
 
   @doc """
-  A special PropEr type which generates parallel testcases,
+  A special PropEr type which generates parallel testcases,
   according to an absract state machine specification.
 
   The function takes as
@@ -303,13 +303,13 @@ defmodule PropCheck.StateM do
   defdelegate parallel_commands(mod), to: :proper_statem
 
   @doc """
-  Similar to `parallel_commands/1`, but generated command sequences
+  Similar to `parallel_commands/1`, but generated command sequences
   always start at a given state.
   """
   defdelegate parallel_commands(mod, initial_state), to: :proper_statem
 
   @doc """
-  Evaluates a given symbolic command sequence `cmds` according to the
+  Evaluates a given symbolic command sequence `cmds` according to the
   state machine specified in `mod`.
 
   The result is a triple of the form
@@ -341,7 +341,7 @@ defmodule PropCheck.StateM do
   defdelegate run_commands(mod, cmds), to: :proper_statem
 
   @doc """
-  Similar to `run_commands/2`, but also accepts an environment,
+  Similar to `run_commands/2`, but also accepts an environment,
   used for symbolic variable evaluation during command execution. The
   environment consists of `{key::atom, value::any}` pairs. Keys may be
   used in symbolic variables (i.e. `{:var, key}`) whithin the command sequence
@@ -351,7 +351,7 @@ defmodule PropCheck.StateM do
   defdelegate run_commands(mod, cmds, env), to: :proper_statem
 
   @doc """
-  Runs a given parallel testcase according to the state machine
+  Runs a given parallel testcase according to the state machine
   specified in `mod`.
 
   The result is a triple of the form
@@ -368,14 +368,14 @@ defmodule PropCheck.StateM do
   defdelegate run_parallel_commands(mod, testcase),  to: :proper_statem
 
   @doc """
-  Similar to `run_parallel_commands/2`, but also accepts an
+  Similar to `run_parallel_commands/2`, but also accepts an
   environment used for symbolic variable evaluation, exactly as described in
   `run_commands/3`.
   """
   defdelegate run_parallel_commands(mod, testcase, env), to: :proper_statem
 
   @doc """
-  Returns the symbolic state after running a given command sequence,
+  Returns the symbolic state after running a given command sequence,
   according to the state machine specification found in `mod`.
 
   The commands are not actually executed.
@@ -383,7 +383,7 @@ defmodule PropCheck.StateM do
   defdelegate state_after(mod, cmds), to: :proper_statem
 
   @doc """
-  Behaves exactly like `Enum.zip/2`.
+  Behaves exactly like `Enum.zip/2`.
 
   Zipping stops when the shortest list stops. This is
   useful for zipping a command sequence with its (failing) execution history.
