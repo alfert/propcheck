@@ -20,6 +20,26 @@ defmodule PropcheckTest do
 		Logger.debug(inspect types, pretty: true)
 	end
 
+  test "let/2 generates larger lists of bindings" do
+    use PropCheck
+
+    let_gen = let [
+      m <- nat(),
+      n <- nat(),
+      o <- nat()
+    ] do
+      [m, n, o]
+      :ok
+    end
+
+    assert capture_io(fn ->
+      quickcheck(
+        forall x <- let_gen do
+          equals(:ok, x)
+        end)
+    end) =~ "Passed"
+  end
+
 	test "equals/2 outputs on error" do
 	  use PropCheck
 	  assert capture_io(fn ->

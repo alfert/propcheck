@@ -541,10 +541,10 @@ defmodule PropCheck do
     end
     defp let_bind({:<-, _, [var, rawtype]} = _bind), do: {var, rawtype}
     defp let_bind([{:<-, _, [var, rawtype]}]) do
-      {var, rawtype}
+      [{var, rawtype}]
     end
     defp let_bind([{:<-, _, [var, rawtype]} | rest]) do
-      [{var, rawtype}, let_bind(rest)]
+      [{var, rawtype} | let_bind(rest)]
     end
 
     @doc """
