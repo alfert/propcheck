@@ -341,7 +341,23 @@ defmodule PropCheck do
     defmacro forall(binding, property)
     defmacro forall({op, _, [var, rawtype]}, do: prop) when op in @in_ops do
         quote do
-            :proper.forall(unquote(rawtype), fn(unquote(var)) -> unquote(prop) end)
+          :proper.forall(
+            unquote(rawtype),
+            fn(unquote(var)) ->
+              try do
+                unquote(prop)
+              rescue
+                e in ExUnit.AssertionError ->
+                  stacktrace = System.stacktrace
+                  e |> ExUnit.AssertionError.message() |> IO.write()
+                  formatted = Exception.format_stacktrace(stacktrace)
+                  IO.puts("stacktrace:\n#{formatted}")
+                  false
+                e ->
+                  stacktrace = System.stacktrace
+                  reraise e, stacktrace
+              end
+            end)
         end
     end
     defmacro forall(_binding, _property), do: syntax_error("var <- generator, do: prop")

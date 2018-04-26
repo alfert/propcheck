@@ -62,6 +62,16 @@ defmodule PropcheckTest do
     end) == "[1,2,3]\n"
   end
 
+  test "can use assertion in forall" do
+    use PropCheck
+    assert capture_io(fn ->
+      quickcheck(
+        forall _x <- :not_ok do
+          assert false
+        end)
+    end) =~ "Expected truthy, got false"
+  end
+
   def recode_vars({:var, line, n}), do:
 		{:var, line, n |> Atom.to_string |> String.upcase |> String.to_atom}
   def recode_vars({t, l, sub_t, expr}), do: {t, l, recode_vars(sub_t), recode_vars(expr)}
