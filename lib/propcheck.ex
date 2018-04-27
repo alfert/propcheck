@@ -336,10 +336,24 @@ defmodule PropCheck do
         ...> end
         ...>)
         true
+
+    `forall` allows using `ExUnit` assertions. By default (`:quiet`), no output
+    is generated if an assertion does not hold:
+
+        iex> use PropCheck
+        iex> quickcheck(
+        ...> forall n <- nat() do
+        ...>   assert n < 0
+        ...> end
+        ...>)
+        false
+
+    Use `:verbose` to enable output on failed `ExUnit` assertions.
+
     """
     @in_ops [:<-, :in]
-    defmacro forall(binding, property)
-    defmacro forall({op, _, [var, rawtype]}, do: prop) when op in @in_ops do
+    defmacro forall(binding, opts \\ [:quiet], property)
+    defmacro forall({op, _, [var, rawtype]}, opts, do: prop) when op in @in_ops do
         quote do
           :proper.forall(
             unquote(rawtype),
@@ -349,9 +363,11 @@ defmodule PropCheck do
               rescue
                 e in ExUnit.AssertionError ->
                   stacktrace = System.stacktrace
-                  e |> ExUnit.AssertionError.message() |> IO.write()
-                  formatted = Exception.format_stacktrace(stacktrace)
-                  IO.puts("stacktrace:\n#{formatted}")
+                  if :verbose in unquote(opts) do
+                    e |> ExUnit.AssertionError.message() |> IO.write()
+                    formatted = Exception.format_stacktrace(stacktrace)
+                    IO.puts("stacktrace:\n#{formatted}")
+                  end
                   false
                 e ->
                   stacktrace = System.stacktrace
@@ -360,7 +376,7 @@ defmodule PropCheck do
             end)
         end
     end
-    defmacro forall(_binding, _property), do: syntax_error("var <- generator, do: prop")
+    defmacro forall(_binding, _opts, _property), do: syntax_error("var <- generator, do: prop")
 
     @doc """
     A property that is only tested if a condition is true.

@@ -66,7 +66,17 @@ defmodule PropcheckTest do
     use PropCheck
     assert capture_io(fn ->
       quickcheck(
-        forall _x <- :not_ok do
+        forall _x <- :not_ok, [:verbose] do
+          assert false
+        end)
+    end) =~ "Expected truthy, got false"
+  end
+
+  test "can use assertion in forall without output" do
+    use PropCheck
+    refute capture_io(fn ->
+      quickcheck(
+        forall _x <- :not_ok, [:quiet] do
           assert false
         end)
     end) =~ "Expected truthy, got false"
