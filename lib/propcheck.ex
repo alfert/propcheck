@@ -730,10 +730,10 @@ defmodule PropCheck do
       end
   end
 
-    @doc """
-    Sample values from a generator `gen`.
+  @doc """
+  Sample values from a generator `gen`.
 
-    ## Example
+  ## Example
 
       iex> use PropCheck
       iex> produce(1)
@@ -742,10 +742,10 @@ defmodule PropCheck do
       true
       iex> nat() |> list() |> produce() |> Kernel.elem(1) |> is_list()
       true
-    """
-    def produce(gen, size \\ 10, seed \\ :os.timestamp()) do
-      :proper_gen.pick(gen, size, seed)
-    end
+  """
+  def produce(gen, size \\ 10, seed \\ :os.timestamp()) do
+    :proper_gen.pick(gen, size, seed)
+  end
 
     @doc """
     Generates a random instance of Type, of size Size, then shrinks it as far as it goes. The value
