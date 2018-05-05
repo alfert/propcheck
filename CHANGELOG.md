@@ -3,7 +3,10 @@
 ## 1.0.5
 * Allows to use `ExUnit` assertions as boolean conditions, thanks to https://github.com/evnu
 * `let` and `let_shrink` allow more than two parameters, thanks to https://github.com/BinaryNoggin
+* Errors, that aren't counter examples, are no longer stored as counter examples,  thanks to https://github.com/evnu
 * new feature `sample_shrink`, thanks to https://github.com/evnu
+* the examples for stateful testing use `GenServer.stop/0` for a reliable
+  stopping of gen servers.
 * several documentation issues
 
 ## 1.0.4

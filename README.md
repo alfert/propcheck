@@ -17,6 +17,10 @@ defp deps do
 end
 ```
 
+## Changes
+
+Relevant changes are document in the [Changelog](CHANGELOG.html).
+
 ## Basic Usage and Build Configuration
 PropCheck allows to define properties, which automatically executed via `ExUnit`
 when running `mix test`. Details about the `property` macro are found in
