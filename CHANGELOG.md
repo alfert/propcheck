@@ -1,5 +1,11 @@
 # PropCheck Changelog
 
+## 1.0.5
+* Allows to use `ExUnit` assertions as boolean conditions, thanks to https://github.com/evnu
+* `let` and `let_shrink` allow more than two parameters, thanks to https://github.com/BinaryNoggin
+* new feature `sample_shrink`, thanks to https://github.com/evnu
+* several documentation issues
+
 ## 1.0.4
 * `produce` has now a valid default parameter
 * Removed several lazy compiler warnings
