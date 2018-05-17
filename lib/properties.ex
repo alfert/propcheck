@@ -27,6 +27,7 @@ defmodule PropCheck.Properties do
   verbose mode is required.
 
   ## Counter Examples
+
   If a property fails, the counter example is in a file. The next time this
   property is checked again, only the counter example is used to ensure that
   the property now behaves correctly. Additionally, a property with an existing

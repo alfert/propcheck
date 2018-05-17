@@ -1,267 +1,274 @@
 defmodule PropCheck do
     @moduledoc """
-      Provides the macros and functions for property based testing
-      using `proper` as base implementation. `PropCheck` supports many
-      features of `PropEr`, but the automated generation of test data
-      generators is only partially supported due to internal features of
-      `PropEr` focussing of Erlang only.
+    Provides the macros and functions for property based testing
+    using `proper` as base implementation. `PropCheck` supports many
+    features of `PropEr`, but the automated generation of test data
+    generators is only partially supported due to internal features of
+    `PropEr` focussing of Erlang only.
 
-      ## Using PropCheck
-      To use `PropCheck`, you need to add `use PropCheck` to your
-      Elixir files. This gives you access to the functions and macros
-      defined here as well as to the `property` macro, defined in
-      `PropCheck.Properties.property/4`. In most examples shown
-      here, we directly use the `quickcheck` function, but typically you
-      use the `property` macro instead to define test cases for `ExUnit`.
+    ## Using PropCheck
 
-      Also availables are the value generators which are imported directly
-      from `PropCheck.BasicTypes`.
+    To use `PropCheck`, you need to add `use PropCheck` to your
+    Elixir files. This gives you access to the functions and macros
+    defined here as well as to the `property` macro, defined in
+    `PropCheck.Properties.property/4`. In most examples shown
+    here, we directly use the `quickcheck` function, but typically you
+    use the `property` macro instead to define test cases for `ExUnit`.
 
-      ## How to write properties
-      The simplest properties that PropEr can test consist of a single boolean
-      expression (or a statement block that returns a boolean), which is expected
-      to evaluate to `true`. Thus, the test `true` always succeeds, while the test
-      `false` always fails (the failure of a property may also be signified by
-      throwing an exception, error or exit. More complex (and useful) properties
-      can be written by wrapping such a boolean expression with one or more of the
-      following wrappers:
+    Also availables are the value generators which are imported directly
+    from `PropCheck.BasicTypes`.
 
-      * `forall/2`
-      * `implies/2`
-      * `when_fail/2`
-      * `trap_exit/1`
-      * `conjunction/1`
-      * `equals/2`
+    ## How to write properties
 
-      There are also multiple wrappers that can be used to collect statistics on
-      the distribution of test data:
+    The simplest properties that PropEr can test consist of a single boolean
+    expression (or a statement block that returns a boolean), which is expected
+    to evaluate to `true`. Thus, the test `true` always succeeds, while the test
+    `false` always fails (the failure of a property may also be signified by
+    throwing an exception, error or exit. More complex (and useful) properties
+    can be written by wrapping such a boolean expression with one or more of the
+    following wrappers:
 
-      * `collect/2`
-      * `collect/3`
-      * `aggregate/2`
-      * `aggregate/3`
-      * `classify/3`
-      * `measure/3`
+    * `forall/2`
+    * `implies/2`
+    * `when_fail/2`
+    * `trap_exit/1`
+    * `conjunction/1`
+    * `equals/2`
 
-      A property may also be wrapped with one or more of the following outer-level
-      wrappers, which control the behaviour of the testing subsystem. If an
-      outer-level wrapper appears more than once in a property, the innermost
-      instance takes precedence.
+    There are also multiple wrappers that can be used to collect statistics on
+    the distribution of test data:
 
-      * `numtests/2`
-      * `fails/1`
-      * `on_output/2`
+    * `collect/2`
+    * `collect/3`
+    * `aggregate/2`
+    * `aggregate/3`
+    * `classify/3`
+    * `measure/3`
 
-      `PropCheck` follows the Elixir idioms that for fluent API the first
-      parameter flows through a pipeline of functions. Therefore, in `PropCheck`
-      the wrapper functions have the property as first argument allowing to
-      use the `|>` to concatenate wrapper functions. It helps to distinguish
-      between the property to test and those wrappers which beautify the
-      results or the collection information about the test values. This is a
-      significant derivation of the API of both, PropEr and QuickCheck.
+    A property may also be wrapped with one or more of the following outer-level
+    wrappers, which control the behaviour of the testing subsystem. If an
+    outer-level wrapper appears more than once in a property, the innermost
+    instance takes precedence.
 
-      For some actual usage examples, see the code in the examples directory, or
-      check out PropEr's site. The testing modules in the tests directory may also
-      be of interest.
+    * `numtests/2`
+    * `fails/1`
+    * `on_output/2`
 
-      ## Program behaviour
-      When running in verbose mode (this is the default for `quickcheck`), each sucessful test
-      prints a `.` on screen. If a test fails, a `!` is printed, along with the
-      failing test case (the instances of the types in every `forall`) and the
-      cause of the failure, if it was not simply the falsification of the
-      property.
+    `PropCheck` follows the Elixir idioms that for fluent API the first
+    parameter flows through a pipeline of functions. Therefore, in `PropCheck`
+    the wrapper functions have the property as first argument allowing to
+    use the `|>` to concatenate wrapper functions. It helps to distinguish
+    between the property to test and those wrappers which beautify the
+    results or the collection information about the test values. This is a
+    significant derivation of the API of both, PropEr and QuickCheck.
 
-      Then, unless the test was expected to fail, PropEr attempts to produce a
-      minimal test case that fails the property in the same way. This process is
-      called *shrinking*. During shrinking, a `.` is printed for each
-      successful simplification of the failing test case. When PropEr reaches its
-      shrinking limit or realizes that the instance cannot be shrunk further while
-      still failing the test, it prints the minimal failing test case and failure
-      reason and exits.
+    For some actual usage examples, see the code in the examples directory, or
+    check out PropEr's site. The testing modules in the tests directory may also
+    be of interest.
 
-      The return value of PropEr can be one of the following:
-      * `true`: The property held for all valid produced inputs.
-      * `false`: The property failed for some input.
-      * `{error, type_of_error}`: An error occured; see the section Errors
-       section for more information.
+    ## Program behaviour
 
-      To test all properties exported from a module (a property is a 0-arity
-      function whose name begins with `prop_`), you can use `module/1` or
-      `module/2`. This returns a list of all failing properties, represented
-      by MFAs. Testing progress is also printed on screen (unless quiet mode is
-      active). The provided options are passed on to each property, except for
-      `long_result`, which controls the return value format of the `module`
-      function itself.
+    When running in verbose mode (this is the default for `quickcheck`), each sucessful test
+    prints a `.` on screen. If a test fails, a `!` is printed, along with the
+    failing test case (the instances of the types in every `forall`) and the
+    cause of the failure, if it was not simply the falsification of the
+    property.
 
-      ## Counterexamples
-      A counterexample for a property is represented as a list of terms; each such
-      term corresponds to the type in a `forall`. The instances are provided in
-      the same order as the `forall` wrappers in the property, i.e. the instance
-      at the head of the list corresponds to the outermost `forall` etc.
-      Instances generated inside a failing sub-property of a conjunction are
-      marked with the sub-property's tag.
+    Then, unless the test was expected to fail, PropEr attempts to produce a
+    minimal test case that fails the property in the same way. This process is
+    called *shrinking*. During shrinking, a `.` is printed for each
+    successful simplification of the failing test case. When PropEr reaches its
+    shrinking limit or realizes that the instance cannot be shrunk further while
+    still failing the test, it prints the minimal failing test case and failure
+    reason and exits.
 
-      The last (simplest) counterexample produced by PropEr during a (failing) run
-      can be retrieved after testing has finished, by running
-      `counterexample/0`. When testing a whole module, run
-      `counterexamples/0` to get a counterexample for each failing property,
-      as a list of `{mfa, counterexample}` tuples. To enable this
-      functionality, some information has to remain in the process dictionary
-      even after PropEr has returned. If, for some reason, you want to completely
-      clean up the process dictionary of PropEr-produced entries, run
-      `clean_garbage/0`.
+    The return value of PropEr can be one of the following:
+    * `true`: The property held for all valid produced inputs.
+    * `false`: The property failed for some input.
+    * `{error, type_of_error}`: An error occured; see the section Errors
+      section for more information.
 
-      Counterexamples can also be retrieved by running PropEr in long-result mode,
-      where counterexamples are returned as part of the return value.
-      Specifically, when testing a single property under long-result mode
-      (activated by supplying the option `:long_result`, or by calling
-      `counterexample/1` or `counterexample/2` instead of
-      `quickcheck/1` and `quickcheck/2` respectively), PropEr will
-      return a counterexample in case of failure (instead of simply returning
-      `false`). When testing a whole module under long-result mode (activated by
-      supplying the option `:long_result` to `module/2`), PropEr will return
-      a list of `{mfa(), counterexample}` tuples, one for each failing
-      property.
+    To test all properties exported from a module (a property is a 0-arity
+    function whose name begins with `prop_`), you can use `module/1` or
+    `module/2`. This returns a list of all failing properties, represented
+    by MFAs. Testing progress is also printed on screen (unless quiet mode is
+    active). The provided options are passed on to each property, except for
+    `long_result`, which controls the return value format of the `module`
+    function itself.
 
-      You can re-check a specific counterexample against the property that it
-      previously falsified by running `check/2` or `check/3`. This
-      will return one of the following (both in short- and long-result mode):
+    ## Counterexamples
 
-      * `true`: The property now holds for this test case.
-      * `false`: The test case still fails (although not necessarily for the
-        same reason as before).
-      * `{error, type_of_error}`: An error occured - see the section Errors
-        section for more information.
+    A counterexample for a property is represented as a list of terms; each such
+    term corresponds to the type in a `forall`. The instances are provided in
+    the same order as the `forall` wrappers in the property, i.e. the instance
+    at the head of the list corresponds to the outermost `forall` etc.
+    Instances generated inside a failing sub-property of a conjunction are
+    marked with the sub-property's tag.
 
-      PropEr will not attempt to shrink the input in case it still fails the
-      property. Unless silent mode is active, PropEr will also print a message on
-      screen, describing the result of the re-checking. Note that PropEr can do
-      very little to verify that the counterexample actually corresponds to the
-      property that it is tested against.
+    The last (simplest) counterexample produced by PropEr during a (failing) run
+    can be retrieved after testing has finished, by running
+    `counterexample/0`. When testing a whole module, run
+    `counterexamples/0` to get a counterexample for each failing property,
+    as a list of `{mfa, counterexample}` tuples. To enable this
+    functionality, some information has to remain in the process dictionary
+    even after PropEr has returned. If, for some reason, you want to completely
+    clean up the process dictionary of PropEr-produced entries, run
+    `clean_garbage/0`.
 
-      ## Options
-      Options can be provided as an extra argument to most testing functions (such
-      as `quickcheck/1`). A single option can be written stand-alone, or
-      multiple options can be provided in a list. When two settings conflict, the
-      one that comes first in the list takes precedence. Settings given inside
-      external wrappers to a property (see the section on How to write properties)
-      override any conflicting settings provided as options.
+    Counterexamples can also be retrieved by running PropEr in long-result mode,
+    where counterexamples are returned as part of the return value.
+    Specifically, when testing a single property under long-result mode
+    (activated by supplying the option `:long_result`, or by calling
+    `counterexample/1` or `counterexample/2` instead of
+    `quickcheck/1` and `quickcheck/2` respectively), PropEr will
+    return a counterexample in case of failure (instead of simply returning
+    `false`). When testing a whole module under long-result mode (activated by
+    supplying the option `:long_result` to `module/2`), PropEr will return
+    a list of `{mfa(), counterexample}` tuples, one for each failing
+    property.
 
-      The available options are:
+    You can re-check a specific counterexample against the property that it
+    previously falsified by running `check/2` or `check/3`. This
+    will return one of the following (both in short- and long-result mode):
 
-      * `:quiet` <br> Enables quiet mode - no output is printed on screen while PropEr is
-        running.
-      * `:verbose` <br>
-        Enables verbose mode - this is the default mode of operation.
-      * `{:to_file, io_device}` <br>
-       Redirects all of PropEr's output to `io_device`, which should be an
-        IO device associated with a file opened for writing.
-      * `{:on_output, output_function}` <br>
-       PropEr will use the supplied function for all output printing. This
-        function should accept two arguments in the style of `:io.format/2`.<br/>
-        **CAUTION:** The above output control options are incompatible with each
-        other.
-      * `:long_result` <br>
-       Enables long-result mode (see the section Counterexamples
-        for details).
-      * `{:numtests, positive_number}` or simply `positive_number` <br>
-       This is equivalent to the `numtests/1` property wrapper. Any
-          `numtests/1` wrappers in the actual property will overwrite this
-        setting.
-      * `{:start_size, size}` <br>
-       Specifies the initial value of the `size` parameter (default is 1), see
-        the documentation of the `PropCheck.BasicTypes` module for details.
-      * `{:max_size, size}` <br>
-       Specifies the maximum value of the `size` parameter (default is 42), see
-        the documentation of the `PropCheck.BasicTypes` module for details.
-      * `{:max_shrinks, non_negative_number}` <br>
-       Specifies the maximum number of times a failing test case should be
-        shrunk before returning. Note that the shrinking may stop before so many
-        shrinks are achieved if the shrinking subsystem deduces that it cannot
-        shrink the failing test case further. Default is 500.
-      * `:noshrink` <br>
-       Instructs PropEr to not attempt to shrink any failing test cases.
-      * `{:constraint_tries, positive_number}` <br>
-       Specifies the maximum number of tries before the generator subsystem
-        gives up on producing an instance that satisfies a `such_that`
-        constraint. Default is 50.
-      * `fails` <br>
-         This is equivalent to the `fails/1` property wrapper.
-      * `{:spec_timeout, :infinity | <Non_negative_number>}` <br>
-       When testing a spec, PropEr will consider an input to be failing if the
-        function under test takes more than the specified amount of milliseconds
-        to return for that input.
-      * `:any_to_integer` <br>
-         All generated instances of the type `PropCheck.BasicTypes.any/0` will be
-        integers. This is provided as a means to speed up the testing of specs,
-        where `any` is a commonly used type. Remark: PropCheck does not support
-        spec-testing.
-      * `{:skip_mfas, [mfa]}` <br>
-        When checking a module's specs, PropEr will not test the
-        specified MFAs.  Default is []. Remark: PropCheck does not support
-        spec-testing.
-      * `{false_positive_mfas, ((mfa(), args::[any], {:fail, result::any} |
-        {:error | :exit | :throw, reason::any}) -> boolean) | :undefined` <br>
-        When checking a module's spec(s), PropEr will treat a
-      counterexample as a false positive if the user supplied function
-      returns true.  Otherwise, PropEr will treat the counterexample as
-      it normally does.  The inputs to the user supplied function are
-      the MFA, the arguments passed to the MFA, and the result returned
-      from the MFA or an exception with it's reason.  If needed, the
-      user supplied function can call `:erlang.get_stacktrace/0`.  Default
-      is `:undefined`. Remark: PropCheck does not support
+    * `true`: The property now holds for this test case.
+    * `false`: The test case still fails (although not necessarily for the
+      same reason as before).
+    * `{error, type_of_error}`: An error occured - see the section Errors
+      section for more information.
+
+    PropEr will not attempt to shrink the input in case it still fails the
+    property. Unless silent mode is active, PropEr will also print a message on
+    screen, describing the result of the re-checking. Note that PropEr can do
+    very little to verify that the counterexample actually corresponds to the
+    property that it is tested against.
+
+    ## Options
+
+    Options can be provided as an extra argument to most testing functions (such
+    as `quickcheck/1`). A single option can be written stand-alone, or
+    multiple options can be provided in a list. When two settings conflict, the
+    one that comes first in the list takes precedence. Settings given inside
+    external wrappers to a property (see the section on How to write properties)
+    override any conflicting settings provided as options.
+
+    The available options are:
+
+    * `:quiet` <br> Enables quiet mode - no output is printed on screen while PropEr is
+      running.
+    * `:verbose` <br>
+      Enables verbose mode - this is the default mode of operation.
+    * `{:to_file, io_device}` <br>
+      Redirects all of PropEr's output to `io_device`, which should be an
+      IO device associated with a file opened for writing.
+    * `{:on_output, output_function}` <br>
+      PropEr will use the supplied function for all output printing. This
+      function should accept two arguments in the style of `:io.format/2`.<br/>
+      **CAUTION:** The above output control options are incompatible with each
+      other.
+    * `:long_result` <br>
+      Enables long-result mode (see the section Counterexamples
+      for details).
+    * `{:numtests, positive_number}` or simply `positive_number` <br>
+      This is equivalent to the `numtests/1` property wrapper. Any
+        `numtests/1` wrappers in the actual property will overwrite this
+      setting.
+    * `{:start_size, size}` <br>
+      Specifies the initial value of the `size` parameter (default is 1), see
+      the documentation of the `PropCheck.BasicTypes` module for details.
+    * `{:max_size, size}` <br>
+      Specifies the maximum value of the `size` parameter (default is 42), see
+      the documentation of the `PropCheck.BasicTypes` module for details.
+    * `{:max_shrinks, non_negative_number}` <br>
+      Specifies the maximum number of times a failing test case should be
+      shrunk before returning. Note that the shrinking may stop before so many
+      shrinks are achieved if the shrinking subsystem deduces that it cannot
+      shrink the failing test case further. Default is 500.
+    * `:noshrink` <br>
+      Instructs PropEr to not attempt to shrink any failing test cases.
+    * `{:constraint_tries, positive_number}` <br>
+      Specifies the maximum number of tries before the generator subsystem
+      gives up on producing an instance that satisfies a `such_that`
+      constraint. Default is 50.
+    * `fails` <br>
+        This is equivalent to the `fails/1` property wrapper.
+    * `{:spec_timeout, :infinity | <Non_negative_number>}` <br>
+      When testing a spec, PropEr will consider an input to be failing if the
+      function under test takes more than the specified amount of milliseconds
+      to return for that input.
+    * `:any_to_integer` <br>
+        All generated instances of the type `PropCheck.BasicTypes.any/0` will be
+      integers. This is provided as a means to speed up the testing of specs,
+      where `any` is a commonly used type. Remark: PropCheck does not support
       spec-testing.
+    * `{:skip_mfas, [mfa]}` <br>
+      When checking a module's specs, PropEr will not test the
+      specified MFAs.  Default is []. Remark: PropCheck does not support
+      spec-testing.
+    * `{false_positive_mfas, ((mfa(), args::[any], {:fail, result::any} |
+      {:error | :exit | :throw, reason::any}) -> boolean) | :undefined` <br>
+      When checking a module's spec(s), PropEr will treat a
+    counterexample as a false positive if the user supplied function
+    returns true.  Otherwise, PropEr will treat the counterexample as
+    it normally does.  The inputs to the user supplied function are
+    the MFA, the arguments passed to the MFA, and the result returned
+    from the MFA or an exception with it's reason.  If needed, the
+    user supplied function can call `:erlang.get_stacktrace/0`.  Default
+    is `:undefined`. Remark: PropCheck does not support
+    spec-testing.
 
-     ## Errors
-     The following errors may be encountered during testing. The term provided
-     for each error is the error type returned by `quickcheck/2` in case such
-     an error occurs. Normaly, a message is also printed on screen describing
-     the error.
+    ## Errors
 
-     * `:arity_limit`<br>
-       The random instance generation subsystem has failed to produce
-       a function of the desired arity. Please recompile PropEr with a suitable
-       value for `?MAX_ARITY` (defined in `proper_internal.hrl`). This error
-       should only be encountered during normal operation.
-     * `:cant_generate`<br>
-       The random instance generation subsystem has failed to
-       produce an instance that satisfies some `such_that/2` constraint. You
-       should either increase the `:constraint_tries` limit, loosen the failing
-       constraint, or make it non-strict. This error should only be encountered
-       during normal operation.
-     * `:cant_satisfy`<br>
-       All the tests were rejected because no produced test case
-       would pass all `implies/2` checks. You should loosen the failing `implies/2`
-       constraint(s). This error should only be encountered during normal
-       operation.
-     * `:non_boolean_result`<br>
-       The property code returned a non-boolean result. Please
-       fix your property.
-     * `:rejected`<br>
-       Only encountered during re-checking, the counterexample does not
-       match the property, since the counterexample doesn't pass an `implies/2`
-       check.
-     * `:too_many_instances`<br>
-       Only encountered during re-checking, the counterexample
-       does not match the property, since the counterexample contains more
-       instances than there are `forall/2`s in the property.
-     * `:type_mismatch`<br>
-       The variables' and types' structures inside a `forall/2` don't
-       match. Please check your properties.
-     * `{:typeserver, sub_error}`<br>
-       The typeserver encountered an error. The `sub_error` field contains
-       specific information regarding the error.
-     * `{:unexpected, result}`<br>
-       A test returned an unexpected result during normal operation. If you
-       ever get this error, it means that you have found a bug in PropEr
-       - please send an error report to the maintainers and remember to include
-       both the failing test case and the output of the program, if possible.
-     * `{:unrecognized_option, option}`<br>
-       `option` is not an option that PropEr understands.
+    The following errors may be encountered during testing. The term provided
+    for each error is the error type returned by `quickcheck/2` in case such
+    an error occurs. Normaly, a message is also printed on screen describing
+    the error.
 
-      ## Acknowldgements
-      Very much of the documentation is directly taken from the
-      `proper` API documentation.
+    * `:arity_limit`<br>
+      The random instance generation subsystem has failed to produce
+      a function of the desired arity. Please recompile PropEr with a suitable
+      value for `?MAX_ARITY` (defined in `proper_internal.hrl`). This error
+      should only be encountered during normal operation.
+    * `:cant_generate`<br>
+      The random instance generation subsystem has failed to
+      produce an instance that satisfies some `such_that/2` constraint. You
+      should either increase the `:constraint_tries` limit, loosen the failing
+      constraint, or make it non-strict. This error should only be encountered
+      during normal operation.
+    * `:cant_satisfy`<br>
+      All the tests were rejected because no produced test case
+      would pass all `implies/2` checks. You should loosen the failing `implies/2`
+      constraint(s). This error should only be encountered during normal
+      operation.
+    * `:non_boolean_result`<br>
+      The property code returned a non-boolean result. Please
+      fix your property.
+    * `:rejected`<br>
+      Only encountered during re-checking, the counterexample does not
+      match the property, since the counterexample doesn't pass an `implies/2`
+      check.
+    * `:too_many_instances`<br>
+      Only encountered during re-checking, the counterexample
+      does not match the property, since the counterexample contains more
+      instances than there are `forall/2`s in the property.
+    * `:type_mismatch`<br>
+      The variables' and types' structures inside a `forall/2` don't
+      match. Please check your properties.
+    * `{:typeserver, sub_error}`<br>
+      The typeserver encountered an error. The `sub_error` field contains
+      specific information regarding the error.
+    * `{:unexpected, result}`<br>
+      A test returned an unexpected result during normal operation. If you
+      ever get this error, it means that you have found a bug in PropEr
+      - please send an error report to the maintainers and remember to include
+      both the failing test case and the output of the program, if possible.
+    * `{:unrecognized_option, option}`<br>
+      `option` is not an option that PropEr understands.
+
+    ## Acknowldgements
+
+    Very much of the documentation is directly taken from the
+    `proper` API documentation.
     """
     defmacro __using__(_) do
         quote do
