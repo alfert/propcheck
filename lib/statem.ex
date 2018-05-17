@@ -14,6 +14,7 @@ defmodule PropCheck.StateM do
 
 
   ## The role of commands
+
   Testcases generated for testing a stateful system are lists of symbolic API
   calls to that system. Symbolic representation has several benefits, which
   are listed here in increasing order of importance:
@@ -42,6 +43,7 @@ defmodule PropCheck.StateM do
   pair `{:b, 42}`.
 
   ## The abstract model-state
+
   In order to be able to test impure code, we need a way to track its
   internal state (at least the useful part of it). To this end, we use an
   abstract state machine representing the possible configurations of the
@@ -63,6 +65,7 @@ defmodule PropCheck.StateM do
 
 
   ## The callback functions
+
   The following functions must be exported from the callback module
   implementing the abstract state machine:
 
@@ -74,6 +77,7 @@ defmodule PropCheck.StateM do
 
 
   ## The property used
+
   Each test consists of two phases:
 
    * As a first step, PropEr generates random symbolic command sequences
@@ -104,6 +108,7 @@ defmodule PropCheck.StateM do
   independently from previous ones.
 
   ## Parallel testing
+
   After ensuring that a system's behaviour can be described via an abstract
   state machine when commands are executed sequentially, it is possible to
   move to parallel testing. The same state machine can be used to generate
@@ -154,6 +159,7 @@ defmodule PropCheck.StateM do
   scheduler.
 
   ## Acknowldgements
+
   Very much of the documentation is immediately taken from the
   `proper` API documentation.
   """

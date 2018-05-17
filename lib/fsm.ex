@@ -18,6 +18,7 @@ defmodule PropCheck.FSM do
   use the  <a href="#functions">API functions </a> of `PropCheck.FSM`.
 
   ## The states of the finite state machine
+
   Following the convention used in `gen_fsm behaviour`, the state is
   separated into types `t:state_name/0` and some
   `t:state_data/0`. `state_name` is used to denote a state
@@ -34,6 +35,7 @@ defmodule PropCheck.FSM do
   `state_data` can be an arbitrary term, but is usually a record.
 
   ## Transitions between states
+
   A transition `t:transition/0` is represented as a tuple
   `{target_state, {:call, m, f, a}}`. This means that performing the specified
   symbolic call at the current state of the fsm will lead to `target_state`.
@@ -41,6 +43,7 @@ defmodule PropCheck.FSM do
   does not change the current state of the fsm.
 
   ## The callback functions
+
   The following functions must be exported from the callback module
   implementing the finite state machine:
 
@@ -79,6 +82,7 @@ defmodule PropCheck.FSM do
     has similar beaviour to `state_name/1`, described above.
 
   ## The property used
+
   This is an example of a property that can be used to test a
   finite state machine specification. It expects a `cleanup` function
   that takes care of removing all artifacts created during tests to
