@@ -89,7 +89,7 @@ defmodule PropCheck.Properties do
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
         result = PropCheck.check(p, counter_example, [:long_result] ++opts)
-        if result == false, do: counter_example, else: result
+        if result == false, do: {counter_example, :rerun_failed}, else: result
     end
     |> handle_check_results(name, should_fail)
   end
@@ -117,6 +117,18 @@ defmodule PropCheck.Properties do
           message: """
           Property #{mfa_to_string name} failed. Counter-Example is:
           #{inspect counter_example, pretty: true}
+          """,
+              expr: nil]
+      {counter_example, :rerun_failed} when is_list(counter_example) ->
+        CounterStrike.add_counter_example(name, counter_example)
+        raise ExUnit.AssertionError, [
+          message: """
+          Property #{mfa_to_string name} failed. Counter-Example is:
+          #{inspect counter_example, pretty: true}
+
+          Consider running `mix propcheck.clean` if a bug in a generator was identified
+          and fixed. PropCheck cannot identify changes to generators. See
+          https://github.com/alfert/propcheck/issues/30 for more details.
           """,
               expr: nil]
     end
