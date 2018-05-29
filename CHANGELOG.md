@@ -1,5 +1,10 @@
 # PropCheck Changelog
 
+## 1.06
+* added a hint about stored counterexamples for users, thanks to https://github.com/evnu
+* Corrected formatting of markdown for documentation, thanks to https://github.com/zamith
+
+
 ## 1.0.5
 * Allows to use `ExUnit` assertions as boolean conditions, thanks to https://github.com/evnu
 * `let` and `let_shrink` allow more than two parameters, thanks to https://github.com/BinaryNoggin
