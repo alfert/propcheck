@@ -37,6 +37,9 @@ defmodule PropCheck.Properties do
   the `--stale` option of `ExUnit` to reduce the amount of tests and properties
   while fixing the code tested by a property.
 
+  After a property was ran successfully against a previous counter example, PropCheck will
+  run the property again to check if other counter examples can be found.
+
   """
   defmacro property(name, opts \\ [:quiet], var \\ quote(do: _), do: p_block) do
       block = quote do
@@ -85,14 +88,21 @@ defmodule PropCheck.Properties do
       :others ->
         # since the tag is set, we execute everything. You can limit
         # the amount of checks by using either --stale or --only failing_prop
-        PropCheck.quickcheck(p, [:long_result] ++opts)
+        qc(p, opts)
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
         result = PropCheck.check(p, counter_example, [:long_result] ++opts)
-        if result == false, do: {counter_example, :rerun_failed}, else: result
+        with true <- result do
+          qc(p, opts)
+        else
+          false -> {:rerun_failed, counter_example}
+          e = {:error, _} -> e
+        end
     end
     |> handle_check_results(name, should_fail)
   end
+
+  defp qc(p, opts), do: PropCheck.quickcheck(p, [:long_result] ++ opts)
 
   # Handles the result of executing quick check or a re-check of a counter example.
   # In this method a new found counter example is added to `CounterStrike`.
