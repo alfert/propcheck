@@ -1,6 +1,9 @@
 # PropCheck Changelog
 
-## 1.06
+## 1.0.6
+* After a counter example is resolved, the entire property is run again to
+  ensure that no other counter examples exist. Thanks to https://github.com/evnu
+* tabs vs whitespace corrected for test cases, thanks to https://github.com/ryanwinchester
 * added a hint about stored counterexamples for users, thanks to https://github.com/evnu
 * Corrected formatting of markdown for documentation, thanks to https://github.com/zamith
 
