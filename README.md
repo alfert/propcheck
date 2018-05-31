@@ -48,20 +48,27 @@ independent from the build environment.
 
 The guides for PropEr are an essential set of documents to make full use of `PropCheck`
 
-* http://proper.softlab.ntua.gr/index.html
-* http://proper.softlab.ntua.gr/Tutorials/
+* [PropEr Home Page](http://proper.softlab.ntua.gr/index.html)
+* [PropEr Tutorials](http://proper.softlab.ntua.gr/Tutorials/)
 
 Elixir versions of most of PropEr's tutorial material can be found in the
-test folder (https://github.com/alfert/propcheck/tree/master/test).
+[test folder on GitHub](https://github.com/alfert/propcheck/tree/master/test).
 
 Jesper Andersen and Robert Aloi blog about their thoughts and experience on
 using QuickCheck which are (mostly) directly transferable to PropCheck (with
 the notable exception of concurrency and the new state machine DSL from
 QuickCheck with the possibility to add requirement tags):
 
-* [QuickCheck Advice](https://medium.com/@jlouis666/quickcheck-advice-c357efb4e7e6#.b9wpla7oi)
-* [Breaking Erlang Maps (4 part series)](https://medium.com/@jlouis666/breaking-erlang-maps-4-4ebc3c64068c#.4d61kua92)
-* http://roberto-aloi.com/erlang/notes-on-erlang-quickcheck
+* [Jesper Andersen's QuickCheck Advice](https://medium.com/@jlouis666/quickcheck-advice-c357efb4e7e6#.b9wpla7oi)
+* [Jesper Andersen's Breaking Erlang Maps (4 part series)](https://medium.com/@jlouis666/breaking-erlang-maps-4-4ebc3c64068c#.4d61kua92)
+* [Roberto Aloi's Notes on Erlang Quickcheck](http://roberto-aloi.com/erlang/notes-on-erlang-quickcheck)
+
+A rather new introductory resource is Fred Hebert's
+[PropEr Testing](http://propertesting.com). It is again concerned with
+Erlang,  it is very well written and translates easily into Elixir (beside
+that at least a reading knowledge of Erlang is extremely helpful to survive
+in the BEAM ecosystem ...). Eventually I will port some of the examples to
+Elixir and PropCheck and certainly like to accept PRs. 
 
 ## What is not available
 
@@ -96,4 +103,7 @@ Please use the GitHub issue tracker for
 PropCheck is provided under the GPL 3 License due to its intimate use of PropEr
 (which is licensed under GPL 3). Since PropCheck is a testing framework, the
 system under test is not infected by the CopyLeft of GPL, since PropCheck is only
-a tool used temporarily during development of the system under test.
+a tool used temporarily during development of the system under test. At least,
+if you don't distribute your system as a binary. Another friendly approach is
+to have the tests in a separate project, such that the tests are a real client
+of the system under test.
