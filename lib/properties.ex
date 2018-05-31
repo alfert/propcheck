@@ -85,12 +85,12 @@ defmodule PropCheck.Properties do
       :others ->
         # since the tag is set, we execute everything. You can limit
         # the amount of checks by using either --stale or --only failing_prop
-        PropCheck.quickcheck(p, [:long_result] ++opts)
+        qc(p, opts)
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
         result = PropCheck.check(p, counter_example, [:long_result] ++opts)
         with true <- result do
-            PropCheck.quickcheck(p, [:long_result] ++ opts)
+          qc(p, opts)
         else
           false -> {:rerun_failed, counter_example}
           e = {:error, _} -> e
@@ -98,6 +98,8 @@ defmodule PropCheck.Properties do
     end
     |> handle_check_results(name, should_fail)
   end
+
+  defp qc(p, opts), do: PropCheck.quickcheck(p, [:long_result] ++ opts)
 
   # Handles the result of executing quick check or a re-check of a counter example.
   # In this method a new found counter example is added to `CounterStrike`.
