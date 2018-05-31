@@ -312,13 +312,11 @@ defmodule PropCheck.StateM.DSL do
   end
 
   # TODO: How is this function to be defined?
-  defp is_valid(mod, initial_state, cmds) do
+  defp is_valid(_mod, _initial_state, _cmds) do
     true
   end
 
-  @doc """
-  The internally used recursive generator for the command list
-  """
+  # The internally used recursive generator for the command list
   @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: PropCheck.BasicTypes.type
   defp gen_cmd_list(0, _cmd_list, _mod, _state, _step_counter), do: exactly([])
   defp gen_cmd_list(size, cmd_list, mod, state, step_counter) do
@@ -405,11 +403,6 @@ defmodule PropCheck.StateM.DSL do
     apply(mod, next_fun, [state, args, result])
   end
 
-  @spec check_preconditions([{state_t, symbolic_call}]) :: boolean
-  defp check_preconditions(list) do
-    Enum.all?(list, fn {state, call} -> check_precondition(state, call) end)
-  end
-
   @spec check_precondition(state_t, symbolic_call) :: boolean
   defp check_precondition(state, {:call, mod, f, args}) do
     pre_fun = (Atom.to_string(f) <> "_pre") |> String.to_atom
@@ -436,10 +429,8 @@ defmodule PropCheck.StateM.DSL do
   end
 
 
-  @doc """
-  Detects alls commands within `mod_bin_code`, i.e. all functions with the
-  same prefix and a suffix `_command` or `_args` and a prefix `_next`.
-  """
+  # Detects alls commands within `mod_bin_code`, i.e. all functions with the
+  # same prefix and a suffix `_command` or `_args` and a prefix `_next`.
   @spec command_list(module, binary) :: [{:cmd, module, String.t, (state_t -> symbolic_call)}]
   defp command_list(mod, "") do
     mod
