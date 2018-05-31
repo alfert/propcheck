@@ -184,8 +184,8 @@ defmodule PropCheck.StateM.DSL do
   """
   @type symbolic_call :: {:call, module, atom, [any]}
   @typedoc """
-  A command is execution of a symblic command and storing its result
-  in a symbolic variable.
+  A value of type `command` denotes the execution of a symblic command and
+  storing its result in a symbolic variable.
   """
   @type command :: {:set, symbolic_var, symbolic_call}
   @typedoc """
