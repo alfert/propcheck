@@ -195,10 +195,10 @@ defmodule PropCheck.StateM.DSL do
   @type history_element :: {dynamic_state, symbolic_call}
   @typedoc """
   The result of the command execution. It contains either the state of the failing
-  pre- and postconditions, the exception values or - if everything is ok -
-  the state of the last commands.
+  precondition, the command's return value of the failing postcondition,
+  the exception values or `:ok` if everything is fine.
   """
-  @type result_t :: {:ok, any} | {:pre_condition, state_t} | {:post_condition, dynamic_state} |
+  @type result_t :: :ok | {:pre_condition, state_t} | {:post_condition, any} |
     {:exception, any}
   # the functional command generator type, which takes a state and creates
   # a data generator from it.
@@ -219,7 +219,7 @@ defmodule PropCheck.StateM.DSL do
   defstruct [
     history: [],
     state: nil,
-    result: {:ok, nil}
+    result: :ok 
   ]
 
   @doc """
@@ -392,8 +392,11 @@ defmodule PropCheck.StateM.DSL do
   end
 
   defp update_history(event = {s, _, r}, %__MODULE__{history: h}) do
-    {code, _result_value} = r
-    %__MODULE__{state: s, result: code, history: [event | h]}
+    result_value = case r do
+      {:ok, _} -> :ok
+      _ -> r
+    end
+    %__MODULE__{state: s, result: result_value, history: [event | h]}
   end
 
   @spec call_next_state(state_t, symbolic_call, any) :: state_t
