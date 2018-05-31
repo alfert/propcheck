@@ -37,6 +37,9 @@ defmodule PropCheck.Properties do
   the `--stale` option of `ExUnit` to reduce the amount of tests and properties
   while fixing the code tested by a property.
 
+  After a property was ran successfully against a previous counter example, PropCheck will
+  run the property again to check if other counter examples can be found.
+
   """
   defmacro property(name, opts \\ [:quiet], var \\ quote(do: _), do: p_block) do
       block = quote do
