@@ -123,7 +123,7 @@ defmodule PropCheck.Test.Cache.DSL do
 
   ###### Command: find
 
-  command :find do
+  defcommand :find do
     def impl(key), do: Cache.find(key)
     def args(_state), do: fixed_list([key()])
     def post(%__MODULE__{entries: l}, [key], res) do
@@ -138,7 +138,7 @@ defmodule PropCheck.Test.Cache.DSL do
     end
   end
 
-  command :cache do
+  defcommand :cache do
     # implement cache
     def impl(key, val), do: Cache.cache(key, val)
     # generator for args of cache
@@ -158,7 +158,7 @@ defmodule PropCheck.Test.Cache.DSL do
     end
   end
 
-  command :flush do
+  defcommand :flush do
     # implement flush
     def impl(), do: Cache.flush()
     # next state is: cache is empty

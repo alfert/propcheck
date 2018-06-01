@@ -25,10 +25,10 @@ defmodule PropCheck.StateM.DSL do
 
   A state machine acting as a model of the SUT can be defined by focussing on
   states or on transitions. We  focus here on the transitions. A transition is a
-  command calling the SUT. Thefore the main phrase of the DSL is the `command`
+  command calling the SUT. Thefore the main phrase of the DSL is the `defcommand`
   macro.
 
-      command :find do
+      defcommand :find do
         # define the rules for executing the find command here
       end
 
@@ -50,7 +50,7 @@ defmodule PropCheck.StateM.DSL do
   conversion of an `{:ok, value}` tuple to only `value` which can simplify
   working with `value`.
 
-      command :find do
+      defcommand :find do
         def impl(key), do: Cache.find(key)
         def args(_state), do: fixed_list([key()])
       end
@@ -63,7 +63,7 @@ defmodule PropCheck.StateM.DSL do
   default implementation and the reason why the precondition is missing
   in the test file.
 
-      command :find do
+      defcommand :find do
         def impl(key), do: Cache.find(key)
         def args(_state), do: fixed_list([key()])
         def pre(_state, [_key]}), do: true
@@ -78,7 +78,7 @@ defmodule PropCheck.StateM.DSL do
   state, nothing is to do. This is again the default implementation and thus
   dismissed in the test file.
 
-      command :find do
+      defcommand :find do
         def impl(key), do: Cache.find(key)
         def args(_state), do: fixed_list([key()])
         def pre(_state, [_key]}), do: true
@@ -94,7 +94,7 @@ defmodule PropCheck.StateM.DSL do
   that if we a return value of `{:ok, val}`, we then also find the value via
   the `key` in our list of `entries`.
 
-      command :find do
+      defcommand :find do
         def impl(key), do: Cache.find(key)
         def args(_state), do: fixed_list([key()])
         def pre(_state, [_key]}), do: true
@@ -208,8 +208,7 @@ defmodule PropCheck.StateM.DSL do
       # {:cmd, module, String.t, gen_fun_t}
   @typedoc """
   The combined result of the test. It contains the history of all executed commands,
-  the final state and the final result. Everything is fine, if `result` matches
-  the value `{:ok, _}`.
+  the final state and the final result. Everything is fine, if `result` is `:ok`.
   """
   @type t :: %__MODULE__{
     history: [history_element],
@@ -219,7 +218,7 @@ defmodule PropCheck.StateM.DSL do
   defstruct [
     history: [],
     state: nil,
-    result: :ok 
+    result: :ok
   ]
 
   @doc """
@@ -261,7 +260,7 @@ defmodule PropCheck.StateM.DSL do
   * if the system under test is in the correct state after the call
     (`post(old_state, arg_list, result) :: boolean`)
   """
-  defmacro command(name, do: block) do
+  defmacro defcommand(name, do: block) do
     pre  = String.to_atom("#{name}_pre")
     next = String.to_atom("#{name}_next")
     post = String.to_atom("#{name}_post")
