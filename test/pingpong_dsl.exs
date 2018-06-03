@@ -49,9 +49,12 @@ defmodule PropCheck.Test.PingPongDSL do
   @doc "initial model state of the state machine"
   def initial_state(), do: %__MODULE__{}
 
-  def weight(%__MODULE__{players: []}, :add_player), do: 1
-  def weight(%__MODULE__{players: []}, _), do: 0
-  def weight(_, _), do: 1
+  def weight(%__MODULE__{players: []}), do: [add_player: 1]
+  def weight(_), do:
+    [
+      add_player: 1, remove_player: 1, get_score: 1,
+      play_ping_pong: 1, play_tennis: 1, play_football: 1
+    ]
 
   #####################################################
   ##
