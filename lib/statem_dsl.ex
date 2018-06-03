@@ -228,8 +228,12 @@ defmodule PropCheck.StateM.DSL do
 
   @doc """
   The optional weights for the command generation. It takes the current
-  model state and the command name, returning the frequency of the
-  command as an positive integer value.
+  model state and returns a list of command/weight pairs. Commands,
+  which are not allowed in a specific state, should be ommitted, since
+  a frequency of `0` is not allowed. 
+
+      def weight(state), do: [x: 1, y: 1, a: 2, b: 2]
+
   """
   @callback weight(symbolic_state, command_name) :: pos_integer
   @optional_callbacks weight: 2
@@ -325,7 +329,7 @@ defmodule PropCheck.StateM.DSL do
     # |> fn l ->
     #   Logger.debug("gen_cmd_list: call list is #{inspect l}")
     #   l end.()
-    cmds = if :erlang.function_exported(mod, :weight, 2) do
+    cmds = if :erlang.function_exported(mod, :weight, 1) do
       freq_cmds(cmds_with_args, state, mod)
     else
       oneof(cmds_with_args)
@@ -342,12 +346,20 @@ defmodule PropCheck.StateM.DSL do
       end
   end
 
+  # takes the list of weighted commands and filters
+  # those from `cmd_list´ which have weights attached.
   defp freq_cmds(cmd_list, state, mod) do
-    cmd_list
-    |> Enum.map(fn c = {:call, _m, f, _a} ->
-      {mod.weight(state, f), c}
+    w_cmds = mod.weight(state)
+    w_cmds
+    |> Enum.map(fn {f, w} ->
+      {w, find_call(cmd_list, f)}
     end)
     |> frequency()
+  end
+
+  defp find_call(cmd_list, fun) do
+    Enum.find(cmd_list, fn {:call, _m, f, _a} ->
+      f == fun end)
   end
 
   @doc """
