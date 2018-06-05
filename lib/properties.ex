@@ -129,7 +129,7 @@ defmodule PropCheck.Properties do
           #{inspect counter_example, pretty: true}
           """,
               expr: nil]
-      {counter_example, :rerun_failed} when is_list(counter_example) ->
+      {:rerun_failed, counter_example} when is_list(counter_example) ->
         CounterStrike.add_counter_example(name, counter_example)
         raise ExUnit.AssertionError, [
           message: """
