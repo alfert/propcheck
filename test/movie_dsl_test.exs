@@ -86,10 +86,10 @@ defmodule PropCheck.Test.MoviesDSL do
   @movie_titles Keyword.keys(@available_movies) ++ [:titanic, :inception]
 
   @doc "generator for name"
-  def name(), do: elements @names
+  def name(), do: oneof @names
 
   @doc "generator for movies"
-  def movie(), do: elements @movie_titles
+  def movie(), do: oneof @movie_titles
 
 
   @doc """
@@ -99,7 +99,7 @@ defmodule PropCheck.Test.MoviesDSL do
   state machine.
   """
   def password(%__MODULE__{users: users}) do
-    elements users
+    oneof users
   end
 
   #########################################################################
@@ -163,7 +163,7 @@ defmodule PropCheck.Test.MoviesDSL do
   defcommand :return_dvd do
     def impl(passwd, movie), do: MovieServer.return_dvd(passwd, movie)
     def args(state) do
-      pm = let {p, m} <- elements(user_movie_pairs(state)) do
+      pm = let {p, m} <- oneof(user_movie_pairs(state)) do
         [p, m]
       end
       fixed_list(pm)
