@@ -117,9 +117,9 @@ defmodule PropCheck.Test.MoviesDSL do
   end
 
   defcommand :delete_account do
-    def args(state), do: fixed_list(password(state))
+    def args(state), do: fixed_list([password(state)])
     def impl(passwd), do: MovieServer.delete_account(passwd)
-    def pre(state, passwd), do:
+    def pre(state, [passwd]), do:
       Enum.member?(state.users, passwd)
     def next(s = %__MODULE__{rented: rented, users: users}, [passwd], _res) do
       case Map.get(rented, passwd) do
