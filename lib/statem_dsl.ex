@@ -455,21 +455,6 @@ defmodule PropCheck.StateM.DSL do
       {:cmd, mod, cmd, args}
     end)
   end
-  # defp command_list(mod, mod_bin_code) do
-  #   {^mod, all_funs} = all_functions(mod_bin_code)
-  #   cmd_impls = find_commands(mod_bin_code)
-  #
-  #   cmd_impls
-  #   |> Enum.map(fn {cmd, _arity} ->
-  #     if find_fun(all_funs, "_args", [1]) do
-  #       args_fun = fn state -> apply(mod, String.to_atom(cmd <> "_args"), [state]) end
-  #       args = gen_call(mod, String.to_atom(cmd), args_fun)
-  #       {:cmd, mod, cmd, args}
-  #     else
-  #       {:cmd, mod, cmd, & apply(mod, String.to_atom(cmd <> "_command"), &1)}
-  #     end
-  #   end)
-  # end
 
   # Generates a function, which expects a state to create the call tuple
   # with constants for module and function and an argument generator.
@@ -477,39 +462,8 @@ defmodule PropCheck.StateM.DSL do
     fn state ->  {:call, mod, fun, arg_fun.(state)} end
   end
 
-
-  # @spec find_fun([{String.t, arity}], String.t, [arity]) :: boolean
-  # defp find_fun(all, suffix, arities) do
-  #   all
-  #   |> Enum.find_index(fn {f, a} ->
-  #     a in arities and String.ends_with?(f, suffix)
-  #   end)
-  #   |> is_integer()
-  # end
-
   @spec find_commands(binary|module) :: [{String.t, arity}]
   defp find_commands(mod) when is_atom(mod), do:
     mod.__all_commands__() |> Enum.map(& ({&1, 0}))
-  # defp find_commands(mod_bin_code) do
-  #   {_mod, funs} = all_functions(mod_bin_code)
-  #
-  #   next_funs = funs
-  #   |> Stream.filter(fn {f, a} ->
-  #     String.ends_with?(f, "_next") and (a in [3,4]) end)
-  #   |> Stream.map(fn {f, _a} -> String.replace_suffix(f, "_next", "") end)
-  #   |> MapSet.new()
-  #
-  #   funs
-  #   |> Enum.filter(fn {f, _a} ->
-  #     MapSet.member?(next_funs, f)
-  #   end)
-  # end
-
-  # @spec all_functions(binary) :: {module, [{String.t, arity}]}
-  # defp all_functions(mod_bin_code) do
-  #   {:ok, {mod, [{:exports, functions}]}} = :beam_lib.chunks(mod_bin_code, [:exports])
-  #   funs = Enum.map(functions, fn {f, a} -> {Atom.to_string(f), a} end)
-  #   {mod, funs}
-  # end
 
 end
