@@ -140,7 +140,7 @@ defmodule PropCheck.Properties do
           and fixed. PropCheck cannot identify changes to generators. See
           https://github.com/alfert/propcheck/issues/30 for more details.
           """,
-              expr: nil]
+          expr: nil]
     end
   end
 
