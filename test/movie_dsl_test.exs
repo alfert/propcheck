@@ -19,18 +19,16 @@ defmodule PropCheck.Test.MoviesDSL do
   property "server works fine" do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
-        Logger.debug "Start another test"
         {:ok, _pid} = MovieServer.start_link()
-        Logger.debug "Fresh MovieSever is started."
         events = run_commands(cmds)
         MovieServer.stop
-        #IO.puts "Property finished. result is: #{inspect r}"
 
         (events.result == :ok)
         |> when_fail(
             IO.puts """
             History: #{inspect events.history, pretty: true}
             State: #{inspect events.state, pretty: true}
+            Env: #{inspect events.env, pretty: true}
             Result: #{inspect events.result, pretty: true}
             """)
         |> aggregate(command_names cmds)
