@@ -35,7 +35,6 @@ defmodule PropCheck.Test.MoviesDSL do
       end
     end
   end
-
   #########################################################################
   ### Model state
   #########################################################################
@@ -46,6 +45,18 @@ defmodule PropCheck.Test.MoviesDSL do
 
   @doc "Initialize the model"
   def initial_state(), do: %__MODULE__{}
+
+
+  #########################################################################
+  ### Test local preconditions, helpers and the like
+  #########################################################################
+
+  test "user_movie_pairs works with symb vars" do
+    s = %__MODULE__{rented: %{{:var, 1} => [:mary_poppins]}, users: [{:var, 1}]}
+    Logger.debug "test u_m_p: #{inspect s}"
+    assert [{{:var, 1}, :mary_poppins}] == user_movie_pairs(s)
+  end
+
 
   #########################################################################
   ### Weights of the commands
@@ -176,17 +187,14 @@ defmodule PropCheck.Test.MoviesDSL do
   defcommand :return_dvd do
     def impl(passwd, movie), do: MovieServer.return_dvd(passwd, movie)
     def args(state) do
+      # Logger.debug "return_dvd args: state.rented #{inspect state.rented}"
       pm = let {p, m} <- oneof(user_movie_pairs(state)) do
         [p, m]
       end
       fixed_list(pm)
     end
     @doc "Don't return movies, which are not rented"
-    def pre(state, [passwd, movie]) do
-      state.rented
-      |> Map.get(passwd, [])
-      |> Enum.member?(movie)
-    end
+    def pre(state, [passwd, movie]), do: movie_rented?(state, passwd, movie)
     def next(s = %__MODULE__{rented: rented}, [passwd, movie], _res) do
       %__MODULE__{s | rented: Map.update!(rented, passwd, &List.delete(&1, movie))}
     end
@@ -212,17 +220,15 @@ defmodule PropCheck.Test.MoviesDSL do
   # are some movies rented?
   @spec some_movies_rented?(t) :: boolean
   defp some_movies_rented?(%__MODULE__{rented: rented}) do
-    Logger.debug "some_movies_rented?: #{inspect rented}"
-    rented
+    result = rented
     |> Map.to_list()
     |> Enum.flat_map(fn {_k, v} -> v end)
     |> Enum.count() > 0
+    # Logger.debug "some_movies_rented?: #{inspect rented} = #{inspect result}"
+    result
   end
 
-  @spec user_movie_pairs(t) :: [{integer, atom}]
-  defp user_movie_pairs(%__MODULE__{rented: %{}}) do
-    raise "no movies rented. Argghh!"
-  end
+  @spec user_movie_pairs(t) :: [{integer | DSL.symbolic_var, atom}]
   defp user_movie_pairs(%__MODULE__{rented: rented}) do
     rented
     |> Map.to_list()
