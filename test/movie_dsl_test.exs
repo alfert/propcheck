@@ -120,8 +120,8 @@ defmodule PropCheck.Test.MoviesDSL do
     def pre(state, [passwd]), do:
       Enum.member?(state.users, passwd)
     def next(s = %__MODULE__{rented: rented, users: users}, [passwd], _res) do
-      case Map.get(rented, passwd) do
-        nil  -> %__MODULE__{
+      case Map.get(rented, passwd, []) do
+        []   -> %__MODULE__{
                   users: List.delete(users, passwd),
                   rented: Map.delete(rented, passwd)
                 }
@@ -129,8 +129,9 @@ defmodule PropCheck.Test.MoviesDSL do
       end
     end
     def post(%__MODULE__{rented: rented}, [passwd], result) do
-      case Map.get(rented, passwd) do
-        nil  -> result == :account_deleted
+      Logger.debug "post delete: passwd=#{inspect passwd}, result=#{inspect result}"
+      case Map.get(rented, passwd, []) do
+        []   -> result == :account_deleted
         _any -> result == :return_movies_first
       end
     end
