@@ -57,7 +57,7 @@ defmodule PropCheck.Test.MoviesDSL do
       create_account: 1, ask_for_popcorn: 1,
       delete_account: 1, rent_dvd: 1
     ]
-    if movies_rented?(s) do
+    if some_movies_rented?(s) do
        std_commands ++ [return_dvd: 1]
     else
       std_commands
@@ -144,6 +144,10 @@ defmodule PropCheck.Test.MoviesDSL do
   defcommand :rent_dvd do
     def args(state), do: fixed_list([password(state), movie()])
     def impl(passwd, movie), do: MovieServer.rent_dvd(passwd, movie)
+    def pre(state, [password, movie]) do
+      user_exists?(state, password) and
+        not movie_rented?(state, password, movie)
+    end
     def next(s = %__MODULE__{rented: rented}, [passwd, movie], _res) do
       case is_available(s, movie) do
         true  -> %__MODULE__{s | rented: Map.update(rented, passwd, [movie], &([movie | &1]))}
@@ -195,8 +199,8 @@ defmodule PropCheck.Test.MoviesDSL do
   end
 
   # are some movies rented?
-  @spec movies_rented?(t) :: boolean
-  defp movies_rented?(%__MODULE__{rented: rented}) do
+  @spec some_movies_rented?(t) :: boolean
+  defp some_movies_rented?(%__MODULE__{rented: rented}) do
     rented
     |> Map.values()
     |> Enum.count() > 0
@@ -209,6 +213,16 @@ defmodule PropCheck.Test.MoviesDSL do
     |> Enum.flat_map(fn {passwd, movies} ->
       Enum.map(movies, fn m -> {passwd, m} end)
     end)
+  end
+
+  defp user_exists?(%__MODULE__{users: users}, passwd) do
+    Enum.member?(users, passwd)
+  end
+
+  defp movie_rented?(%__MODULE__{rented: rented}, passwd, movie) do
+    rented
+    |> Map.get(passwd, [])
+    |> Enum.member?(movie)
   end
 
 end
