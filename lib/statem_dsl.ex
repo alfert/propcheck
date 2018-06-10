@@ -230,7 +230,7 @@ defmodule PropCheck.StateM.DSL do
   The optional weights for the command generation. It takes the current
   model state and returns a list of command/weight pairs. Commands,
   which are not allowed in a specific state, should be ommitted, since
-  a frequency of `0` is not allowed. 
+  a frequency of `0` is not allowed.
 
       def weight(state), do: [x: 1, y: 1, a: 2, b: 2]
 
@@ -324,16 +324,7 @@ defmodule PropCheck.StateM.DSL do
   defp gen_cmd_list(0, _cmd_list, _mod, _state, _step_counter), do: exactly([])
   defp gen_cmd_list(size, cmd_list, mod, state, step_counter) do
     # Logger.debug "gen_cmd_list: cmd_list = #{inspect cmd_list}"
-    cmds_with_args = cmd_list
-    |> Enum.map(fn {:cmd, _mod, _f, arg_fun} -> arg_fun.(state) end)
-    # |> fn l ->
-    #   Logger.debug("gen_cmd_list: call list is #{inspect l}")
-    #   l end.()
-    cmds = if :erlang.function_exported(mod, :weight, 1) do
-      freq_cmds(cmds_with_args, state, mod)
-    else
-      oneof(cmds_with_args)
-    end
+    cmds = create_cmds_with_args_in_state(cmd_list, mod, state)
 
     let call <-
       (such_that c <- cmds, when: check_precondition(state, c))
@@ -346,20 +337,34 @@ defmodule PropCheck.StateM.DSL do
       end
   end
 
-  # takes the list of weighted commands and filters
-  # those from `cmd_list´ which have weights attached.
-  defp freq_cmds(cmd_list, state, mod) do
-    w_cmds = mod.weight(state)
-    w_cmds
-    |> Enum.map(fn {f, w} ->
-      {w, find_call(cmd_list, f)}
-    end)
+  defp create_cmds_with_args_in_state(cmd_list, mod, state) do
+    # filter the cmds according to the weights callback (or allow all)
+    valid_cmds = if :erlang.function_exported(mod, :weight, 1) do
+      filter_freq_cmds(cmd_list, state, mod)
+    else
+      # the default frequency is unweighted commands is 1
+      Enum.map(cmd_list, fn c -> {1, c} end)
+    end
+    # generate the arguments and put them into the frequency generator
+    valid_cmds
+    |> Enum.map(fn {freq, {:cmd, _mod, _f, arg_fun}} -> {freq, arg_fun.(state)} end)
     |> frequency()
   end
 
+  # takes the list of weighted commands and filters
+  # those from `cmd_list´ which have weights attached.
+  defp filter_freq_cmds(cmd_list, state, mod) do
+    state
+    |> mod.weight()
+    |> Enum.map(fn {f, w} ->
+      {w, find_call(cmd_list, Atom.to_string(f))}
+    end)
+
+  end
+
   defp find_call(cmd_list, fun) do
-    Enum.find(cmd_list, fn {:call, _m, f, _a} ->
-      f == fun end)
+    cmd_list
+    |> Enum.find(fn {:cmd, _m, f, _a} -> f == fun end)
   end
 
   @doc """
