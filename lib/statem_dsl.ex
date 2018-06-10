@@ -208,17 +208,20 @@ defmodule PropCheck.StateM.DSL do
       # {:cmd, module, String.t, gen_fun_t}
   @typedoc """
   The combined result of the test. It contains the history of all executed commands,
-  the final state and the final result. Everything is fine, if `result` is `:ok`.
+  the final state, the final result and the environment, mapping symbolic
+  vars to their actual values. Everything is fine, if `result` is `:ok`.
   """
   @type t :: %__MODULE__{
     history: [history_element],
     state: state_t,
-    result: result_t
+    result: result_t,
+    env: %{}
   }
   defstruct [
     history: [],
     state: nil,
-    result: :ok
+    result: :ok,
+    env: %{}
   ]
 
   @doc """
@@ -373,30 +376,45 @@ defmodule PropCheck.StateM.DSL do
   Returns the result, the history and the final state of the model.
   """
   @spec run_commands([command]) :: t
-  def run_commands(commands) do
+  def run_commands(commands) when length(commands) > 0 do
+    Logger.debug "Run commands: #{inspect commands, pretty: true}"
+    {initial_state, _cmd} = hd(commands)
     commands
-    |> Enum.reduce(%__MODULE__{}, fn
+    |> Enum.reduce(new_state(initial_state), fn
       # do nothing if a failure occured
-      _cmd, acc = %__MODULE__{result: {r, _} } when r != :ok -> acc
+      _cmd, acc = %__MODULE__{result: {r, _} } when r != :ok ->
+        Logger.debug "Failed execution: r = #{inspect r}"
+        acc
       # execute the next command
       cmd, acc ->
         cmd
-        |> execute_cmd()
+        |> execute_cmd(acc)
         |> update_history(acc)
     end)
   end
 
-  @spec execute_cmd({state_t, command}) :: {state_t, symbolic_call, result_t}
-  defp execute_cmd({state, {:set, {:var, _}, c = {:call, m, f, args}}}) do
-    result = if check_precondition(state, c) do
+  @spec new_state(state_t) :: t
+  defp new_state(initial_state), do: %__MODULE__{state: initial_state}
+
+    @spec execute_cmd({state_t, command}, t) :: {state_t, symbolic_call, result_t}
+  defp execute_cmd({_, {:set, v = {:var, _}, sym_c = {:call, _m, _f, _args}}}, prop_state) do
+    # Logger.debug "execute_cmd: symb call: #{inspect sym_c}"
+    state = prop_state.state
+    # Logger.debug "execute_cmd: state = #{inspect state}"
+    replaced_call = replace_symb_vars(sym_c, prop_state.env)
+    # Logger.debug "execute_cmd: replaced vars: #{inspect replaced_call}"
+    result = if check_precondition(state, replaced_call) do
       try do
-        result = apply(m, f, args)
-        if check_postcondition(state, c, result) do
+        {:call, mod, fun, args} = replaced_call
+        result = apply(mod, fun, args)
+        if check_postcondition(state, replaced_call, result) do
           {:ok, result}
         else
           {:post_condition, result}
         end
-      rescue exc -> {:exception, exc}
+      rescue exc ->
+        Logger.error "Got exeception: #{inspect exc}"
+        {:exception, {exc, Exception.format_stacktrace()}}
       catch
         value -> {:exception, value}
         kind, value -> {:exception, {kind, value}}
@@ -404,15 +422,55 @@ defmodule PropCheck.StateM.DSL do
     else
       {:pre_condition, state}
     end
-    {state, c, result}
+    s = case result do
+      {:ok, r} ->
+        # Logger.debug "result is ok, calc next state from #{inspect state}"
+        # Logger.debug "replaced call is: #{inspect replaced_call}"
+        new_state = call_next_state(state, replaced_call, r)
+        # Logger.debug "new state is: #{inspect new_state}"
+        new_state
+      _ -> state
+    end
+    {s, replaced_call, {v, result}}
   end
 
-  defp update_history(event = {s, _, r}, %__MODULE__{history: h}) do
-    result_value = case r do
+  # replaces all symbolic variables of form `{:var, n}` with
+  # the value in `env` (i.e. mapping of symbolic vars to values)
+  defp replace_symb_vars({:call, m, f, args}, env) do
+    replaced_m = replace_symb_vars(m, env)
+    replaced_f = replace_symb_vars(f, env)
+    replaced_args = replace_symb_vars(args, env)
+    {:call, replaced_m, replaced_f, replaced_args}
+  end
+  defp replace_symb_vars(args, env) when is_list(args) do
+    Enum.map(args, &replace_symb_vars(&1, env))
+  end
+  defp replace_symb_vars(v = {:var, n}, env) when is_integer(n) do
+    case Map.get(env, v) do
+      nil ->
+        Logger.error "replace_symb_vars: unknown #{inspect v} in #{inspect env}"
+        v
+      value -> value
+    end
+  end
+  defp replace_symb_vars(value, _env), do: value
+
+  # updates the history and the environment
+  defp update_history(event = {s, _, {v, r}}, %__MODULE__{env: env, history: h}) do
+    result = case r do
       {:ok, _} -> :ok
       _ -> r
     end
-    %__MODULE__{state: s, result: result_value, history: [event | h]}
+    value = case r do
+      {:ok, val} -> val
+      _ -> r
+    end
+    h = %__MODULE__{state: s,
+      result: result,
+      history: [event | h],
+      env: Map.put(env, v, value)}
+    # Logger.debug "Updated history: #{inspect h, pretty: true}"
+    h
   end
 
   @spec call_next_state(state_t, symbolic_call, any) :: state_t
