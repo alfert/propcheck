@@ -16,7 +16,7 @@ defmodule PropCheck.Test.MoviesDSL do
   ### The properties
   #########################################################################
 
-  property "server works fine" do
+  property "server works fine", [:verbose] do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = MovieServer.start_link()
@@ -96,6 +96,9 @@ defmodule PropCheck.Test.MoviesDSL do
   therefore this has to be considered in designing the
   state machine.
   """
+  def password(%__MODULE__{users: []}) do
+    raise "No users available, what a mess!"
+  end
   def password(%__MODULE__{users: users}) do
     oneof users
   end
@@ -105,10 +108,15 @@ defmodule PropCheck.Test.MoviesDSL do
   #########################################################################
 
   defcommand :create_account do
-    def impl(name), do: MovieServer.create_account(name)
+    def impl(name) do
+      # Logger.info "Create account #{inspect name}"
+      MovieServer.create_account(name)
+    end
     def args(_state), do: fixed_list([name()])
-    def next(s = %__MODULE__{users: users}, _name, password), do:
+    def next(s = %__MODULE__{users: users}, _name, password) do
+      # Logger.info "created account for passwd #{inspect password}"
       %__MODULE__{s | users: [password | users]}
+    end
     def post(%__MODULE__{users: users}, _name, password), do:
       # the new user was not in the user db already
       not Enum.member?(users, password)
@@ -116,9 +124,11 @@ defmodule PropCheck.Test.MoviesDSL do
 
   defcommand :delete_account do
     def args(state), do: fixed_list([password(state)])
-    def impl(passwd), do: MovieServer.delete_account(passwd)
-    def pre(state, [passwd]), do:
-      Enum.member?(state.users, passwd)
+    def impl(passwd) do
+      # Logger.info "Delete account #{inspect passwd}"
+      MovieServer.delete_account(passwd)
+    end
+    def pre(state, [passwd]), do: user_exists?(state, passwd)
     def next(s = %__MODULE__{rented: rented, users: users}, [passwd], _res) do
       case Map.get(rented, passwd, []) do
         []   -> %__MODULE__{
@@ -129,7 +139,7 @@ defmodule PropCheck.Test.MoviesDSL do
       end
     end
     def post(%__MODULE__{rented: rented}, [passwd], result) do
-      Logger.debug "post delete: passwd=#{inspect passwd}, result=#{inspect result}"
+      # Logger.debug "post delete: passwd=#{inspect passwd}, result=#{inspect result}"
       case Map.get(rented, passwd, []) do
         []   -> result == :account_deleted
         _any -> result == :return_movies_first
@@ -202,12 +212,17 @@ defmodule PropCheck.Test.MoviesDSL do
   # are some movies rented?
   @spec some_movies_rented?(t) :: boolean
   defp some_movies_rented?(%__MODULE__{rented: rented}) do
+    Logger.debug "some_movies_rented?: #{inspect rented}"
     rented
-    |> Map.values()
+    |> Map.to_list()
+    |> Enum.flat_map(fn {_k, v} -> v end)
     |> Enum.count() > 0
   end
 
   @spec user_movie_pairs(t) :: [{integer, atom}]
+  defp user_movie_pairs(%__MODULE__{rented: %{}}) do
+    raise "no movies rented. Argghh!"
+  end
   defp user_movie_pairs(%__MODULE__{rented: rented}) do
     rented
     |> Map.to_list()
