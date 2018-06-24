@@ -54,7 +54,6 @@ defmodule PropCheck.Test.CounterDSL do
         Counter.stop()
 
         (events.result == :ok)
-        # |> fails()
         |> when_fail(
             IO.puts """
             History: #{inspect events.history, pretty: true}
@@ -64,9 +63,9 @@ defmodule PropCheck.Test.CounterDSL do
             """)
         |> aggregate(command_names cmds)
         |> measure("length of commands", length(cmds))
-
       end
     end
+    |> fails()
   end
   #########################################################################
   ### The model
