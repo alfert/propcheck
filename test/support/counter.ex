@@ -6,7 +6,7 @@ defmodule PropCheck.Test.Counter do
   a default of `:infinity`, i.e. no modulo division of the counter.
   """
 
-  use Agent
+  require Agent
   require Logger
   @type reset_t :: pos_integer | :infinity
 
