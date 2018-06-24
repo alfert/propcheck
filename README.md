@@ -102,7 +102,7 @@ Please use the GitHub issue tracker for
 
 PropCheck is provided under the GPL 3 License due to its intimate use of PropEr
 (which is licensed under GPL 3). In particular, PropEr's exclusion rule of
-open source software from copyleft applies here as well (see the discussion on GitHub https://github.com/proper-testing/proper/issues/29#issuecomment-4956226).
+open source software from copyleft applies here as well [as described in this discussion on GitHub](https://github.com/proper-testing/proper/issues/29#issuecomment-4956226).
 
 Personally, I would prefer to use the LPGL to differentiate between extending PropEr
 and PropCheck as GPL-licensed software and the use of PropEr/PropCheck, which would
