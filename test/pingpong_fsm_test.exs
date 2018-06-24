@@ -22,7 +22,6 @@ defmodule PropCheck.Test.PingPongFSM do
         {history, state, result} = r
         # {:ok, messages} = :sys.log(PingPongMaster, :get)
         PingPongMaster.stop
-        wait_for_master_to_stop()
         # Logger.info "Property finished. result is: #{inspect r}"
         # IO.puts "Property finished. result is: #{inspect r}"
         (result == :ok)
@@ -35,13 +34,6 @@ defmodule PropCheck.Test.PingPongFSM do
             """)
       end
     end)
-  end
-
-  defp wait_for_master_to_stop() do
-    ref = Process.monitor(PingPongMaster)
-    receive do
-      {:DOWN, ^ref, :process, _object, _reason} -> :ok
-    end
   end
 
   defp log_message(log_state, {:in, msg}, proc_state) do

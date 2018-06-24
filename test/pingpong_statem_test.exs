@@ -20,7 +20,6 @@ defmodule PropCheck.Test.PingPongStateM do
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         PingPongMaster.stop
-        wait_for_master_to_stop()
         #IO.puts "Property finished. result is: #{inspect r}"
         (result == :ok)
         |> when_fail(
@@ -34,18 +33,11 @@ defmodule PropCheck.Test.PingPongStateM do
     end)
   end
 
-  defp wait_for_master_to_stop() do
-    ref = Process.monitor(PingPongMaster)
-    receive do
-      {:DOWN, ^ref, :process, _object, _reason} -> :ok
-    end
-  end
-
-
   # ensure all player processes are dead
   defp kill_all_player_processes() do
     Process.registered
-    |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
+    |> Enum.filter(&(Atom.to_string(&1)
+    |> String.starts_with?("player_")))
     |> Enum.each(fn name ->
       # nice idea from José Valim: Monitor the process ...
       ref = Process.monitor(name)
@@ -80,7 +72,9 @@ defmodule PropCheck.Test.PingPongStateM do
   ##
   #####################################################
   @max_players 100
-  @players 1..@max_players |> Enum.map(&("player_#{&1}") |> String.to_atom)
+  @players 1..@max_players
+    |> Enum.map(&("player_#{&1}")
+    |> String.to_atom)
 
   def name(), do: elements @players
   def name(%__MODULE__{players: player_list}), do: elements player_list
