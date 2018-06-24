@@ -68,7 +68,7 @@ A rather new introductory resource is Fred Hebert's
 Erlang,  it is very well written and translates easily into Elixir (beside
 that at least a reading knowledge of Erlang is extremely helpful to survive
 in the BEAM ecosystem ...). Eventually I will port some of the examples to
-Elixir and PropCheck and certainly like to accept PRs. 
+Elixir and PropCheck and certainly like to accept PRs.
 
 ## What is not available
 
@@ -101,9 +101,23 @@ Please use the GitHub issue tracker for
 ## License
 
 PropCheck is provided under the GPL 3 License due to its intimate use of PropEr
-(which is licensed under GPL 3). Since PropCheck is a testing framework, the
+(which is licensed under GPL 3). In particular, PropEr's exclusion rule of
+open source software from copyleft applies here as well [as described in this discussion on GitHub](https://github.com/proper-testing/proper/issues/29#issuecomment-4956226).
+
+Personally, I would prefer to use the LPGL to differentiate between extending PropEr
+and PropCheck as GPL-licensed software and the use of PropEr/PropCheck, which would
+not be infected by GPL's copyleft. But as long as PropEr does not change its
+licensing, we have no options. PropCheck is clearly an extension of PropEr, so it
+is derived work falling under GPL's copyleft. Using LGPL or any other license for
+PropCheck will not help, since GPL's copyleft overrules other licenses or result
+in an invalid or at least questionable licensing which does not help anybody.
+
+From my understanding of open source licenses as a legal amateur, the situation is
+currently as follows: Since PropCheck is a testing framework, the
 system under test is not infected by the CopyLeft of GPL, since PropCheck is only
 a tool used temporarily during development of the system under test. At least,
-if you don't distribute your system as a binary. Another friendly approach is
+if you don't distribute your system together with the test code and the test libs
+as a binary. Another friendly approach is
 to have the tests in a separate project, such that the tests are a real client
-of the system under test.
+of the system under test. But again, this is my personal take. In question, please
+consult a professional legal advisor.
