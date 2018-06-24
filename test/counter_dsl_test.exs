@@ -45,6 +45,29 @@ defmodule PropCheck.Test.CounterDSL do
       end
     end
   end
+
+  property "modulo counter does not increment inifinite times", [:verbose] do
+    forall cmds <- commands(__MODULE__) do
+      trap_exit do
+        {:ok, _pid} = Counter.start_link(5)
+        events = run_commands(cmds)
+        Counter.stop()
+
+        (events.result == :ok)
+        # |> fails()
+        |> when_fail(
+            IO.puts """
+            History: #{inspect events.history, pretty: true}
+            State: #{inspect events.state, pretty: true}
+            Env: #{inspect events.env, pretty: true}
+            Result: #{inspect events.result, pretty: true}
+            """)
+        |> aggregate(command_names cmds)
+        |> measure("length of commands", length(cmds))
+
+      end
+    end
+  end
   #########################################################################
   ### The model
   #########################################################################
