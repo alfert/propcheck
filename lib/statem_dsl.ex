@@ -317,10 +317,29 @@ defmodule PropCheck.StateM.DSL do
     such_that cmds <- gen_cmd, when: is_valid(mod, initial_state, cmds)
   end
 
-  # TODO: How is this function to be defined?
-  defp is_valid(_mod, _initial_state, _cmds) do
-    true
+  # Checks that the precondition holds, required for shrinking
+  defp is_valid(_mod, _initial_state, []), do: true
+  defp is_valid(mod, initial_state, cmds) do
+    # Logger.debug "is_valid: initial=#{inspect initial_state}"
+    # Logger.debug "is valid: cmds=#{inspect cmds, pretty: true}"
+    {first_state, _} = hd(cmds)
+    initial_state == mod.initial_state() and
+    initial_state == first_state and
+    is_valid(mod, initial_state, cmds, %{})
   end
+  defp is_valid(_mod, _state, [], _env), do: true
+  defp is_valid(m, state, [call | cmds], env) do
+    {_s, {:set, var, c}} = call
+    if check_precondition(state, c) do
+      replaced_call = replace_symb_vars(c, env)
+      # {:call, mod, fun, args} = replaced_call
+      next_state = call_next_state(state, replaced_call, var)
+      is_valid(m, next_state, cmds, Map.put(env, var, var))
+    else
+      false
+    end
+  end
+
 
   # The internally used recursive generator for the command list
   @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: PropCheck.BasicTypes.type
