@@ -46,7 +46,10 @@ defmodule PropCheck.Test.CounterDSL do
     end
   end
 
+  @tag will_fail: true
   property "modulo counter does not increment inifinite times", [:verbose] do
+    Logger.error "This property will fail in order to show the shrinking results"
+    Logger.error "It is excluded from the set of test for the travis build"
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = Counter.start_link(5)
@@ -65,7 +68,6 @@ defmodule PropCheck.Test.CounterDSL do
         |> measure("length of commands", length(cmds))
       end
     end
-    |> fails()
   end
   #########################################################################
   ### The model
