@@ -340,6 +340,23 @@ defmodule PropCheck.StateM.DSL do
     end
   end
 
+  # This is directly taken from PropEr's proper_statem.erl
+  # However the shorter gen_commands does already shrinking.
+  # This private function is unused but implemented in case
+  # that the shrinking of gen_commands proves not good enough.
+  @spec gen_commands_as_proper(module, [cmd_t]) :: :proper_types.type()
+  @doc false
+  defp gen_commands_as_proper(mod, cmd_list) do
+    initial_state = mod.initial_state()
+    such_that (cmds <-
+      let (list <-
+        sized(size, noshrink(gen_cmd_list(size, cmd_list, mod, initial_state, 1)))) do
+          shrink_list(list)
+        end),
+      when: is_valid(mod, initial_state, cmds)
+  end
+
+
 
   # The internally used recursive generator for the command list
   @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: PropCheck.BasicTypes.type
