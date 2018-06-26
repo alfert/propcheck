@@ -91,6 +91,8 @@ defmodule PropCheck.Test.CounterDSL do
     def impl(), do: Counter.get()
     def args(_), do: fixed_list([])
     def post(_state, [], res), do: res >= 0
+    def pre(:init, _, _), do: false
+    def pre(_, _, _), do: true
   end
 
   defcommand :clear do
