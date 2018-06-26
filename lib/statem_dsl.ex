@@ -354,7 +354,7 @@ defmodule PropCheck.StateM.DSL do
         gen_result = {:var, step_counter}
         gen_state = call_next_state(state, call, gen_result)
         let cmds <- gen_cmd_list(size - 1, cmd_list, mod, gen_state, step_counter + 1) do
-          [{state, {:set, gen_result, call}} | cmds]
+          shrink_list([{state, {:set, gen_result, call}} | cmds])
         end
       end
   end
