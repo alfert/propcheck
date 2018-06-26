@@ -8,7 +8,7 @@ defmodule PropCheck.Test.Cache.DSL do
   use PropCheck.StateM.DSL
 
   alias PropCheck.Test.Cache
-  require Logger
+  # require Logger
 
 
   @cache_size 10
@@ -130,7 +130,7 @@ defmodule PropCheck.Test.Cache.DSL do
           {^key, val} -> res == {:ok, val}
       end
       if not ret_val do
-        Logger.error "Postcondition failed: find(#{inspect key}) resulted in #{inspect res})"
+        # Logger.error "Postcondition failed: find(#{inspect key}) resulted in #{inspect res})"
       end
       ret_val
     end
