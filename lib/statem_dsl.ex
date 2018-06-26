@@ -377,13 +377,13 @@ defmodule PropCheck.StateM.DSL do
   """
   @spec run_commands([command]) :: t
   def run_commands(commands) when length(commands) > 0 do
-    Logger.debug "Run commands: #{inspect commands, pretty: true}"
+    # Logger.debug "Run commands: #{inspect commands, pretty: true}"
     {initial_state, _cmd} = hd(commands)
     commands
     |> Enum.reduce(new_state(initial_state), fn
       # do nothing if a failure occured
       _cmd, acc = %__MODULE__{result: {r, _} } when r != :ok ->
-        Logger.debug "Failed execution: r = #{inspect r}"
+        # Logger.debug "Failed execution: r = #{inspect r}"
         acc
       # execute the next command
       cmd, acc ->
