@@ -342,11 +342,14 @@ defmodule PropCheck.StateM.DSL do
 
   # This is directly taken from PropEr's proper_statem.erl
   # However the shorter gen_commands does already shrinking.
-  # This private function is unused but implemented in case
-  # that the shrinking of gen_commands proves not good enough.
+  # This function is unused but implemented in case
+  # that the shrinking of gen_commands proves to be not good enough. It should
+  # be a private function but since it is unsused, this generates a warning
+  # resulting in an error during CI build. For this
+  # specific reason the function is public.
   @spec gen_commands_as_proper(module, [cmd_t]) :: :proper_types.type()
   @doc false
-  defp gen_commands_as_proper(mod, cmd_list) do
+  def gen_commands_as_proper(mod, cmd_list) do
     initial_state = mod.initial_state()
     such_that (cmds <-
       let (list <-
