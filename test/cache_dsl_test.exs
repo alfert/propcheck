@@ -123,7 +123,7 @@ defmodule PropCheck.Test.Cache.DSL do
 
   defcommand :find do
     def impl(key), do: Cache.find(key)
-    def args(_state), do: fixed_list([key()])
+    def args(_state), do: [key()]
     def post(%__MODULE__{entries: l}, [key], res) do
       ret_val = case List.keyfind(l, key, 0, false) do
           false       -> res == {:error, :not_found}
@@ -140,7 +140,7 @@ defmodule PropCheck.Test.Cache.DSL do
     # implement cache
     def impl(key, val), do: Cache.cache(key, val)
     # generator for args of cache
-    def args(_state), do: fixed_list([key(), val()])
+    def args(_state), do: [key(), val()]
     # what is the next state?
     def next(s=%__MODULE__{entries: l, count: n, max: m}, [k, v], _res) do
       case List.keyfind(l, k, 0, false) do

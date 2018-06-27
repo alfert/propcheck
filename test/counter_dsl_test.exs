@@ -97,7 +97,7 @@ defmodule PropCheck.Test.CounterDSL do
 
   defcommand :inc do
     def impl(), do: Counter.inc()
-    def args(_), do: fixed_list([])
+    def args(_), do: []
     def next(:init, [], _res), do: :zero
     def next(:zero, [], _res), do: :one
     def next(:one, [], _res), do: :one
@@ -108,7 +108,7 @@ defmodule PropCheck.Test.CounterDSL do
 
   defcommand :get do
     def impl(), do: Counter.get()
-    def args(_), do: fixed_list([])
+    def args(_), do: []
     def post(_state, [], res), do: res >= 0
     def pre(:init, _, _), do: false
     def pre(_, _, _), do: true
@@ -116,7 +116,7 @@ defmodule PropCheck.Test.CounterDSL do
 
   defcommand :clear do
     def impl(), do: Counter.clear()
-    def args(_), do: fixed_list([])
+    def args(_), do: []
     def next(_state, [], _res), do: :zero
     def post(_state, [], res), do: res == :ok
   end
