@@ -37,6 +37,7 @@ defmodule PropCheck.Test.Cache.DSL do
     end
   end
 
+  @tag will_fail: true
   property "run the misconfigured sequential cache", [:verbose] do
     forall cmds <- commands(__MODULE__) do
       # Logger.debug "Commands to run: #{inspect cmds}"
