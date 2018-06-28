@@ -6,7 +6,15 @@ defmodule PropCheck.StateM.DSL do
 
   ## The basic approach
   Property based testing of stateful systems is different from ordinary property
-  based testing and has two phases. In phase 1, the generators create a list of
+  based testing. Instead of testing operations and their effects on the
+  datastructure directly, we construct a model of system and generate a sequecence
+  of commands operating on both, the model and the system. Then we check, that
+  after each command step, the system has evolved accordingly to the model.
+  This is same idea which is used in model checking and is sometimes called
+  a bismulation.
+
+  After defining a model, we two phases during executing the property.
+  In phase 1, the generators create a list of
   (symbolic) commands including their parameters to be run against the system under test
   (SUT). A state machine guides the generation of commands.
 
@@ -258,14 +266,24 @@ defmodule PropCheck.StateM.DSL do
 
   @known_suffixes [:pre, :post, :args, :next]
   @doc """
-  Defines a new command of the model. Inside the command, local functions
-  define
-  * how the command is executed (`impl(...)`)
-  * how the arguments in the current model state are generated (`args(state)`
+  Defines a new command of the model.
+
+  Inside the command, local functions define
+  * how the command is executed (`impl(...)`). This is required.
+  * how the arguments in the current model state are generated (`args(state)`.
+    The default is the empty list of arguments.
   * if the command is allowed in the current model state (`pre(state, arg_list) :: bolean`)
-  * what the next state of the model is after the call (`next(old_state, arg_list, result) :: new_state`)
+    This is `true` per default.
+  * what the next state of the model is after the call (`next(old_state, arg_list, result) :: new_state`).
+    The default implementaiton does not change the model state, sufficient for
+    queries.
   * if the system under test is in the correct state after the call
-    (`post(old_state, arg_list, result) :: boolean`)
+    (`post(old_state, arg_list, result) :: boolean`). This is `true` in the
+    default implementation.  
+
+  These local functions inside the macro are effectively callbacks to guide and
+  evolve the model state.
+
   """
   defmacro defcommand(name, do: block) do
     pre  = String.to_atom("#{name}_pre")
