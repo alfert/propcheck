@@ -61,7 +61,7 @@ defmodule PropCheck.Test.Cache.DSL do
         |> Enum.map(fn model -> model.count end)
         |> Enum.max())
     end
-    |> fails
+    # |> fails
   end
 
   ###########################
