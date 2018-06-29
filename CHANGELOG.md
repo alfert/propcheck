@@ -1,5 +1,11 @@
 # PropCheck Changelog
 
+## 1.0.7 / 1.1.0
+* New command oriented DSL for testing stateful systems, inspired by EQC and
+  discussions about stateful testing in StreamData
+* More details regarding licensing 
+* Rerun of properties fixed
+
 ## 1.0.6
 * After a counter example is resolved, the entire property is run again to
   ensure that no other counter examples exist. Thanks to https://github.com/evnu

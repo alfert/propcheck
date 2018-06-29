@@ -8,7 +8,7 @@ defmodule PropCheck.Test.Cache.DSL do
   use PropCheck.StateM.DSL
 
   alias PropCheck.Test.Cache
-  require Logger
+  # require Logger
 
 
   @cache_size 10
@@ -37,6 +37,7 @@ defmodule PropCheck.Test.Cache.DSL do
     end
   end
 
+  @tag will_fail: true
   property "run the misconfigured sequential cache", [:verbose] do
     forall cmds <- commands(__MODULE__) do
       # Logger.debug "Commands to run: #{inspect cmds}"
@@ -61,7 +62,7 @@ defmodule PropCheck.Test.Cache.DSL do
         |> Enum.map(fn model -> model.count end)
         |> Enum.max())
     end
-    |> fails
+    # |> fails
   end
 
   ###########################
@@ -123,14 +124,14 @@ defmodule PropCheck.Test.Cache.DSL do
 
   defcommand :find do
     def impl(key), do: Cache.find(key)
-    def args(_state), do: fixed_list([key()])
+    def args(_state), do: [key()]
     def post(%__MODULE__{entries: l}, [key], res) do
       ret_val = case List.keyfind(l, key, 0, false) do
           false       -> res == {:error, :not_found}
           {^key, val} -> res == {:ok, val}
       end
       if not ret_val do
-        Logger.error "Postcondition failed: find(#{inspect key}) resulted in #{inspect res})"
+        # Logger.error "Postcondition failed: find(#{inspect key}) resulted in #{inspect res})"
       end
       ret_val
     end
@@ -140,7 +141,7 @@ defmodule PropCheck.Test.Cache.DSL do
     # implement cache
     def impl(key, val), do: Cache.cache(key, val)
     # generator for args of cache
-    def args(_state), do: fixed_list([key(), val()])
+    def args(_state), do: [key(), val()]
     # what is the next state?
     def next(s=%__MODULE__{entries: l, count: n, max: m}, [k, v], _res) do
       case List.keyfind(l, k, 0, false) do
