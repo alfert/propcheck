@@ -134,7 +134,7 @@ defmodule PropCheck.Test.Movies do
     case Map.get(rented, password, []) do
       []    -> %__MODULE__{s | users: List.delete(users, password),
                                rented: rented |> Map.delete(password)}
-      _any  ->	s
+      _any  -> s
     end
   end
   def next_state(s = %__MODULE__{rented: rented}, _v, {:call, _, :rent_dvd, [password, movie]}) do
