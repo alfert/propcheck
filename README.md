@@ -12,7 +12,7 @@ To use PropCheck with your project, add it as a dependency to `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:propcheck, "~> 1.0", only: :test}
+    {:propcheck, "~> 1.1.0-rc1", only: :test}
   ]
 end
 ```
@@ -23,12 +23,17 @@ Relevant changes are document in the [Changelog](CHANGELOG.html).
 
 ## Basic Usage and Build Configuration
 PropCheck allows to define properties, which automatically executed via `ExUnit`
-when running `mix test`. Details about the `property` macro are found in
-`PropCheck.Properties`,  details about how to specify the property conditions
-are documented in `PropCheck`, the basic data generators are found in
-`PropCheck.BasicTypes`.
+when running `mix test`. You find relevant information here:
 
-For PropCheck, there is only one configuration option. All found counter examples
+* details about the `property` macro are found in `PropCheck.Properties`,  
+* details about how to specify the property conditions are documented in
+  `PropCheck`,
+* the basic data generators are found in `PropCheck.BasicTypes`,
+* for property testing of state-based systems take a loot at `PropCheck.StateM.DSL`
+  for the new DSL (since Propcheck 1.1.0-rc1), which is a layer on top of
+  `PropCheck.StateM`.
+
+For PropCheck, there is only one configuration option. All counter examples found
 are stored in a file, the name of which is configurable in `mix.exs` as part of
 the `project` configuration:
 
@@ -41,7 +46,7 @@ end
 ```
 
 Per default, the counter examples file is stored in the build directory (`_build`),
-independent from the build environment.
+independent from the build environment, in the file `propcheck.ctex`.
 
 
 ## Links to other documentation
@@ -63,8 +68,11 @@ QuickCheck with the possibility to add requirement tags):
 * [Jesper Andersen's Breaking Erlang Maps (4 part series)](https://medium.com/@jlouis666/breaking-erlang-maps-4-4ebc3c64068c#.4d61kua92)
 * [Roberto Aloi's Notes on Erlang Quickcheck](http://roberto-aloi.com/erlang/notes-on-erlang-quickcheck)
 
-A rather new introductory resource is Fred Hebert's
-[PropEr Testing](http://propertesting.com). It is again concerned with
+A rather new introductory resource is
+
+* [Fred Hebert's PropEr Testing](http://propertesting.com).
+
+It is again concerned with
 Erlang,  it is very well written and translates easily into Elixir (beside
 that at least a reading knowledge of Erlang is extremely helpful to survive
 in the BEAM ecosystem ...). Eventually I will port some of the examples to
@@ -74,10 +82,11 @@ Elixir and PropCheck and certainly like to accept PRs.
 
 PropCheck does not support PropEr's capability to derive automatically type
 generators from type specifications. This is due to some shortcomings in PropEr,
-where the specification analysis and the type server storing type definitions
-circular dependency and at certain situation attempt to parse the Erlang source
+where the specification analysis in certain situation attempt to parse the Erlang source
 code of the file with the type specification. Apparently, this fails if the
-types are specified in an Elixir source file. Effectively this means, that to
+types are specified in an Elixir source file.
+
+Effectively this means, that to
 to support this feature from Elixir, the type management system in PropEr needs
 to be rewritten completely. Jesper Andersen argues in his aforementioned blog
 post eloquently that automatically derived type generators are not needed, even
