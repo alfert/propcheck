@@ -286,30 +286,30 @@ defmodule PropCheck do
     @type output_fun :: ((charlist,[term]) -> :ok)
     @type size :: non_neg_integer
     @type user_opt :: :quiet
-    		  | :verbose
-    		  | {:to_file, :io.device}
-    		  | {:on_output, output_fun}
-    		  | :long_result
-    		  | {:numtests, pos_integer}
-    		  | pos_integer
-    		  | {:start_size, size}
-    		  | {:max_size, size}
-    		  | {:max_shrinks, non_neg_integer}
-    		  | :noshrink
-    		  | {:constraint_tries, pos_integer}
-    		  | :fails
-    		  | :any_to_integer
-    		  | {:spec_timeout, timeout}
-    		  | {:skip_mfas, [mfa]}
-    		  | {:false_positive_mfas, false_positive_mfas}
+      | :verbose
+      | {:to_file, :io.device}
+      | {:on_output, output_fun}
+      | :long_result
+      | {:numtests, pos_integer}
+      | pos_integer
+      | {:start_size, size}
+      | {:max_size, size}
+      | {:max_shrinks, non_neg_integer}
+      | :noshrink
+      | {:constraint_tries, pos_integer}
+      | :fails
+      | :any_to_integer
+      | {:spec_timeout, timeout}
+      | {:skip_mfas, [mfa]}
+      | {:false_positive_mfas, false_positive_mfas}
     @type false_positive_mfas ::
       ((mfa(), args::[any], {:fail, result::any} |
         {:error | :exit | :throw, reason::any}) -> boolean) | :undefined
     @type error :: {:error, error_reason}
     @type error_reason :: :arity_limit | :cant_generate | :cant_satisfy
-    		      | :non_boolean_result | :rejected | :too_many_instances
-    		      | :type_mismatch | :wrong_type | {:typeserver, any}
-    		      | {:unexpected, any} | {:unrecognized_option, any}
+          | :non_boolean_result | :rejected | :too_many_instances
+          | :type_mismatch | :wrong_type | {:typeserver, any}
+          | {:unexpected, any} | {:unrecognized_option, any}
 
     @type long_result :: :true | counterexample | error
     @type short_result :: boolean | error
@@ -320,8 +320,7 @@ defmodule PropCheck do
 
     @type sample :: [any]
     @type title :: charlist | atom | String.t
-    @type stats_printer :: ((sample) -> :ok)
-    		       | ((sample, output_fun) -> :ok)
+    @type stats_printer :: ((sample) -> :ok) | ((sample, output_fun) -> :ok)
 
     @doc """
     A property that should hold for all values generated.

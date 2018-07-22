@@ -8,7 +8,7 @@ defmodule PropCheck.Test.MasterStateM do
   use PropCheck.StateM
   use ExUnit.Case
   alias PropCheck.Test.PingPongMaster
-	@moduletag capture_log: true
+  @moduletag capture_log: true
 
   property "master works fine", [:verbose, max_size: 100] do
     forall cmds <- more_commands(100, commands(__MODULE__)) do

@@ -3,7 +3,7 @@ defmodule PropCheck.Test.MovieServer do
   use GenServer
 
   @movies [{:mary_poppins,3}, {:finding_nemo,2}, {:despicable_me,3},
-		 {:toy_story,5}, {:the_lion_king,2}, {:peter_pan,1}]
+      {:toy_story,5}, {:the_lion_king,2}, {:peter_pan,1}]
 
   @type name :: atom
   @type movie :: atom
@@ -96,7 +96,7 @@ defmodule PropCheck.Test.MovieServer do
         [{_, n}] ->
           new_rented = rented |> List.delete(movie)
           :ets.update_element(u, pass, {3,new_rented})
-			    :ets.update_element(m, movie, {2, n+1})
+          :ets.update_element(m, movie, {2, n+1})
           new_rented
       end
     end

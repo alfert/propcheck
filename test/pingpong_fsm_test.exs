@@ -9,7 +9,7 @@ defmodule PropCheck.Test.PingPongFSM do
   use ExUnit.Case
   alias PropCheck.Test.PingPongMaster
   require Logger
-	@moduletag capture_log: true
+  @moduletag capture_log: true
 
   property "ping-pong FSM works properly", [:quiet] do
     numtests(1_000, forall cmds in commands(__MODULE__) do
