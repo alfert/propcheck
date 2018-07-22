@@ -11,7 +11,7 @@
 
 # CONFIGURATION
 old="1.1.0-rc1"
-new="1.1.0-dev"
+new="1.1.0"
 # do not set any variables beyond this line
 
 # check that old and new version differ
