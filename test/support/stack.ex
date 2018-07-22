@@ -1,6 +1,5 @@
 defmodule PropCheck.Test.Stack do
-	#use PropCheck.Properties
-	use PropCheck.TypeGen
+
 
 	@opaque stack(t) :: [t] # when t: var
 
