@@ -279,7 +279,7 @@ defmodule PropCheck do
         end
     end
 
-    @opaque counterexample :: :proper.counterexample
+    @type counterexample :: :proper.counterexample
     @type user_opts :: [user_opt] | user_opt
     @type outer_test :: :proper.outer_test
     @type test :: :proper.test
