@@ -200,20 +200,21 @@ defmodule PropCheck.StateM.DSL do
   The history of command execution in phase 2 is stored in a history element.
   It contains the current dynamic state and the call to be made.
   """
-  @type history_element :: {dynamic_state, symbolic_call}
+  @type history_element :: {state_t, symbolic_call, result_t} # {dynamic_state, symbolic_call}
   @typedoc """
   The result of the command execution. It contains either the state of the failing
   precondition, the command's return value of the failing postcondition,
   the exception values or `:ok` if everything is fine.
   """
   @type result_t :: :ok | {:pre_condition, state_t} | {:post_condition, any} |
-    {:exception, any}
+    {:exception, any} | {:ok, any}
   # the functional command generator type, which takes a state and creates
   # a data generator from it.
-  @typep gen_fun_t :: (state_t -> PropCheck.BasicTypes.type)
+  @typep gen_fun_t :: (state_t -> BasicTypes.type)
   @typep cmd_t ::
       {:args, module, String.t, atom, gen_fun_t} # |
       # {:cmd, module, String.t, gen_fun_t}
+  @typep environment :: %{symbolic_var: any}
   @typedoc """
   The combined result of the test. It contains the history of all executed commands,
   the final state, the final result and the environment, mapping symbolic
@@ -223,7 +224,7 @@ defmodule PropCheck.StateM.DSL do
     history: [history_element],
     state: state_t,
     result: result_t,
-    env: %{}
+    env: environment
   }
   defstruct [
     history: [],
@@ -438,10 +439,12 @@ defmodule PropCheck.StateM.DSL do
     {initial_state, _cmd} = hd(commands)
     commands
     |> Enum.reduce(new_state(initial_state), fn
+
       # do nothing if a failure occured
       _cmd, acc = %__MODULE__{result: {r, _} } when r != :ok ->
         # Logger.debug "Failed execution: r = #{inspect r}"
         acc
+
       # execute the next command
       cmd, acc ->
         cmd
