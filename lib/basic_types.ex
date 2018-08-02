@@ -23,7 +23,7 @@ defmodule PropCheck.BasicTypes do
   @type ext_float :: float | :inf
 
   @typedoc "The internal representation of a basic type in PropEr"
-  @opaque raw_type :: :proper_types.raw_type
+  @type raw_type :: :proper_types.raw_type
 
   @typedoc "The internal representation of a type in PropEr"
   @type type :: :proper_types.type
