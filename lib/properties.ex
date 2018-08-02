@@ -144,7 +144,7 @@ defmodule PropCheck.Properties do
     end
   end
 
-  defp mfa_to_string({m, f, []}) do
+  defp mfa_to_string({m, f, _}) do
     "#{m}.#{f}()"
   end
 
