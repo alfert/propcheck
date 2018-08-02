@@ -279,7 +279,7 @@ defmodule PropCheck.StateM.DSL do
     queries.
   * if the system under test is in the correct state after the call
     (`post(old_state, arg_list, result) :: boolean`). This is `true` in the
-    default implementation.  
+    default implementation.
 
   These local functions inside the macro are effectively callbacks to guide and
   evolve the model state.
@@ -321,14 +321,14 @@ defmodule PropCheck.StateM.DSL do
   @doc """
   Generates the command list for the given module
   """
-  @spec commands(module) :: :proper_types.type()
+  @spec commands(module) :: BasicTypes.type()
   def commands(mod) do
     cmd_list = command_list(mod, "")
     # Logger.debug "commands:  cmd_list = #{inspect cmd_list}"
     gen_commands(mod, cmd_list)
   end
 
-  @spec gen_commands(module, [cmd_t]) :: :proper_types.type()
+  @spec gen_commands(module, [cmd_t]) :: BasicTypes.type()
   defp gen_commands(mod, cmd_list) do
     initial_state = mod.initial_state()
     gen_cmd = sized(size, gen_cmd_list(size, cmd_list, mod, initial_state, 1))
@@ -365,7 +365,7 @@ defmodule PropCheck.StateM.DSL do
   # be a private function but since it is unsused, this generates a warning
   # resulting in an error during CI build. For this
   # specific reason the function is public.
-  @spec gen_commands_as_proper(module, [cmd_t]) :: :proper_types.type()
+  @spec gen_commands_as_proper(module, [cmd_t]) :: BasicTypes.type()
   @doc false
   def gen_commands_as_proper(mod, cmd_list) do
     initial_state = mod.initial_state()
