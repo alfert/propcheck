@@ -26,7 +26,7 @@ defmodule PropCheck.BasicTypes do
   @opaque raw_type :: :proper_types.raw_type
 
   @typedoc "The internal representation of a type in PropEr"
-  @opaque type :: type
+  @type type :: :proper_types.type
 
   @type frequency :: pos_integer
 
