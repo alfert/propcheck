@@ -214,7 +214,7 @@ defmodule PropCheck.StateM.DSL do
   @typep cmd_t ::
       {:args, module, String.t, atom, gen_fun_t} # |
       # {:cmd, module, String.t, gen_fun_t}
-  @typep environment :: %{symbolic_var: any}
+  @typep environment :: %{required(symbolic_var) => any}
 
   @typedoc """
   The combined result of the test. It contains the history of all executed commands,
@@ -338,6 +338,7 @@ defmodule PropCheck.StateM.DSL do
   end
 
   # Checks that the precondition holds, required for shrinking
+  @spec is_valid(module, state_t, [BasicTypes.type]) :: boolean
   defp is_valid(_mod, _initial_state, []), do: true
   defp is_valid(mod, initial_state, cmds) do
     # Logger.debug "is_valid: initial=#{inspect initial_state}"
@@ -347,6 +348,7 @@ defmodule PropCheck.StateM.DSL do
     initial_state == first_state and
     is_valid(mod, initial_state, cmds, %{})
   end
+  @spec is_valid(module, state_t, [BasicTypes.type], environment) :: boolean
   defp is_valid(_mod, _state, [], _env), do: true
   defp is_valid(m, state, [call | cmds], env) do
     {_s, {:set, var, c}} = call
@@ -476,6 +478,7 @@ defmodule PropCheck.StateM.DSL do
 
   # replaces all symbolic variables of form `{:var, n}` with
   # the value in `env` (i.e. mapping of symbolic vars to values)
+  @spec replace_symb_vars(symbolic_call | symbolic_var | [symbolic_call | symbolic_var] | any, environment) :: symbolic_call
   defp replace_symb_vars({:call, m, f, args}, env) do
     replaced_m = replace_symb_vars(m, env)
     replaced_f = replace_symb_vars(f, env)
