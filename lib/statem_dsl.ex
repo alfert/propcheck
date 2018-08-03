@@ -433,7 +433,7 @@ defmodule PropCheck.StateM.DSL do
     end)
   end
 
-  @spec new_state(state_t) :: t
+  @spec new_state(state_t) :: %__MODULE__{}
   defp new_state(initial_state), do: %__MODULE__{state: initial_state}
 
   @spec execute_cmd(state_t, t) :: history_event
