@@ -200,7 +200,7 @@ defmodule PropCheck.StateM.DSL do
   The history of command execution in phase 2 is stored in a history element.
   It contains the current dynamic state and the call to be made.
   """
-  @type history_element :: {state_t, symbolic_call, result_t} # {dynamic_state, symbolic_call}
+  @type history_event :: {state_t, symbolic_call, {any, result_t}}
   @typedoc """
   The result of the command execution. It contains either the state of the failing
   precondition, the command's return value of the failing postcondition,
@@ -215,13 +215,14 @@ defmodule PropCheck.StateM.DSL do
       {:args, module, String.t, atom, gen_fun_t} # |
       # {:cmd, module, String.t, gen_fun_t}
   @typep environment :: %{symbolic_var: any}
+
   @typedoc """
   The combined result of the test. It contains the history of all executed commands,
   the final state, the final result and the environment, mapping symbolic
   vars to their actual values. Everything is fine, if `result` is `:ok`.
   """
   @type t :: %__MODULE__{
-    history: [history_element],
+    history: [history_event],
     state: state_t,
     result: result_t,
     env: environment
@@ -435,7 +436,7 @@ defmodule PropCheck.StateM.DSL do
   @spec new_state(state_t) :: t
   defp new_state(initial_state), do: %__MODULE__{state: initial_state}
 
-    @spec execute_cmd({state_t, command}, t) :: {state_t, symbolic_call, result_t}
+  @spec execute_cmd(state_t, t) :: history_event
   defp execute_cmd({_, {:set, v = {:var, _}, sym_c = {:call, _m, _f, _args}}}, prop_state) do
     # Logger.debug "execute_cmd: symb call: #{inspect sym_c}"
     state = prop_state.state
@@ -495,6 +496,7 @@ defmodule PropCheck.StateM.DSL do
   defp replace_symb_vars(value, _env), do: value
 
   # updates the history and the environment
+  @spec update_history(history_event, %__MODULE__{}) ::  %__MODULE__{}
   defp update_history(event = {s, _, {v, r}}, %__MODULE__{env: env, history: h}) do
     result = case r do
       {:ok, _} -> :ok
