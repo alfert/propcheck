@@ -202,6 +202,10 @@ defmodule PropCheck.StateM.DSL do
   """
   @type history_event :: {state_t, symbolic_call, {any, result_t}}
   @typedoc """
+  The sequence of calls consists of state and symbolic calls.
+  """
+  @type state_call :: {dynamic_state, command}
+  @typedoc """
   The result of the command execution. It contains either the state of the failing
   precondition, the command's return value of the failing postcondition,
   the exception values or `:ok` if everything is fine.
@@ -438,7 +442,7 @@ defmodule PropCheck.StateM.DSL do
   @spec new_state(state_t) :: %__MODULE__{}
   defp new_state(initial_state), do: %__MODULE__{state: initial_state}
 
-  @spec execute_cmd(state_t, t) :: history_event
+  @spec execute_cmd(state_call, t) :: history_event
   defp execute_cmd({_, {:set, v = {:var, _}, sym_c = {:call, _m, _f, _args}}}, prop_state) do
     # Logger.debug "execute_cmd: symb call: #{inspect sym_c}"
     state = prop_state.state
