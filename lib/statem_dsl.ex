@@ -359,29 +359,8 @@ defmodule PropCheck.StateM.DSL do
     end
   end
 
-  # This is directly taken from PropEr's proper_statem.erl
-  # However the shorter gen_commands does already shrinking.
-  # This function is unused but implemented in case
-  # that the shrinking of gen_commands proves to be not good enough. It should
-  # be a private function but since it is unsused, this generates a warning
-  # resulting in an error during CI build. For this
-  # specific reason the function is public.
-  @spec gen_commands_as_proper(module, [cmd_t]) :: BasicTypes.type()
-  @doc false
-  def gen_commands_as_proper(mod, cmd_list) do
-    initial_state = mod.initial_state()
-    such_that (cmds <-
-      let (list <-
-        sized(size, noshrink(gen_cmd_list(size, cmd_list, mod, initial_state, 1)))) do
-          shrink_list(list)
-        end),
-      when: is_valid(mod, initial_state, cmds)
-  end
-
-
-
   # The internally used recursive generator for the command list
-  @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: PropCheck.BasicTypes.type
+  @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: BasicTypes.type
   defp gen_cmd_list(0, _cmd_list, _mod, _state, _step_counter), do: exactly([])
   defp gen_cmd_list(size, cmd_list, mod, state, step_counter) do
     # Logger.debug "gen_cmd_list: cmd_list = #{inspect cmd_list}"
