@@ -504,12 +504,12 @@ defmodule PropCheck.StateM.DSL do
       {:ok, val} -> val
       _ -> r
     end
-    h = %__MODULE__{state: s,
+    new_h = %__MODULE__{state: s,
       result: result,
       history: [event | h],
       env: Map.put(env, v, value)}
     # Logger.debug "Updated history: #{inspect h, pretty: true}"
-    h
+    new_h
   end
 
   @spec call_next_state(state_t, symbolic_call, any) :: state_t
