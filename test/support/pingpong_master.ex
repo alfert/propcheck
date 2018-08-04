@@ -60,7 +60,7 @@ defmodule PropCheck.Test.PingPongMaster do
           ping(name)
       {:tennis, from}   -> send(from, :maybe_later)
       {:football, from} -> send(from, :no_way)
-      msg -> Logger.error "Player #{inspect name} got invalid message #{inspect msg}".
+      msg -> Logger.error "Player #{inspect name} got invalid message #{inspect msg}"
         exit(:kill)
     end
     # Logger.debug "Player #{inspect name} is recursive"

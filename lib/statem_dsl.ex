@@ -200,30 +200,36 @@ defmodule PropCheck.StateM.DSL do
   The history of command execution in phase 2 is stored in a history element.
   It contains the current dynamic state and the call to be made.
   """
-  @type history_element :: {dynamic_state, symbolic_call}
+  @type history_event :: {state_t, symbolic_call, {any, result_t}}
+  @typedoc """
+  The sequence of calls consists of state and symbolic calls.
+  """
+  @type state_call :: {dynamic_state, command}
   @typedoc """
   The result of the command execution. It contains either the state of the failing
   precondition, the command's return value of the failing postcondition,
   the exception values or `:ok` if everything is fine.
   """
   @type result_t :: :ok | {:pre_condition, state_t} | {:post_condition, any} |
-    {:exception, any}
+    {:exception, any} | {:ok, any}
   # the functional command generator type, which takes a state and creates
   # a data generator from it.
-  @typep gen_fun_t :: (state_t -> PropCheck.BasicTypes.type)
+  @typep gen_fun_t :: (state_t -> BasicTypes.type)
   @typep cmd_t ::
       {:args, module, String.t, atom, gen_fun_t} # |
       # {:cmd, module, String.t, gen_fun_t}
+  @typep environment :: %{required(symbolic_var) => any}
+
   @typedoc """
   The combined result of the test. It contains the history of all executed commands,
   the final state, the final result and the environment, mapping symbolic
   vars to their actual values. Everything is fine, if `result` is `:ok`.
   """
   @type t :: %__MODULE__{
-    history: [history_element],
+    history: [history_event],
     state: state_t,
     result: result_t,
-    env: %{}
+    env: environment
   }
   defstruct [
     history: [],
@@ -279,7 +285,7 @@ defmodule PropCheck.StateM.DSL do
     queries.
   * if the system under test is in the correct state after the call
     (`post(old_state, arg_list, result) :: boolean`). This is `true` in the
-    default implementation.  
+    default implementation.
 
   These local functions inside the macro are effectively callbacks to guide and
   evolve the model state.
@@ -321,14 +327,14 @@ defmodule PropCheck.StateM.DSL do
   @doc """
   Generates the command list for the given module
   """
-  @spec commands(module) :: :proper_types.type()
+  @spec commands(module) :: BasicTypes.type()
   def commands(mod) do
     cmd_list = command_list(mod, "")
     # Logger.debug "commands:  cmd_list = #{inspect cmd_list}"
     gen_commands(mod, cmd_list)
   end
 
-  @spec gen_commands(module, [cmd_t]) :: :proper_types.type()
+  @spec gen_commands(module, [cmd_t]) :: BasicTypes.type()
   defp gen_commands(mod, cmd_list) do
     initial_state = mod.initial_state()
     gen_cmd = sized(size, gen_cmd_list(size, cmd_list, mod, initial_state, 1))
@@ -336,6 +342,7 @@ defmodule PropCheck.StateM.DSL do
   end
 
   # Checks that the precondition holds, required for shrinking
+  @spec is_valid(module, state_t, [BasicTypes.type]) :: boolean
   defp is_valid(_mod, _initial_state, []), do: true
   defp is_valid(mod, initial_state, cmds) do
     # Logger.debug "is_valid: initial=#{inspect initial_state}"
@@ -345,6 +352,7 @@ defmodule PropCheck.StateM.DSL do
     initial_state == first_state and
     is_valid(mod, initial_state, cmds, %{})
   end
+  @spec is_valid(module, state_t, [BasicTypes.type], environment) :: boolean
   defp is_valid(_mod, _state, [], _env), do: true
   defp is_valid(m, state, [call | cmds], env) do
     {_s, {:set, var, c}} = call
@@ -358,29 +366,8 @@ defmodule PropCheck.StateM.DSL do
     end
   end
 
-  # This is directly taken from PropEr's proper_statem.erl
-  # However the shorter gen_commands does already shrinking.
-  # This function is unused but implemented in case
-  # that the shrinking of gen_commands proves to be not good enough. It should
-  # be a private function but since it is unsused, this generates a warning
-  # resulting in an error during CI build. For this
-  # specific reason the function is public.
-  @spec gen_commands_as_proper(module, [cmd_t]) :: :proper_types.type()
-  @doc false
-  def gen_commands_as_proper(mod, cmd_list) do
-    initial_state = mod.initial_state()
-    such_that (cmds <-
-      let (list <-
-        sized(size, noshrink(gen_cmd_list(size, cmd_list, mod, initial_state, 1)))) do
-          shrink_list(list)
-        end),
-      when: is_valid(mod, initial_state, cmds)
-  end
-
-
-
   # The internally used recursive generator for the command list
-  @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: PropCheck.BasicTypes.type
+  @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: BasicTypes.type
   defp gen_cmd_list(0, _cmd_list, _mod, _state, _step_counter), do: exactly([])
   defp gen_cmd_list(size, cmd_list, mod, state, step_counter) do
     # Logger.debug "gen_cmd_list: cmd_list = #{inspect cmd_list}"
@@ -438,10 +425,12 @@ defmodule PropCheck.StateM.DSL do
     {initial_state, _cmd} = hd(commands)
     commands
     |> Enum.reduce(new_state(initial_state), fn
+
       # do nothing if a failure occured
       _cmd, acc = %__MODULE__{result: {r, _} } when r != :ok ->
         # Logger.debug "Failed execution: r = #{inspect r}"
         acc
+
       # execute the next command
       cmd, acc ->
         cmd
@@ -450,10 +439,10 @@ defmodule PropCheck.StateM.DSL do
     end)
   end
 
-  @spec new_state(state_t) :: t
+  @spec new_state(state_t) :: %__MODULE__{}
   defp new_state(initial_state), do: %__MODULE__{state: initial_state}
 
-    @spec execute_cmd({state_t, command}, t) :: {state_t, symbolic_call, result_t}
+  @spec execute_cmd(state_call, t) :: history_event
   defp execute_cmd({_, {:set, v = {:var, _}, sym_c = {:call, _m, _f, _args}}}, prop_state) do
     # Logger.debug "execute_cmd: symb call: #{inspect sym_c}"
     state = prop_state.state
@@ -493,6 +482,7 @@ defmodule PropCheck.StateM.DSL do
 
   # replaces all symbolic variables of form `{:var, n}` with
   # the value in `env` (i.e. mapping of symbolic vars to values)
+  @spec replace_symb_vars(symbolic_call | symbolic_var | [symbolic_call | symbolic_var] | any, environment) :: symbolic_call
   defp replace_symb_vars({:call, m, f, args}, env) do
     replaced_m = replace_symb_vars(m, env)
     replaced_f = replace_symb_vars(f, env)
@@ -513,6 +503,7 @@ defmodule PropCheck.StateM.DSL do
   defp replace_symb_vars(value, _env), do: value
 
   # updates the history and the environment
+  @spec update_history(history_event, %__MODULE__{}) ::  %__MODULE__{}
   defp update_history(event = {s, _, {v, r}}, %__MODULE__{env: env, history: h}) do
     result = case r do
       {:ok, _} -> :ok
@@ -522,12 +513,12 @@ defmodule PropCheck.StateM.DSL do
       {:ok, val} -> val
       _ -> r
     end
-    h = %__MODULE__{state: s,
+    new_h = %__MODULE__{state: s,
       result: result,
       history: [event | h],
       env: Map.put(env, v, value)}
     # Logger.debug "Updated history: #{inspect h, pretty: true}"
-    h
+    new_h
   end
 
   @spec call_next_state(state_t, symbolic_call, any) :: state_t
