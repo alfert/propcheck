@@ -1,12 +1,13 @@
 # PropCheck Changelog
 
-## 1.0.7 / 1.1.0
+## 1.1.0
 * New command oriented DSL for testing stateful systems, inspired by EQC and
   discussions about stateful testing in StreamData
 * More details regarding licensing
 * Rerun of properties fixed
+* Better and corrected type specs, compatible with dialyxir 1.0.0(-rc*)
 * Old modules for automatic type generators removed. They were never completed and
-  since 2016 no longer part of the API (before release 0.0.1).
+  since 2016 no longer part of the API (i.e. even before release 0.0.1).
 
 ## 1.0.6
 * After a counter example is resolved, the entire property is run again to

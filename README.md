@@ -12,7 +12,7 @@ To use PropCheck with your project, add it as a dependency to `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:propcheck, "~> 1.1.0-rc1", only: :test}
+    {:propcheck, "~> 1.1.0", only: :test}
   ]
 end
 ```
