@@ -134,10 +134,8 @@ defmodule PropCheck.StateM.DSL do
   in function `weight/2`, taking the current model state and the command to be
   generated. The return value is an integer defining the frequency. In our cache
   example we want three times more `find` than other commands:
-
-      def weight(_state, :find),  do: 1
-      def weight(_state, :cache), do: 3
-      def weight(_state, :flush), do: 1
+  
+      def weight(_state), do: %{find: 1, cache: 3, flush: 1}
 
   ## The property to test
   The property to test the stateful system is for all systems more or less
