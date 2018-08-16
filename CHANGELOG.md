@@ -1,5 +1,9 @@
 # PropCheck Changelog
 
+## 1.1.1
+* the weight callback for the DSL was incorrectly specified and documented. Thanks
+  to https://github.com/adkron 
+
 ## 1.1.0
 * New command oriented DSL for testing stateful systems, inspired by EQC and
   discussions about stateful testing in StreamData
