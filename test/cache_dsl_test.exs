@@ -117,7 +117,7 @@ defmodule PropCheck.Test.Cache.DSL do
 
   ##################
   # The command weight distribution
-  def weight(_state), do: [find: 1, cache: 3, flush: 1]
+  def weight(_state), do: %{find: 1, cache: 3, flush: 1}
 
 
   ###### Command: find
