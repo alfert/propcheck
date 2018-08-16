@@ -92,8 +92,8 @@ defmodule PropCheck.Test.CounterDSL do
 
   def initial_state(), do: :init
 
-  def weight(:init), do: [inc: 1, clear: 1]
-  def weight(_), do: [get: 1, inc: 2, clear: 1]
+  def weight(:init), do: %{inc: 1, clear: 1}
+  def weight(_), do: %{get: 1, inc: 2, clear: 1}
 
   defcommand :inc do
     def impl(), do: Counter.inc()

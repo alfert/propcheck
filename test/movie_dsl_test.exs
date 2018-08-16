@@ -62,14 +62,15 @@ defmodule PropCheck.Test.MoviesDSL do
   ### Weights of the commands
   #########################################################################
   def weight(%__MODULE__{users: []}), do:
-    [create_account: 1, ask_for_popcorn: 1]
+    %{create_account: 1, ask_for_popcorn: 1}
   def weight(s) do
-    std_commands = [
+    std_commands = %{
       create_account: 1, ask_for_popcorn: 1,
       delete_account: 1, rent_dvd: 1
-    ]
+    }
     if some_movies_rented?(s) do
-       std_commands ++ [return_dvd: 1]
+       std_commands
+       |> Map.put(:return_dvd, 1)
     else
       std_commands
     end
