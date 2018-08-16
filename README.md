@@ -20,7 +20,7 @@ end
 
 ## Changes
 
-Relevant changes are document in the [Changelog](CHANGELOG.html).
+Relevant changes are documented in the [Changelog](CHANGELOG.html).
 
 ## Basic Usage and Build Configuration
 PropCheck allows to define properties, which automatically executed via `ExUnit`
@@ -69,9 +69,10 @@ QuickCheck with the possibility to add requirement tags):
 * [Jesper Andersen's Breaking Erlang Maps (4 part series)](https://medium.com/@jlouis666/breaking-erlang-maps-4-4ebc3c64068c#.4d61kua92)
 * [Roberto Aloi's Notes on Erlang Quickcheck](http://roberto-aloi.com/erlang/notes-on-erlang-quickcheck)
 
-A rather new introductory resource is
+Rather new introductory resource are
 
-* [Fred Hebert's PropEr Testing](http://propertesting.com).
+* [Fred Hebert's PropEr Testing](http://propertesting.com) and
+* Fred Hebert's book [Property-Based Testing With PropEr, Erlang and Elixir](https://pragprog.com/book/fhproper/property-based-testing-with-proper-erlang-and-elixir)
 
 It is again concerned with
 Erlang,  it is very well written and translates easily into Elixir (beside
