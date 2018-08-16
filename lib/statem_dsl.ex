@@ -23,7 +23,7 @@ defmodule PropCheck.StateM.DSL do
   detected, then the command sequence is shrunk towards a shorter sequence
   serving then as counter examples.
 
-  This appraoch works exactly the same as with `PropCheck.StateM` and
+  This approach works exactly the same as with `PropCheck.StateM` and
   `PropCheck.FSM`. The main difference is the API, grouping pre- and postconditions,
   state transitions and argument generators around the commands of the SUT. This
   leads towards more logical locality compared to the former implementations.
@@ -131,10 +131,10 @@ defmodule PropCheck.StateM.DSL do
   is not appropriate, e.g. in the cache example we expect many more `find` then
   `cache` commands. Therefore, commands can have a weight, which is technically used
   inside a `PropCheck.BasicTypes.frequency/1` generator. The weights are defined
-  in function `weight/2`, taking the current model state and the command to be
-  generated. The return value is an integer defining the frequency. In our cache
-  example we want three times more `find` than other commands:
-  
+  in callback function `c:weight/1`, taking the current model state and returning
+  a map of command and frequency pairs to be generated.  In our cache example
+  we want the `find` command to appear three times more often than other commands:
+
       def weight(_state), do: %{find: 1, cache: 3, flush: 1}
 
   ## The property to test
@@ -243,15 +243,15 @@ defmodule PropCheck.StateM.DSL do
 
   @doc """
   The optional weights for the command generation. It takes the current
-  model state and returns a list of command/weight pairs. Commands,
+  model state and returns a map of command/weight pairs. Commands,
   which are not allowed in a specific state, should be ommitted, since
   a frequency of `0` is not allowed.
 
-      def weight(state), do: [x: 1, y: 1, a: 2, b: 2]
+      def weight(state), do: %{x: 1, y: 1, a: 2, b: 2}
 
   """
-  @callback weight(symbolic_state, command_name) :: pos_integer
-  @optional_callbacks weight: 2
+  @callback weight(symbolic_state) :: %{required(command_name) => pos_integer}
+  @optional_callbacks weight: 1
 
 
   defmacro __using__(_options) do
