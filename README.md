@@ -5,6 +5,7 @@ based property testing framework in the spirit of QuickCheck. This project
 is derived from ProperEx, but is mostly completely rewritten.
 
 [![Build Status](https://travis-ci.org/alfert/propcheck.svg?branch=master)](https://travis-ci.org/alfert/propcheck)
+[![Hex.pm version](https://img.shields.io/hexpm/v/propcheck.svg)](https://hex.pm/packages/propcheck)
 
 ## Installation
 To use PropCheck with your project, add it as a dependency to `mix.exs`:
@@ -12,7 +13,7 @@ To use PropCheck with your project, add it as a dependency to `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:propcheck, "~> 1.1.0", only: :test}
+    {:propcheck, "~> 1.1", only: :test}
   ]
 end
 ```
