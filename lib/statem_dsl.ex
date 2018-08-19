@@ -7,7 +7,7 @@ defmodule PropCheck.StateM.DSL do
   ## The basic approach
   Property based testing of stateful systems is different from ordinary property
   based testing. Instead of testing operations and their effects on the
-  datastructure directly, we construct a model of system and generate a sequecence
+  datastructure directly, we construct a model of system and generate a sequence
   of commands operating on both, the model and the system. Then we check, that
   after each command step, the system has evolved accordingly to the model.
   This is same idea which is used in model checking and is sometimes called
