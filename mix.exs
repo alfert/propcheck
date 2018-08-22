@@ -68,7 +68,7 @@ defmodule Propcheck.Mixfile do
       {:coverex, "~> 1.4", only: :test},
       {:ex_doc, "~>0.16", only: :dev},
       {:earmark, ">= 0.2.1", only: :dev},
-      {:proper, "~> 1.2.0"}
+      {:proper, "~> 1.2"}
     ]
   end
 end
