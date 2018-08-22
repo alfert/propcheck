@@ -54,8 +54,8 @@ independent from the build environment, in the file `propcheck.ctex`.
 
 The guides for PropEr are an essential set of documents to make full use of `PropCheck`
 
-* [PropEr Home Page](http://proper.softlab.ntua.gr/index.html)
-* [PropEr Tutorials](http://proper.softlab.ntua.gr/Tutorials/)
+* [PropEr Home Page](https://proper-testing.github.io/index.html
+* [PropEr Tutorials](https://proper-testing.github.io/tutorials.html)
 
 Elixir versions of most of PropEr's tutorial material can be found in the
 [test folder on GitHub](https://github.com/alfert/propcheck/tree/master/test).
@@ -101,6 +101,8 @@ generated automatically.
 PropCheck has only very limited support for parallel testing since it introduces
 no new features for concurrency compared to PropEr.
 
+The new feature Targeted Property-Based Testing (TPBT) of PropEr 1.3 is not yet available,
+also any new generators from PropEr 1.3
 
 ## Contributing
 
