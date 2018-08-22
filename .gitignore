@@ -5,3 +5,5 @@ erl_crash.dump
 *.ez
 /cover
 counterexamples.dets
+/.elixir_ls
+
