@@ -1,5 +1,9 @@
 # PropCheck Changelog
 
+## 1.1.2
+* Proper v1.3.0 is supported (effectively, all 1.x versions are allowed
+  as depedency)
+
 ## 1.1.1
 * the weight callback for the DSL was incorrectly specified and documented. Thanks
   to https://github.com/adkron 
