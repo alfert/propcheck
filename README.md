@@ -54,7 +54,7 @@ independent from the build environment, in the file `propcheck.ctex`.
 
 The guides for PropEr are an essential set of documents to make full use of `PropCheck`
 
-* [PropEr Home Page](https://proper-testing.github.io/index.html
+* [PropEr Home Page](https://proper-testing.github.io/index.html)
 * [PropEr Tutorials](https://proper-testing.github.io/tutorials.html)
 
 Elixir versions of most of PropEr's tutorial material can be found in the
