@@ -104,6 +104,12 @@ defmodule PropCheck.BasicTypes do
 
 
   @doc """
+  A map whose keys are defined by the generator k and values by the generator v.
+  """
+  @spec map(raw_type, raw_type) :: type
+  defdelegate map(k, v), to: :proper_types
+
+  @doc """
   All lists containing elements of type `elem_type`.
 
   Instances shrink towards the empty list, `[]`.
