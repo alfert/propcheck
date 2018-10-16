@@ -276,6 +276,7 @@ defmodule PropCheck do
             import PropCheck.Properties
             # import :proper_types, except: [lazy: 1, to_binary: 1, function: 2]
             import PropCheck.BasicTypes
+            import PropCheck.TargetedPBT
         end
     end
 
