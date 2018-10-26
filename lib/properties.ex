@@ -136,8 +136,8 @@ defmodule PropCheck.Properties do
           Property #{mfa_to_string name} failed. Counter-Example is:
           #{inspect counter_example, pretty: true}
 
-          Consider running `mix propcheck.clean` if a bug in a generator was identified
-          and fixed. PropCheck cannot identify changes to generators. See
+          Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+          identified and fixed. PropCheck cannot identify changes to generators. See
           https://github.com/alfert/propcheck/issues/30 for more details.
           """,
           expr: nil]
