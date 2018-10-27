@@ -128,13 +128,7 @@ defmodule PropCheck.Test.LevelTest do
   #                    end).
 
 
-  # This property fails because the search is successful
-  # In contrast to "Default PBT Level 1", where a pure
-  # random search was not successful.
-  # The logic is negative, therefore we expect that
-  # the property fails.
-  property "forall_targeted PBT Level 1", [:verbose] do
-    level_data = Level.level1()
+  def prop_forall_targeted(level_data) do
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
@@ -155,6 +149,22 @@ defmodule PropCheck.Test.LevelTest do
           end
       end
     end
+  end
+
+  # This property fails because the search is successful
+  # In contrast to "Default PBT Level 1", where a pure
+  # random search was not successful.
+  # The logic is negative, therefore we expect that
+  # the property fails.
+  property "forall_targeted PBT Level 1", [:verbose] do
+    level_data = Level.level1()
+    prop_forall_targeted(level_data)
+    |> fails()
+  end
+
+  property "forall_targeted PBT Level 2", [:verbose] do
+    level_data = Level.level2()
+    prop_forall_targeted(level_data)
     |> fails()
   end
 
