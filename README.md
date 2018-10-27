@@ -13,7 +13,7 @@ To use PropCheck with your project, add it as a dependency to `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:propcheck, "~> 1.1", only: :test}
+    {:propcheck, "~> 1.1", only: [:test, :dev]}
   ]
 end
 ```
@@ -47,7 +47,9 @@ end
 ```
 
 Per default, the counter examples file is stored in the build directory (`_build`),
-independent from the build environment, in the file `propcheck.ctex`.
+independent from the build environment, in the file `propcheck.ctex`. The file can
+be removed using `mix propcheck.clean`. Note that this task is only available if propcheck
+is also available in `:dev`. Otherwise, `MIX_ENV mix propcheck.clean` can be used.
 
 
 ## Links to other documentation
