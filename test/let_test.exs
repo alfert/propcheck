@@ -23,7 +23,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     end
   end
 
-  defmodule DSLShrinkTest do
+  defmodule DSLShrinkTest do # shrinks properly
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM.DSL
@@ -55,7 +55,7 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
-  defmodule DSLLetTest do
+  defmodule DSLLetTest do # shrinks propery
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM.DSL
@@ -65,10 +65,10 @@ defmodule PropCheck.Test.LetAndShrinks do
     defcommand :equal do
       def impl(_number), do: :ok
       def args(_state) do
-        k = let num <- integer(1, 1000) do
+        arg_generator = let num <- integer(1, 1000) do
           num
         end
-        [k]
+        [arg_generator]
       end
       def post(_state, [arg], :ok), do: arg != 800
       def next(model, [_arg], _ret), do: model
@@ -92,7 +92,7 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
-  defmodule LetStateMachineTest do
+  defmodule LetStateMachineTest do # shrinks properly
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM
@@ -131,7 +131,7 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
-  defmodule DSLLetShrinkTest do
+  defmodule DSLLetShrinkTest do # does shrink properly
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM.DSL
@@ -141,7 +141,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     defcommand :equal do
       def impl(_number), do: :ok
       def args(_state) do
-        let_shrink ([num <- integer(1, 1000)]) do
+        let  ([num <- integer(1, 1000)]) do
            [num]
         end
 
