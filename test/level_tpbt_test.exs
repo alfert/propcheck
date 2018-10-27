@@ -52,10 +52,16 @@ defmodule PropCheck.Test.LevelTest do
     end
   end
 
+  # This property fails, this means that in every situation a path was found
+  # ==> negated logic of the property
   property "Default PBT Level 0" do
     prop_exit(Level.level0())
+    |> fails()
   end
 
+  # This property does not fail. This means there PropCheck was not able to find
+  # a path to the exit in every case. We need to search more cleverly =>
+  # The case for Targeted PBT
   property "Default PBT Level 1" do
     prop_exit(Level.level1())
   end
