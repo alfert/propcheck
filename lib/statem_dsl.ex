@@ -329,14 +329,20 @@ defmodule PropCheck.StateM.DSL do
   def commands(mod) do
     cmd_list = command_list(mod, "")
     # Logger.debug "commands:  cmd_list = #{inspect cmd_list}"
-    gen_commands(mod, cmd_list)
+    gen_commands_proper(mod, cmd_list)
   end
 
-  @spec gen_commands(module, [cmd_t]) :: BasicTypes.type()
-  defp gen_commands(mod, cmd_list) do
-    initial_state = mod.initial_state()
-    gen_cmd = sized(size, gen_cmd_list(size, cmd_list, mod, initial_state, 1))
-    such_that cmds <- gen_cmd, when: is_valid(mod, initial_state, cmds)
+  # This is taken from proper_statem.erl and achieves better shrinking
+  # in case of more complex argument generators with let-constructs.
+  @spec gen_commands_proper(module, [cmd_t]) :: BasicTypes.type()
+  defp gen_commands_proper(mod, cmd_list) do
+    let initial_state <- lazy(mod.initial_state()) do
+      such_that (cmds <-
+          (let list <- sized(size,
+            noshrink(gen_cmd_list(size, cmd_list, mod, initial_state, 1))) do
+              shrink_list(list)
+          end)), when: is_valid(mod, initial_state, cmds)
+    end
   end
 
   # Checks that the precondition holds, required for shrinking
@@ -377,7 +383,7 @@ defmodule PropCheck.StateM.DSL do
         gen_result = {:var, step_counter}
         gen_state = call_next_state(state, call, gen_result)
         let cmds <- gen_cmd_list(size - 1, cmd_list, mod, gen_state, step_counter + 1) do
-          shrink_list([{state, {:set, gen_result, call}} | cmds])
+          [{state, {:set, gen_result, call}} | cmds]
         end
       end
   end
