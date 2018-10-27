@@ -19,9 +19,13 @@ defmodule PropCheck.Test.LevelTest do
 
   @spec path_next() :: ([Level.step], any() -> PropCheck.BasicTypes.t)
   def path_next() do
-    fn (prev_path, _temperature) when is_list(prev_path) ->
-      let next_steps <- vector(20, step()), do:
-        prev_path ++ next_steps
+    fn
+      ({:"$used",  prev_path, _another_path}, _temperature) when is_list(prev_path) ->
+       let next_steps <- vector(20, step()), do:
+          prev_path ++ next_steps
+      (prev_path, _temperature) when is_list(prev_path) ->
+        let next_steps <- vector(20, step()), do:
+          prev_path ++ next_steps
     end
   end
 
