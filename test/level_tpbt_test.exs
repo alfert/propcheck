@@ -88,7 +88,7 @@ defmodule PropCheck.Test.LevelTest do
   #              end).
 
 
-  property "Target PBT Level 1", [:verbose] do
+  property "Target PBT Level 1 with forall_sa", [:verbose] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
@@ -108,6 +108,54 @@ defmodule PropCheck.Test.LevelTest do
       end
       |> collect(length(path))
     end
+  end
+
+  # prop_exit_targeted(LevelData) ->
+  #   Level = build_level(LevelData),
+  #   #{entrance := Entrance} = Level,
+  #   #{exit := Exit} = Level,
+  #   ?FORALL_TARGETED(Path, ?USERNF(path(), path_next()),
+  #                    case follow_path(Entrance, Path, Level) of
+  #                      {exited, _Pos} -> false;
+  #                      Pos ->
+  #                        case length(Path) > 2000 of
+  #                          true -> proper_sa:reset(), true;
+  #                          _ ->
+  #                            UV = distance(Pos, Exit),
+  #                            ?MINIMIZE(UV),
+  #                            true
+  #                        end
+  #                    end).
+
+
+  # This property fails because the search is successful
+  # In contrast to "Default PBT Level 1", where a pure
+  # random search was not successful.
+  # The logic is negative, therefore we expect that
+  # the property fails.
+  property "forall_targeted PBT Level 1", [:verbose] do
+    level_data = Level.level1()
+    level = Level.build_level(level_data)
+    %{entrance: entrance} = level
+    %{exit: exit_pos} = level
+    forall_targeted path <- user_nf(path_gen(), path_next()) do
+      case Level.follow_path(entrance, path, level) do
+        {:exited, _pos} -> false
+
+        pos ->
+          if length(path) > 2_000 do
+            # reset the search because we assume that the path is
+            # too long and we are caught in a local minimum.
+            :proper_sa.reset()
+            true
+          else
+            uv = distance(pos, exit_pos)
+            minimize(uv)
+            true
+          end
+      end
+    end
+    |> fails()
   end
 
   property "Exists Target PBT Level 1", [:verbose] do
