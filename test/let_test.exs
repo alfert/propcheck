@@ -1,7 +1,6 @@
 defmodule PropCheck.Test.LetAndShrinks do
   use ExUnit.Case
   use PropCheck
-  use PropCheck.StateM.DSL
 
   @tag will_fail: true
   property "a simple forall shrinks", [:verbose] do
@@ -96,37 +95,35 @@ defmodule PropCheck.Test.LetAndShrinks do
   defmodule LetStateMachineTest do
     use ExUnit.Case
     use PropCheck
-    use PropCheck.StateM.DSL
+    use PropCheck.StateM
 
     def initial_state(), do: %{}
 
-    def args(), do: integer(1, 1000)
-    #   let (num <- integer(1, 1000)) do
-    #     num
-    #   end
-    # end
+    def args() do
+      let ([num <- integer(1, 1000)]) do
+        [num]
+      end
+    end
     def command(_state) do
-      # oneof([
-        {:call, __MODULE__, :impl, exactly(5)}
-        # {:call, __MODULE__, :impl, [args()]}
-      # ])
+      oneof([
+        {:call, __MODULE__, :impl, args()}
+      ])
     end
     def impl(_), do: :ok
     def postcondition(_state, {:call, _mod, _fun, [arg]}, :ok), do: arg != 800
     def next_state(model, _ret, _arg), do: model
     def precondition(_state, _call), do: true
 
-    @tag will_fail: false
+    @tag will_fail: true
     property "let does not shrink in native SM", [numtests: 1000] do
       forall cmds <- commands(__MODULE__) do
-          events = run_commands(cmds)
-          (events.result == :ok)
+          {history, state, result} = run_commands(__MODULE__, cmds)
+          (result == :ok)
           |> when_fail(
               IO.puts """
-              History: #{inspect events.history, pretty: true}
-              State: #{inspect events.state, pretty: true}
-              Env: #{inspect events.env, pretty: true}
-              Result: #{inspect events.result, pretty: true}
+              History: #{inspect history, pretty: true}
+              State: #{inspect state, pretty: true}
+              Result: #{inspect result, pretty: true}
               """)
           |> aggregate(command_names cmds)
       end
