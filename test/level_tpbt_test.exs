@@ -5,7 +5,7 @@ defmodule PropCheck.Test.LevelTest do
   require Logger
 
   alias PropCheck.Test.Level
-  alias PropCheck.TargetedPBT
+  # alias PropCheck.TargetedPBT
 
   #######################################################################
   # Generators
@@ -169,19 +169,39 @@ defmodule PropCheck.Test.LevelTest do
   end
 
   property "Exists Target PBT Level 1", [:verbose] do
-    level_data = Level.level0()
+    level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
-    exists path <- path_sa() do
+
+    # Property: Proof that there exists a path from the entry of the labyrinth
+    # to the exit.
+    # There, generate random walks until you find the exit.
+    exists path <- user_nf(path_gen(), path_next()) do
+      # take the random walk `path` and look where it ends
       case Level.follow_path(entrance, path, level) do
-        {:exited, _} -> false
+        # we found the exit. => Stop the search. In PBT terms, the path is counterexample.
+        {:exited, _pos} -> true
+
+        # we are landed somewhere but did not find the exit.
         pos ->
-          uv = distance(pos, exit_pos)
-          minimize(uv)
-          true
+          if length(path) > 2_000 do
+            # reset the search because we assume that the path is
+            # too long and we are caught in a local minimum.
+            :proper_sa.reset()
+            false
+          else
+            # measure the distance to exit and search for a new
+            # variant of the walk which is closer the exit (=> minimize the distance)
+            uv = distance(pos, exit_pos)
+            minimize(uv)
+            false
+          end
       end
     end
+    # we expect to find a path, there the property should fail.
+    # The fails() command does not shrink the result. This a space of improvement.
+    |> fails()
   end
 
 
