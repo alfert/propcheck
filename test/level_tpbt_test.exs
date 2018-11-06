@@ -15,16 +15,26 @@ defmodule PropCheck.Test.LevelTest do
 
   def path_gen(), do: list(step())
 
-  def path_sa(), do: %{first: path_gen(), next: path_next()}
+  def path_gen_sa(), do: %{first: path_gen(), next: path_next_sa()}
 
   @spec path_next() :: ([Level.step], any() -> PropCheck.BasicTypes.t)
   def path_next() do
     fn
-      ({:"$used",  prev_path, _another_path}, _temperature) when is_list(prev_path) ->
-       let next_steps <- vector(20, step()), do:
-          prev_path ++ next_steps
       (prev_path, _temperature) when is_list(prev_path) ->
         let next_steps <- vector(20, step()), do:
+          prev_path ++ next_steps
+    end
+  end
+
+  # this is different from the Erlang example code in level.erl and
+  # seems to reveal an internal implementation detail.
+  def path_next_sa() do
+    fn
+      (prev_path, _temperature) when is_list(prev_path) ->
+          let next_steps <- vector(20, step()), do:
+            prev_path ++ next_steps
+      ({:"$used",  prev_path, _another_path}, _temperature) when is_list(prev_path) ->
+       let next_steps <- vector(20, step()), do:
           prev_path ++ next_steps
     end
   end
@@ -93,7 +103,7 @@ defmodule PropCheck.Test.LevelTest do
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
-    forall_sa path <- target(path_sa()) do
+    forall_sa path <- target(path_gen_sa()) do
       case Level.follow_path(entrance, path, level) do
         {:exited, _} -> false
         pos ->
@@ -137,7 +147,7 @@ defmodule PropCheck.Test.LevelTest do
         {:exited, _pos} -> false
 
         pos ->
-          if length(path) > 2_000 do
+          if length(path) > 1_000 do
             # reset the search because we assume that the path is
             # too long and we are caught in a local minimum.
             :proper_sa.reset()
@@ -162,7 +172,7 @@ defmodule PropCheck.Test.LevelTest do
     |> fails()
   end
 
-  property "forall_targeted PBT Level 2", [:verbose] do
+  property "forall_targeted PBT Level 2", [:verbose, numtests: 3_000] do
     level_data = Level.level2()
     prop_forall_targeted(level_data)
     |> fails()
