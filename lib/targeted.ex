@@ -10,33 +10,25 @@ defmodule PropCheck.TargetedPBT do
   The typical structure for a targeted property looks as follows:
 
       property prop_target do          # Try to check that
-        exists input <- params do       # some input exists that fullfills the property.
-            uv = sut.run(input)        # Do so by running SUT with Input
-            maximize(uv)               # and maximize its Utility Value
-            uv < threshold             # up to some Threshold.
+        exists input <- params do      # some input exists that fullfills the property.
+            uv = sut.run(input)        # Do so by running SUT with input
+            maximize(uv)               # and maximize its utility value
+            uv < threshold             # up to some threshold, the property condition.
         end
       end
 
+  Most of the documentation is taken directly from PropEr.
+
   """
 
-  #  -define(EXISTS(X,RawType,Prop), proper:exists(RawType, fun(X) -> Prop end, false)).
-  # -define(NOT_EXISTS(X,RawType,Prop), proper:exists(RawType, fun(X) -> Prop end, true)).
-  # -define(FORALL_TARGETED(X, RawType, Prop),
-  #     proper:exists(RawType, fun(X) -> not Prop end, true)).
   @in_ops [:<-, :in]
 
   @doc """
   The `exists` macro uses the targeted PBT component of PropEr to try
-  to find one instance of `xs` that makes the `prop` true. If such a `xs`
-  is found the property passes. Note that there is no counterexample if no
+  to find one instance of `xs` that makes the `prop` return `true`. If such a `xs`
+  is found, the property passes. Note that there is no counterexample if no
   such `xs` could be found.
   """
-  # defmacro exists({op, _, [var, rawtype]}, do: prop_body) when op in @in_ops do
-  #   quote do
-  #     :proper.exists(unquote(rawtype), fn unquote(var) -> unquote(prop_body) end, true)
-  #   end
-  # end
-
   defmacro exists({:<-, _, [var, rawtype]}, do: prop_body) do
     quote do
         :proper.exists(unquote(rawtype),
@@ -44,29 +36,41 @@ defmodule PropCheck.TargetedPBT do
     end
   end
 
-
+  @doc """
+  The `not_exists` macro uses the targeted PBT component of PropEr to try
+  to find one instance of `xs` that makes the `prop` return `false`. If such a `xs`
+  is found the property passes. Note that there is no counterexample if no
+  such `xs` could be found.
+  """
   defmacro not_exists({op, _, [var, rawtype]}, do: prop_body) when op in @in_ops do
     quote do
       :proper.exists(unquote(rawtype), fn unquote(var) -> unquote(prop_body) end, false)
     end
   end
 
+  @doc """
+  The `forall_targeted` mactos uses the targeted PBT component of PropEr to try
+  that all instances of `xs` fullfill porperty `prop`. In contrast to `exists`, often
+  the property here is negated.
+  """
   defmacro forall_targeted({op, _, [var, rawtype]}, do: prop_body) when op in @in_ops do
     quote do
       :proper.exists(unquote(rawtype), fn unquote(var) -> not unquote(prop_body) end, true)
     end
   end
 
-  # -define(MAXIMIZE(Fitness), proper_target:update_target_uvs(Fitness, inf)).
-  # -define(MINIMIZE(Fitness), ?MAXIMIZE(-Fitness)).
-  # -define(USERNF(Type, NF), proper_gen_next:set_user_nf(Type, NF)).
-  # -define(USERMATCHER(Type, Matcher), proper_gen_next:set_matcher(Type, Matcher)).
-
+  @doc """
+  This macro tells the search strategy to maximize the value `fitness`.
+  """
   defmacro maximize(fitness) do
     quote do
       :proper_target.update_target_uvs(unquote(fitness), :inf)
     end
   end
+  @doc """
+  This macro tells the search strategy to minize the value `fitness` and
+  is equivalent to `maximaize(-fitness)`.
+  """
   defmacro minimize(fitness) do
     quote do
       :proper_target.update_target_uvs(- unquote(fitness), :inf)
@@ -79,9 +83,20 @@ defmodule PropCheck.TargetedPBT do
   function `fun` should be of type
   `fun(any(), {Depth :: number(), Temperature::float()} -> any()`
   """
-  defmacro user_nf(type, nf) do
+  defmacro user_nf(generator, nf) do
     quote do
-      :proper_gen_next.set_user_nf(unquote(type), unquote(nf))
+      :proper_gen_next.set_user_nf(unquote(generator), unquote(nf))
+    end
+  end
+
+  # -define(USERMATCHER(Type, Matcher), proper_gen_next:set_matcher(Type, Matcher)).
+  @doc """
+  This overwrites the structural matching of PropEr for the generator with the user provided
+  `matcher` function. The matcher should be of type `proper_gen_next:matcher()'
+  """
+  defmacro user_matcher(generator, matcher) do
+    quote do
+      :proper_gen_next.set_matcher(unquote(generator), unquote(matcher))
     end
   end
 
@@ -91,6 +106,9 @@ defmodule PropCheck.TargetedPBT do
   #       fun proper_target:cleanup_strategy/0
   #   end, Prop)).
 
+  @doc """
+  For backward compatibility with the scientific papers.
+  """
   defmacro target(tmap) do
     quote do
       :proper_target.targeted(make_ref(), unquote(tmap))
@@ -98,12 +116,18 @@ defmodule PropCheck.TargetedPBT do
   end
 
   # -define(SETUP(SetupFun,Prop), proper:setup(SetupFun,Prop))
+  @doc """
+  For backward compatibility with the scientific papers.
+  """
   defmacro setup(setup_fun, prop) do
     quote do
       :proper.setup(unquote(setup_fun), unquote(prop))
     end
   end
 
+  @doc """
+  For backward compatibility with the scientific papers.
+  """
   defmacro strategy(strat, prop) do
     quote do
       unquote(__MODULE__).setup(fn opts ->
@@ -115,6 +139,9 @@ defmodule PropCheck.TargetedPBT do
 
   # -define(FORALL_SA(X, RawType, Prop),
   #   ?STRATEGY(proper_sa, proper:forall(RawType,fun(X) -> Prop end))).
+  @doc """
+  For backward compatibility with the scientific papers.
+  """
   defmacro forall_sa({:<-, _, [var, rawtype]}, do: prop_body) do
     quote do
       strategy(:proper_sa,
