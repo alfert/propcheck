@@ -19,6 +19,8 @@ defmodule PropCheck.Test.Counter do
     Agent.start_link(fn -> {-1, reset} end, name: name)
   end
 
+  @spec stop() :: :ok
+  @spec stop(atom | pid) :: :ok
   def stop(pid \\ __MODULE__) do
     Agent.stop(pid)
   end
