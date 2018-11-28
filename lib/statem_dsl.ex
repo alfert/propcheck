@@ -7,10 +7,10 @@ defmodule PropCheck.StateM.DSL do
   ## The basic approach
   Property based testing of stateful systems is different from ordinary property
   based testing. Instead of testing operations and their effects on the
-  data structure directly, we construct a model of system and generate a sequence
-  of commands operating on both, the model and the system. Then we check, that
+  data structure directly, we construct a model of the system and generate a sequence
+  of commands operating on both, the model and the system. Then we check that
   after each command step, the system has evolved accordingly to the model.
-  This is same idea which is used in model checking and is sometimes called
+  This is the same idea which is used in model checking and is sometimes called
   a bisimulation.
 
   After defining a model, we have two phases during executing the property.
@@ -21,17 +21,17 @@ defmodule PropCheck.StateM.DSL do
   In phase 2, the commands are executed and the state machine checks that  the
   SUT is in the same state as the state machine. If an invalid state is
   detected, then the command sequence is shrunk towards a shorter sequence
-  serving then as counter examples.
+  serving then as counterexamples.
 
   This approach works exactly the same as with `PropCheck.StateM` and
   `PropCheck.FSM`. The main difference is the API, grouping pre- and postconditions,
-  state transitions and argument generators around the commands of the SUT. This
+  state transitions, and argument generators around the commands of the SUT. This
   leads towards more logical locality compared to the former implementations.
   QuickCheck EQC has a similar approach for structuring their modern state machines.
 
   ## The DSL
 
-  A state machine acting as a model of the SUT can be defined by focussing on
+  A state machine acting as a model of the SUT can be defined by focusing on
   states or on transitions. We  focus here on the transitions. A transition is a
   command calling the SUT. Therefore the main phrase of the DSL is the `defcommand`
   macro.
@@ -67,7 +67,7 @@ defmodule PropCheck.StateM.DSL do
   this is allowed. For this, we define function `pre/2`, taking the model state
   and the generated list of arguments to check whether this call is
   allowed in the current model state. In this particular example, `find` is always
-  allowed, hence we return true without any further checking. This also the
+  allowed, hence we return `true` without any further checking. This is also the
   default implementation and the reason why the precondition is missing
   in the test file.
 
@@ -79,24 +79,24 @@ defmodule PropCheck.StateM.DSL do
 
   If the precondition is satisfied, the call can happen. After the call, the SUT
   can be in a different state and the model state must be updated according to
-  the mapping of the SUT to the model. Function `next/3` takes the state before
+  the mapping of the SUT to the model. The function `next/3` takes the state before
   the call, the list of arguments and the symbolic or dynamic result (depending
   on phase 1 or 2, respectively). `next/3` returns the  new model state.  Since
   searching for a key in the cache does not modify the system nor the model
-  state, nothing is to do. This is again the default implementation and thus
-  dismissed in the test file.
+  state, nothing has to be done. This is again the default implementation and thus
+  left out in the test file.
 
       defcommand :find do
         def impl(key), do: Cache.find(key)
         def args(_state), do: [key()]
         def pre(_state, [_key]}), do: true
-        def next(old_state, _args, call_result), do: state
+        def next(old_state, _args, call_result), do: old_state
       end
 
   The missing part of the command definition is the post condition, checking
   that after calling the system in phase 2 the system is in the expected state
   compared the model. This check is implemented in function `post/3`, which
-  again has a trivial default implementation for post conditions that are always
+  again has a trivial default implementation for post conditions that always returns
   true. In this example, we check if the `call_result` is `{:error, :not_found}`,
   then we also do not find the key in our model list `entries`. The other case is
   that if we a return value of `{:ok, val}`, then we also find the value via
@@ -106,7 +106,7 @@ defmodule PropCheck.StateM.DSL do
         def impl(key), do: Cache.find(key)
         def args(_state), do: [key()]
         def pre(_state, [_key]}), do: true
-        def next(old_state, _args, _call_result), do: state
+        def next(old_state, _args, _call_result), do: old_state
         def post(entries, [key], call_result) do
           case List.keyfind(entries, key, 0, false) do
               false       -> call_result == {:error, :not_found}
@@ -121,25 +121,25 @@ defmodule PropCheck.StateM.DSL do
 
   In addition to commands, we need to define the model itself. This is the
   ingenious part of stateful property based testing! The initial state
-  of the model must be implemented as function `initial_state/0`. From this
+  of the model must be implemented as the function `initial_state/0`. From this
   function, all model evolutions start. In our simplified cache example the
   initial model is an empty list:
 
       def initial_state(), do: []
 
   The commands are generated with the same frequency by default. Often, this
-  is not appropriate, e.g. in the cache example we expect many more `find` then
+  is not appropriate, e.g. in the cache example we expect many more `find` than
   `cache` commands. Therefore, commands can have a weight, which is technically used
   inside a `PropCheck.BasicTypes.frequency/1` generator. The weights are defined
   in callback function `c:weight/1`, taking the current model state and returning
   a map of command and frequency pairs to be generated.  In our cache example
   we want the `find` command to appear three times more often than other commands:
 
-      def weight(_state), do: %{find: 1, cache: 3, flush: 1}
+      def weight(_state), do: %{find: 3, cache: 1, flush: 1}
 
   ## The property to test
-  The property to test the stateful system is for all systems more or less
-  equal. We generate all commands via generator `commands/1`, which takes
+  The property to test the stateful system is more or less the same for all systems.
+  We generate all commands via generator `commands/1`, which takes
   a module with callbacks as parameter. Inside the test, we first start
   the SUT, execute the commands with `run_commands/1`, stopping the SUT
   and evaluating the result of the executions as a boolean expression.
