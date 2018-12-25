@@ -463,8 +463,9 @@ defmodule PropCheck.StateM.DSL do
           {:post_condition, result}
         end
       rescue exc ->
-        Logger.error "Got exception: #{inspect exc}"
-        {:exception, {exc, Exception.format_stacktrace()}}
+        stacktrace = Exception.format_stacktrace(System.stacktrace())
+        Logger.error("Got exeception: #{inspect(exc)}\nstacktrace: #{stacktrace}")
+        {:exception, {exc, stacktrace}}
       catch
         value -> {:exception, value}
         kind, value -> {:exception, {kind, value}}
