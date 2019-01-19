@@ -49,7 +49,7 @@ defmodule PropCheck.TargetedPBT do
   end
 
   @doc """
-  The `forall_targeted` mactos uses the targeted PBT component of PropEr to try
+  The `forall_targeted` macros uses the targeted PBT component of PropEr to try
   that all instances of `xs` fullfill porperty `prop`. In contrast to `exists`, often
   the property here is negated.
   """
@@ -92,7 +92,7 @@ defmodule PropCheck.TargetedPBT do
   # -define(USERMATCHER(Type, Matcher), proper_gen_next:set_matcher(Type, Matcher)).
   @doc """
   This overwrites the structural matching of PropEr for the generator with the user provided
-  `matcher` function. The matcher should be of type `proper_gen_next:matcher()'
+  `matcher` function. The matcher should be of type `proper_gen_next:matcher()`
   """
   defmacro user_matcher(generator, matcher) do
     quote do
