@@ -55,7 +55,7 @@ defmodule PropCheck.TargetedPBT do
   """
   defmacro forall_targeted({op, _, [var, rawtype]}, do: prop_body) when op in @in_ops do
     quote do
-      :proper.exists(unquote(rawtype), fn unquote(var) -> not unquote(prop_body) end, true)
+      :proper.exists(unquote(rawtype), fn unquote(var) -> not (unquote(prop_body)) end, true)
     end
   end
 
