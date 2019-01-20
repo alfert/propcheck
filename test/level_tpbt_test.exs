@@ -172,7 +172,7 @@ defmodule PropCheck.Test.LevelTest do
     |> fails()
   end
 
-  property "forall_targeted PBT Level 2", [:verbose, numtests: 3_000] do
+  property "forall_targeted PBT Level 2", [:verbose, search_steps: 3_000] do
     level_data = Level.level2()
     prop_forall_targeted(level_data)
     |> fails()
