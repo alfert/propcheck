@@ -17,6 +17,16 @@ defmodule PropCheck.TargetedPBT do
         end
       end
 
+  ## Options
+
+  For targeted properties exists a new option:
+  * `{:search_steps, non_negative_number}` <br>
+    takes an integer defining how many search steps the searching algorithm takes.
+    Its default value is `1_000`.  The effect of `search_steps` is similar to `num_tests` for
+    ordinary properties. `num_tests` has no effect on the search strategy. This helps when you
+    combine a regular property with search strategy, e.g. generating a configuration parameter
+    and search for specific properties to hold depending on that parameter.
+
   Most of the documentation is taken directly from PropEr.
 
   """
