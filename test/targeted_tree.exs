@@ -82,4 +82,26 @@ defmodule PropCheck.Test.TargetTreeTest do
     end
   end
 
+  #####################################################################################
+  # Combine regular properties with user-defined neighborhood-fucntion and
+  # a search strategy inside.
+
+  property "Tree search", [:verbose]  do
+    forall l <- list(integer()) do
+      exists t <- user_nf(
+          # trick: wrap the list value l into the let to construct the
+          # required generator for user_nf
+          ( let x <- l, do: to_tree(x) ),
+          next_tree()) do
+        weight = sides(t)
+        {left, right} = weight
+        IO.write(" #{inspect weight}")
+        # ensure that the left tree is larger than the right one
+        maximize(left-right)
+        false # guarantees a full search for exists
+      end
+    end
+  end
+
+
 end
