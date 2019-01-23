@@ -42,7 +42,7 @@ defmodule PropCheck.TargetedPBT do
   defmacro exists({:<-, _, [var, rawtype]}, do: prop_body) do
     quote do
         :proper.exists(unquote(rawtype),
-            fn(unquote(var)) -> unquote(prop_body) end, true)
+            fn(unquote(var)) -> unquote(prop_body) end, false)
     end
   end
 
@@ -54,7 +54,7 @@ defmodule PropCheck.TargetedPBT do
   """
   defmacro not_exists({op, _, [var, rawtype]}, do: prop_body) when op in @in_ops do
     quote do
-      :proper.exists(unquote(rawtype), fn unquote(var) -> unquote(prop_body) end, false)
+      :proper.exists(unquote(rawtype), fn unquote(var) -> unquote(prop_body) end, true)
     end
   end
 
@@ -116,9 +116,8 @@ defmodule PropCheck.TargetedPBT do
   #       fun proper_target:cleanup_strategy/0
   #   end, Prop)).
 
-  @doc """
-  For backward compatibility with the scientific papers.
-  """
+  # For backward compatibility with the scientific papers.
+  @doc false
   defmacro target(tmap) do
     quote do
       :proper_target.targeted(make_ref(), unquote(tmap))
@@ -126,18 +125,16 @@ defmodule PropCheck.TargetedPBT do
   end
 
   # -define(SETUP(SetupFun,Prop), proper:setup(SetupFun,Prop))
-  @doc """
-  For backward compatibility with the scientific papers.
-  """
+  # For backward compatibility with the scientific papers.
+  @doc false
   defmacro setup(setup_fun, prop) do
     quote do
       :proper.setup(unquote(setup_fun), unquote(prop))
     end
   end
 
-  @doc """
-  For backward compatibility with the scientific papers.
-  """
+  # For backward compatibility with the scientific papers.
+  @doc false
   defmacro strategy(strat, prop) do
     quote do
       unquote(__MODULE__).setup(fn opts ->
@@ -149,9 +146,8 @@ defmodule PropCheck.TargetedPBT do
 
   # -define(FORALL_SA(X, RawType, Prop),
   #   ?STRATEGY(proper_sa, proper:forall(RawType,fun(X) -> Prop end))).
-  @doc """
-  For backward compatibility with the scientific papers.
-  """
+  # For backward compatibility with the scientific papers.
+  @doc false
   defmacro forall_sa({:<-, _, [var, rawtype]}, do: prop_body) do
     quote do
       strategy(:proper_sa,

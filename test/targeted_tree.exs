@@ -88,7 +88,7 @@ defmodule PropCheck.Test.TargetTreeTest do
 
   property "Tree search", [:verbose]  do
     forall l <- list(integer()) do
-      exists t <- user_nf(
+      not_exists t <- user_nf(
           # trick: wrap the list value l into the let to construct the
           # required generator for user_nf
           ( let x <- l, do: to_tree(x) ),

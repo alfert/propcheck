@@ -53,18 +53,17 @@ defmodule PropCheck.Test.TargetPathTest do
   end
 
   @doc """
-  Similar to the `forall_targeted` variant but using `not_exists`: Check that at least one path
+  Similar to the `forall_targeted` variant but using `exists`: Check that at least one path
   is has a `distance_square >= 100`.
   """
-  property "not exists: at least one path with distance >= sqrt(100) exists", [:verbose, search_steps: 100] do
-    not_exists p <- path() do
+  property "exists: at least one path with distance >= sqrt(100) exists", [:verbose, search_steps: 100] do
+    exists p <- path() do
       {x,y} = Enum.reduce(p, {0, 0}, &move/2)
       IO.write "(#{x},#{y})."
       distance_square = (x*x + y*y)
       maximize(distance_square)
       distance_square >= 100
     end
-    # |> fails()
   end
 
 
