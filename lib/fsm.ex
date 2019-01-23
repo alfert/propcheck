@@ -124,7 +124,7 @@ defmodule PropCheck.FSM do
 
   @doc """
   Specifies the initial state of the finite state machine. As with
-  `PropCheck.StateM.initial_state/0`, its result should be deterministic.
+  `c:PropCheck.StateM.initial_state/0`, its result should be deterministic.
   """
   @callback initial_state() :: state_name
 
@@ -135,7 +135,7 @@ defmodule PropCheck.FSM do
   @callback initial_data() :: state_data
 
   @doc """
-  Similar to `PropCheck.StateM.precondition/2`.
+  Similar to `c:PropCheck.StateM.precondition/2`.
 
   Specifies the
   precondition that should hold about `state_data` so that `call` can be
@@ -152,7 +152,7 @@ defmodule PropCheck.FSM do
     state_data :: state_data, call :: symb_call) :: boolean
 
   @doc """
-  Similar to `PropCheck.StateM.postcondition/3`. Specifies the
+  Similar to `c:PropCheck.StateM.postcondition/3`. Specifies the
   postcondition that should hold about the result `res` of the evaluation
   of `call`.
   """
@@ -160,7 +160,7 @@ defmodule PropCheck.FSM do
     state_data :: state_data, call :: symb_call, result :: result) :: boolean
 
   @doc """
-  Similar to `PropCheck.StateM.next_state/3`. Specifies how the
+  Similar to `c:PropCheck.StateM.next_state/3`. Specifies how the
   transition from `from` to `target` triggered by `call` affects the
   `state_data`. `res` refers to the result of `call` and can be either
   symbolic or dynamic.
