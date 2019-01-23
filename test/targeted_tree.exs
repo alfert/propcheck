@@ -39,7 +39,7 @@ defmodule PropCheck.Test.TargetTreeTest do
     end
   end
 
-  property "A left-heavy tree", [numtests: 1_000] do
+  property "A left-heavy tree" do
     forall_targeted t <- tree() do
       weight = sides(t)
       {left, right} = weight
@@ -58,6 +58,28 @@ defmodule PropCheck.Test.TargetTreeTest do
     end
   end
 
+  #####################################################################################
+  # define our own neighborhood function achive even more left-heavy trees
 
+  @doc "Returns the generator function for next value depending on the temperature"
+  def next_tree() do
+    fn old_tree, {_, temperature} ->
+      let n <- integer() do
+        scaled_value = trunc(n * temperature * 100)
+        insert(scaled_value, old_tree)
+      end
+    end
+  end
+
+  property "A very left-heavy tree with neighborhood function"  do
+    forall_targeted t <- user_nf(tree(), next_tree()) do
+      weight = sides(t)
+      {left, right} = weight
+      IO.write(" #{inspect weight}")
+      # ensure that the left tree is larger than the right one
+      maximize(left-right)
+      true # this property holds always
+    end
+  end
 
 end
