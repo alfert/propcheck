@@ -86,7 +86,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   # Combine regular properties with user-defined neighborhood-fucntion and
   # a search strategy inside.
 
-  property "Tree search", [:verbose]  do
+  property "Tree search", [:verbose, search_steps: 100]  do
     forall l <- list(integer()) do
       not_exists t <- user_nf(
           # trick: wrap the list value l into the let to construct the
