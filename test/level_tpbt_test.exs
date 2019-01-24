@@ -55,6 +55,7 @@ defmodule PropCheck.Test.LevelTest do
   #             _ -> true
   #           end).
 
+  # This is a classic parameterized property
   def prop_exit(level_data) do
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
@@ -147,7 +148,7 @@ defmodule PropCheck.Test.LevelTest do
         {:exited, _pos} -> false
 
         pos ->
-          if length(path) > 1_000 do
+          if length(path) > 2_000 do
             # reset the search because we assume that the path is
             # too long and we are caught in a local minimum.
             :proper_sa.reset()
