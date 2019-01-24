@@ -3,6 +3,7 @@
 ## 1.1.3-dev 
 * Better command generator with improved shrinking for complex argument generations. 
 * Support for map-generator, thanks to http://github.com/IRog
+* Support for targeted properties, a new feature of Proper 1.3
 
 ## 1.1.2
 * Proper v1.3.0 is supported (effectively, all 1.x versions are allowed
