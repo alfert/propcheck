@@ -209,9 +209,6 @@ defmodule PropCheck.Test.LevelTest do
           end
       end
     end
-    # we expect to find a path, there the property should fail.
-    # The fails() command does not shrink the result. This a space of improvement.
-    |> fails()
   end
 
 
