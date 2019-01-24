@@ -173,6 +173,9 @@ defmodule PropCheck.Test.LevelTest do
     |> fails()
   end
 
+  # This test is flaky. It works perfectly on my machine but fails sometimes
+  # on Travis CI. Currently, I have no idea how to properly handle this.
+  @tag unstable_test: true
   property "forall_targeted PBT Level 2", [:verbose, search_steps: 3_000] do
     level_data = Level.level2()
     prop_forall_targeted(level_data)
