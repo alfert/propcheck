@@ -2,6 +2,7 @@ defmodule PropCheck.Test.Stack do
 
 
   @opaque stack(t) :: [t] # when t: var
+  @opaque stack :: stack(any)
 
   @spec new(t) :: stack(t) when t: var
   def new(_) , do: []
@@ -13,11 +14,11 @@ defmodule PropCheck.Test.Stack do
   def pop([]), do: throw "Empty Stack"
   def pop([x | s]), do: {x, s}
 
-  @spec empty(stack(_t)) :: boolean when _t: var
+  @spec empty(stack) :: boolean
   def empty([]), do: true
   def empty(_), do: false
 
-  @spec size(stack(_t)) :: non_neg_integer when _t: var
+  @spec size(stack) :: non_neg_integer
   def size(s), do: length s
 
 end

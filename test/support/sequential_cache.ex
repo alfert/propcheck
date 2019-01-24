@@ -19,7 +19,7 @@ defmodule PropCheck.Test.Cache do
   Finding keys is done through scanning an ETS table with `:ets.match/2`
   """
   def find(key) do
-    case :ets.match(@cache_name, {:"_", {key, :"$1"}}) do
+    case :ets.match(@cache_name, {:_, {key, :"$1"}}) do
         [[val]] -> {:ok, val}
         [] -> {:error, :not_found}
     end
@@ -31,7 +31,7 @@ defmodule PropCheck.Test.Cache do
   """
   def cache(key,  val) do
     # Logger.debug "Cache.cache(#{inspect key}, #{inspect val})"
-    case :ets.match(@cache_name, {:"$1", {key, :"_"}}) do # find dupes
+    case :ets.match(@cache_name, {:"$1", {key, :_}}) do # find dupes
         [[n]] ->
             # Logger.debug "Cache: override as pos #{n}"
             :ets.insert(@cache_name, {n, {key, val}}) # overwrite dupe

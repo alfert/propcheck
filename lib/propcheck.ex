@@ -201,6 +201,8 @@ defmodule PropCheck do
       integers. This is provided as a means to speed up the testing of specs,
       where `any` is a commonly used type. Remark: PropCheck does not support
       spec-testing.
+    * `{:search_steps, non_negative_number}` <br>
+      used for targeted properties, see `PropCheck.TargetedPBT`.
     * `{:skip_mfas, [mfa]}` <br>
       When checking a module's specs, PropEr will not test the
       specified MFAs.  Default is []. Remark: PropCheck does not support
@@ -276,6 +278,7 @@ defmodule PropCheck do
             import PropCheck.Properties
             # import :proper_types, except: [lazy: 1, to_binary: 1, function: 2]
             import PropCheck.BasicTypes
+            import PropCheck.TargetedPBT
         end
     end
 
