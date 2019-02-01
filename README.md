@@ -1,8 +1,7 @@
 # PropCheck - Property based testing for Elixir
 
 `PropCheck` is a testing library, that provides a wrapper around PropEr, an Erlang
-based property testing framework in the spirit of QuickCheck. This project
-is derived from ProperEx, but is mostly completely rewritten.
+based property testing framework in the spirit of QuickCheck. 
 
 [![Build Status](https://travis-ci.org/alfert/propcheck.svg?branch=master)](https://travis-ci.org/alfert/propcheck)
 [![Hex.pm version](https://img.shields.io/hexpm/v/propcheck.svg)](https://hex.pm/packages/propcheck)
@@ -74,10 +73,14 @@ QuickCheck with the possibility to add requirement tags):
 Rather new introductory resource are
 
 * [Fred Hebert's PropEr Testing](http://propertesting.com) and
-* Fred Hebert's book [Property-Based Testing With PropEr, Erlang and Elixir](https://pragprog.com/book/fhproper/property-based-testing-with-proper-erlang-and-elixir)
+* Fred Hebert's book [Property-Based Testing With PropEr, Erlang and Elixir](https://pragprog.com/book/fhproper/property-based-testing-with-proper-erlang-and-elixir). 
+  This book explains the new approach of targeted property based testing (TPBT) very nicely 
+  and is way more approachable then the scientific papers regarding TPBT. Some of the 
+  Erlang only examples of the book are ported to Elixir and can be found in the test 
+  [test folder on GitHub](https://github.com/alfert/propcheck/tree/master/test). 
 
-It is again concerned with
-Erlang,  it is very well written and translates easily into Elixir (beside
+In contrast to book, the free website is concerned with
+Erlang only. The Erlang examples translate easily into Elixir (beside
 that at least a reading knowledge of Erlang is extremely helpful to survive
 in the BEAM ecosystem ...). Eventually I will port some of the examples to
 Elixir and PropCheck and certainly like to accept PRs.
@@ -103,8 +106,6 @@ generated automatically.
 PropCheck has only very limited support for parallel testing since it introduces
 no new features for concurrency compared to PropEr.
 
-The new feature Targeted Property-Based Testing (TPBT) of PropEr 1.3 is not yet available,
-also any new generators from PropEr 1.3
 
 ## Contributing
 
