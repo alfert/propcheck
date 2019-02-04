@@ -588,6 +588,19 @@ defmodule PropCheck do
       [{var, rawtype} | let_bind(rest)]
     end
 
+    # -define(SETUP(SetupFun,Prop), proper:setup(SetupFun,Prop))
+    @doc """
+    Adds a setup function to the property which will be called before the
+    first test. This function has to return a finalize function of arity 0,
+    which should return the atom `:ok`, that will be called after the last test.
+    It is possible to use multiple `property_setup` macros on the same property.
+    """
+    defmacro property_setup(setup_fun, prop) do
+      quote do
+        :proper.setup(unquote(setup_fun), unquote(prop))
+      end
+    end
+
     @doc """
     This produces a specialization of a generator, encoded as
     a binding of form `x <- type` (as in the let macro).

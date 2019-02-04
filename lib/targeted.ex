@@ -124,20 +124,12 @@ defmodule PropCheck.TargetedPBT do
     end
   end
 
-  # -define(SETUP(SetupFun,Prop), proper:setup(SetupFun,Prop))
-  # For backward compatibility with the scientific papers.
-  @doc false
-  defmacro setup(setup_fun, prop) do
-    quote do
-      :proper.setup(unquote(setup_fun), unquote(prop))
-    end
-  end
 
   # For backward compatibility with the scientific papers.
   @doc false
   defmacro strategy(strat, prop) do
     quote do
-      unquote(__MODULE__).setup(fn opts ->
+      PropCheck.property_setup(fn opts ->
         :proper_target.use_strategy(unquote(strat), opts)
         &:proper_target.cleanup_strategy/0
       end, unquote(prop))
