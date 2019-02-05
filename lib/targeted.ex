@@ -111,10 +111,6 @@ defmodule PropCheck.TargetedPBT do
   end
 
   # -define(TARGET(TMap), proper_target:targeted(make_ref(), TMap)).
-  # -define(STRATEGY(Strat, Prop), ?SETUP(fun (Opts) ->
-  #       proper_target:use_strategy(Strat, Opts),
-  #       fun proper_target:cleanup_strategy/0
-  #   end, Prop)).
 
   # For backward compatibility with the scientific papers.
   @doc false
@@ -126,12 +122,16 @@ defmodule PropCheck.TargetedPBT do
 
 
   # For backward compatibility with the scientific papers.
+  # -define(STRATEGY(Strat, Prop), ?SETUP(fun (Opts) ->
+  #       proper_target:use_strategy(Strat, Opts),
+  #       fun proper_target:cleanup_strategy/0
+  #   end, Prop)).
   @doc false
   defmacro strategy(strat, prop) do
     quote do
       PropCheck.property_setup(fn opts ->
         :proper_target.use_strategy(unquote(strat), opts)
-        &:proper_target.cleanup_strategy/0
+        &(:proper_target.cleanup_strategy/0)
       end, unquote(prop))
     end
   end
