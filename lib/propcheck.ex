@@ -591,7 +591,9 @@ defmodule PropCheck do
     # -define(SETUP(SetupFun,Prop), proper:setup(SetupFun,Prop))
     @doc """
     Adds a setup function to the property which will be called before the
-    first test. This function has to return a finalize function of arity 0,
+    first test.
+
+    This function has to return a finalize function of arity 0,
     which should return the atom `:ok`, that will be called after the last test.
     It is possible to use multiple `property_setup` macros on the same property.
     """
