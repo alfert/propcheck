@@ -114,7 +114,6 @@ defmodule PropCheck.Test.LevelTest do
             true
           end
       end
-      |> collect(length(path))
     end
   end
 
