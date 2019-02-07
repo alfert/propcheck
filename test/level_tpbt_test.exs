@@ -33,9 +33,6 @@ defmodule PropCheck.Test.LevelTest do
       (prev_path, _temperature) when is_list(prev_path) ->
           let next_steps <- vector(20, step()), do:
             prev_path ++ next_steps
-      ({:"$used",  prev_path, _another_path}, _temperature) when is_list(prev_path) ->
-       let next_steps <- vector(20, step()), do:
-          prev_path ++ next_steps
     end
   end
 
