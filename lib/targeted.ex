@@ -116,7 +116,9 @@ defmodule PropCheck.TargetedPBT do
   @doc false
   defmacro target(tmap) do
     quote do
-      :proper_target.targeted(make_ref(), unquote(tmap))
+      tmap_val = unquote(tmap)
+      Logger.debug "target: tmap = #{inspect tmap_val}"
+      :proper_target.targeted(make_ref(), tmap_val)
     end
   end
 
@@ -143,8 +145,11 @@ defmodule PropCheck.TargetedPBT do
   defmacro forall_sa({:<-, _, [var, rawtype]}, do: prop_body) do
     quote do
       strategy(:proper_sa,
-        :proper.forall(unquote(rawtype),
-          fn(unquote(var)) -> unquote(prop_body) end))
+        forall unquote(var) <- unquote(rawtype) do
+          unquote(prop_body)
+        end)
+        # :proper.forall(unquote(rawtype),
+        #   fn(unquote(var)) -> unquote(prop_body) end))
     end
   end
 
