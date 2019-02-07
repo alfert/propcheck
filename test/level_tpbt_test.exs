@@ -101,7 +101,9 @@ defmodule PropCheck.Test.LevelTest do
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
-    forall_targeted path <- path_gen() do
+    # When using a proper-derived generator, we might have to search longer to search for
+    # a successful path.
+    numtests(50_000, forall_targeted path <- path_gen() do
       case Level.follow_path(entrance, path, level) do
         {:exited, _} -> false
         pos ->
@@ -114,7 +116,7 @@ defmodule PropCheck.Test.LevelTest do
             true
           end
       end
-    end
+    end) |> fails()
   end
 
   # prop_exit_targeted(LevelData) ->
