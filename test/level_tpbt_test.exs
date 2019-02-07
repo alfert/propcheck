@@ -96,12 +96,12 @@ defmodule PropCheck.Test.LevelTest do
   #              end).
 
 
-  property "Target PBT Level 1 with forall_sa", [:verbose] do
+  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
-    forall_sa path <- target(path_gen_sa()) do
+    forall_targeted path <- path_gen() do
       case Level.follow_path(entrance, path, level) do
         {:exited, _} -> false
         pos ->
