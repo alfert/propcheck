@@ -111,35 +111,29 @@ defmodule PropCheck.TargetedPBT do
   end
 
   # -define(TARGET(TMap), proper_target:targeted(make_ref(), TMap)).
-  # -define(STRATEGY(Strat, Prop), ?SETUP(fun (Opts) ->
-  #       proper_target:use_strategy(Strat, Opts),
-  #       fun proper_target:cleanup_strategy/0
-  #   end, Prop)).
 
   # For backward compatibility with the scientific papers.
   @doc false
   defmacro target(tmap) do
     quote do
-      :proper_target.targeted(make_ref(), unquote(tmap))
+      tmap_val = unquote(tmap)
+      Logger.debug "target: tmap = #{inspect tmap_val}"
+      :proper_target.targeted(make_ref(), tmap_val)
     end
   end
 
-  # -define(SETUP(SetupFun,Prop), proper:setup(SetupFun,Prop))
-  # For backward compatibility with the scientific papers.
-  @doc false
-  defmacro setup(setup_fun, prop) do
-    quote do
-      :proper.setup(unquote(setup_fun), unquote(prop))
-    end
-  end
 
   # For backward compatibility with the scientific papers.
+  # -define(STRATEGY(Strat, Prop), ?SETUP(fun (Opts) ->
+  #       proper_target:use_strategy(Strat, Opts),
+  #       fun proper_target:cleanup_strategy/0
+  #   end, Prop)).
   @doc false
   defmacro strategy(strat, prop) do
     quote do
-      unquote(__MODULE__).setup(fn opts ->
+      PropCheck.property_setup(fn opts ->
         :proper_target.use_strategy(unquote(strat), opts)
-        &:proper_target.cleanup_strategy/0
+        &(:proper_target.cleanup_strategy/0)
       end, unquote(prop))
     end
   end
@@ -151,8 +145,11 @@ defmodule PropCheck.TargetedPBT do
   defmacro forall_sa({:<-, _, [var, rawtype]}, do: prop_body) do
     quote do
       strategy(:proper_sa,
-        :proper.forall(unquote(rawtype),
-          fn(unquote(var)) -> unquote(prop_body) end))
+        forall unquote(var) <- unquote(rawtype) do
+          unquote(prop_body)
+        end)
+        # :proper.forall(unquote(rawtype),
+        #   fn(unquote(var)) -> unquote(prop_body) end))
     end
   end
 
