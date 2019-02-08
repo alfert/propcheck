@@ -33,9 +33,6 @@ defmodule PropCheck.Test.LevelTest do
       (prev_path, _temperature) when is_list(prev_path) ->
           let next_steps <- vector(20, step()), do:
             prev_path ++ next_steps
-      ({:"$used",  prev_path, _another_path}, _temperature) when is_list(prev_path) ->
-       let next_steps <- vector(20, step()), do:
-          prev_path ++ next_steps
     end
   end
 
@@ -99,12 +96,14 @@ defmodule PropCheck.Test.LevelTest do
   #              end).
 
 
-  property "Target PBT Level 1 with forall_sa", [:verbose] do
+  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
-    forall_sa path <- target(path_gen_sa()) do
+    # When using a proper-derived generator, we might have to search longer to search for
+    # a successful path.
+    numtests(50_000, forall_targeted path <- path_gen() do
       case Level.follow_path(entrance, path, level) do
         {:exited, _} -> false
         pos ->
@@ -117,8 +116,7 @@ defmodule PropCheck.Test.LevelTest do
             true
           end
       end
-      |> collect(length(path))
-    end
+    end) |> fails()
   end
 
   # prop_exit_targeted(LevelData) ->
