@@ -17,6 +17,78 @@ defmodule PropCheck.TargetedPBT do
         end
       end
 
+  ## Some thoughts on strategies how to use targeted properties
+
+  Targeted PBT is a rather new technology and really fascinating. But when should you to use it and when are
+  the classical technologies more suitable? Here are some thoughts on that topic based on the
+  limited experience we currently have.
+
+  If you want to test interesting parts of your algorithms or data structures, you would typically invest
+  into more elaborated generators. If you are working on binary trees and youd need more lefty trees then a new
+  generator is required that somehow generates trees of that particular shape. The big advantage here is that
+  you can use all of the standard functions and macros, in particular for collectings statistics about the quality
+  of the generated data (e.g. by `PropCheck.collect/2` and its friends).
+
+  Another approach would be to use targeted properties
+  as shown in `targeted_tree_test.exs`: You use a rather simple data generator and define a measuring function
+  on the data to express the "leftiness" of the tree. Equiped with that, a target property searches automatically
+  for data the maxinizes (or minimizes) the measuring function (often called utility value or function). Not
+  inventing a clever data generators comes with a price - there is no free lunch...
+  * You need some _relevant_ property of your generated data which you can measure, i.e. you need a function
+    from your data to the real numbers. This is not allways possible.
+  * Searching for an optimum takes more time than simply generating random data: the run-time of the properties
+    increases.
+  * Data collecting functions and macros such as `PropCheck.collect/2` are currently not available. This
+    it the reason why in `targeted_tree_test.exs` we use print-outs to show and verify the generated data.
+  * Counter examples and shrinking are not abailable
+  * The current implementaion in PropEr does not work well together with recursive data generators, which
+    renders the approach unusable for state-based PBT.
+
+  But, of course, you gain also something. You can use rather straight data generators and let the searching
+  algorithm find the interesting parts with respect to the measuring function.
+
+  In `level_tpbt_test.exs` a very different approach is used. Here the basic idea is to verify that a data
+  structure (here: a maze in a computer game) has a proper structure (here: there exists at least one valid
+  path from the entrance to the exit of the maze). The function to minimize is the distance from the end of
+  the path to the exit position. The searching alorithm then optimizes the path length for a minimal
+  distance until the exit is found. For more complex mazes, it is required to adopt the amount of `search_steps`
+  and the `neighbor_hood` function to find the exit. They takes over the role `numtests` and `resize` to
+  enlarge or refit the generated data for the next search step.
+
+  You can combine approaches by using a classical generator for e.g. generating a new maze, and then use
+  inside a targeted property to find a path to the maze's exit. This would be roughly like this:
+
+      forall maze <- maze_generator() do
+        exists p <- path_generator() do
+          pos = Maze.follow_path(maze, maze.entry_pos, p)
+          uv = distance(pos, maze.exit_pos)
+          minimize(uv)
+          pos == maze.exit_pos
+        end
+      end
+
+
+  ## How the targeted properties relate
+
+  The targeted macros `forall_targeted`, `exists` and `not_exists` are related to each other.
+  The universal laws of quantors from first-order logic apply here as well (cf.
+  [provable entities in first-order logic](https://en.wikipedia.org/wiki/First-order_logic#Provable_identities))
+  and explain why some conditions in the test examples are constructed the way they are.
+
+  In the following, we use the variable `x`, the generator `x_gen()` and a boolean predicate `p()`. The
+  term `<==>` means that the expression on both sides are equivalent.
+
+      forall_targeted x <- x_gen(), do: p(x)
+         <==> not_exists x <- x_gen(), do: not(p(x))
+
+      exists x <- x_gen(), do: p(x)
+         <==> forall_targeted x <- x_gen(), do: not(p(x))
+              |> fails()
+
+      not_exists x <- x_gen(), do: p(x)
+         <==> forall_targeted x <- x_gen(), do: not(p(x))
+
+
   ## Options
 
   For targeted properties exists a new option:
@@ -27,7 +99,7 @@ defmodule PropCheck.TargetedPBT do
     combine a regular property with search strategy, e.g. generating a configuration parameter
     and search for specific properties to hold depending on that parameter.
 
-  Most of the documentation is taken directly from PropEr.
+  Some of the documentation is taken directly from PropEr.
 
   """
 
@@ -35,7 +107,9 @@ defmodule PropCheck.TargetedPBT do
 
   @doc """
   The `exists` macro uses the targeted PBT component of PropEr to try
-  to find one instance of `xs` that makes the `prop` return `true`. If such a `xs`
+  to find one instance of `xs` that makes the `prop` return `true`.
+
+  If such a `xs`
   is found, the property passes. Note that there is no counterexample if no
   such `xs` could be found.
   """
@@ -48,7 +122,9 @@ defmodule PropCheck.TargetedPBT do
 
   @doc """
   The `not_exists` macro uses the targeted PBT component of PropEr to try
-  to find one instance of `xs` that makes the `prop` return `false`. If such a `xs`
+  to find one instance of `xs` that makes the `prop` return `false`.
+
+  If such a `xs`
   is found the property passes. Note that there is no counterexample if no
   such `xs` could be found.
   """
@@ -60,8 +136,9 @@ defmodule PropCheck.TargetedPBT do
 
   @doc """
   The `forall_targeted` macros uses the targeted PBT component of PropEr to try
-  that all instances of `xs` fullfill porperty `prop`. In contrast to `exists`, often
-  the property here is negated.
+  that all instances of `xs` fullfill porperty `prop`.
+
+  In contrast to `exists`, often the property here is negated.
   """
   defmacro forall_targeted({op, _, [var, rawtype]}, do: prop_body) when op in @in_ops do
     quote do
@@ -89,8 +166,9 @@ defmodule PropCheck.TargetedPBT do
 
   @doc """
   This uses the neighborhood function `nf` instead of PropEr's
-  constructed neighborhood function for this generator. The neighborhood
-  function `fun` should be of type
+  constructed neighborhood function for this generator.
+
+  The neighborhood function `nf` should be of type
   `fun(any(), {Depth :: number(), Temperature::float()} -> any()`
   """
   defmacro user_nf(generator, nf) do
@@ -102,7 +180,9 @@ defmodule PropCheck.TargetedPBT do
   # -define(USERMATCHER(Type, Matcher), proper_gen_next:set_matcher(Type, Matcher)).
   @doc """
   This overwrites the structural matching of PropEr for the generator with the user provided
-  `matcher` function. The matcher should be of type `proper_gen_next:matcher()`
+  `matcher` function.
+
+  The `matcher` should be of type `proper_gen_next:matcher()`
   """
   defmacro user_matcher(generator, matcher) do
     quote do
