@@ -98,7 +98,7 @@ defmodule PropCheck.Test.LevelTest do
   # This property uses `forall_targed`, therefore the the condition checked inside
   # the property is negated and it must be negated outside (see docs of `prop_exit/1` for
   # more details).
-  # When using a proper-derived generator, we might have to search longer to search for
+  # When using a proper-derived generator, we might have to search longer to find
   # a successful path. Therefore, we increase the amount of search_steps. For more complex
   # situations, e.g. for level 2, the size of the generated paths may become larger.
   property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose, search_steps: 2_0000] do
