@@ -98,14 +98,16 @@ defmodule PropCheck.Test.LevelTest do
   # This property uses `forall_targed`, therefore the the condition checked inside
   # the property is negated and it must be negated outside (see docs of `prop_exit/1` for
   # more details).
-  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose] do
+  # When using a proper-derived generator, we might have to search longer to search for
+  # a successful path. Therefore, we increase the amount of search_steps. For more complex
+  # situations, e.g. for level 2, the size of the generated paths may become larger.
+  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose, search_steps: 2_0000] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
-    # When using a proper-derived generator, we might have to search longer to search for
-    # a successful path.
-    numtests(50_000, forall_targeted path <- path_gen() do
+
+    forall_targeted path <- path_gen() do
       case Level.follow_path(entrance, path, level) do
         {:exited, _} -> false
         pos ->
@@ -118,7 +120,8 @@ defmodule PropCheck.Test.LevelTest do
             true
           end
       end
-    end) |> fails()
+    end
+    |> fails()
   end
 
   # prop_exit_targeted(LevelData) ->
