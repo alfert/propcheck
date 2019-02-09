@@ -32,6 +32,9 @@ when running `mix test`. You find relevant information here:
 * for property testing of state-based systems take a loot at `PropCheck.StateM.DSL`
   for the new DSL (since Propcheck 1.1.0-rc1), which is a layer on top of
   `PropCheck.StateM`.
+* The new targeted property based testing approach (TBPT) employing an automated
+  search strategy towards more interesting test data is described in 
+  `PropCheck.TargetedPBT`.
 
 For PropCheck, there is only one configuration option. All counter examples found
 are stored in a file, the name of which is configurable in `mix.exs` as part of
