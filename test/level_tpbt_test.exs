@@ -15,7 +15,7 @@ defmodule PropCheck.Test.LevelTest do
 
   def path_gen(), do: list(step())
 
-  def path_gen_sa(), do: %{first: path_gen(), next: path_next_sa()}
+  def path_gen_sa(), do: %{first: path_gen(), next: path_next()}
 
   @spec path_next() :: ([Level.step], any() -> PropCheck.BasicTypes.t)
   def path_next() do
@@ -23,16 +23,6 @@ defmodule PropCheck.Test.LevelTest do
       (prev_path, _temperature) when is_list(prev_path) ->
         let next_steps <- vector(20, step()), do:
           prev_path ++ next_steps
-    end
-  end
-
-  # this is different from the Erlang example code in level.erl and
-  # seems to reveal an internal implementation detail.
-  def path_next_sa() do
-    fn
-      (prev_path, _temperature) when is_list(prev_path) ->
-          let next_steps <- vector(20, step()), do:
-            prev_path ++ next_steps
     end
   end
 
