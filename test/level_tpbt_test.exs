@@ -15,7 +15,7 @@ defmodule PropCheck.Test.LevelTest do
 
   def path_gen(), do: list(step())
 
-  def path_gen_sa(), do: %{first: path_gen(), next: path_next_sa()}
+  def path_gen_sa(), do: %{first: path_gen(), next: path_next()}
 
   @spec path_next() :: ([Level.step], any() -> PropCheck.BasicTypes.t)
   def path_next() do
@@ -23,16 +23,6 @@ defmodule PropCheck.Test.LevelTest do
       (prev_path, _temperature) when is_list(prev_path) ->
         let next_steps <- vector(20, step()), do:
           prev_path ++ next_steps
-    end
-  end
-
-  # this is different from the Erlang example code in level.erl and
-  # seems to reveal an internal implementation detail.
-  def path_next_sa() do
-    fn
-      (prev_path, _temperature) when is_list(prev_path) ->
-          let next_steps <- vector(20, step()), do:
-            prev_path ++ next_steps
     end
   end
 
@@ -52,7 +42,16 @@ defmodule PropCheck.Test.LevelTest do
   #             _ -> true
   #           end).
 
-  # This is a classic parameterized property
+  # This is function taking the test data as parameter and applying
+  # a classic property. The property tests for each path, at least
+  # one connects the entrance with the exit. The construction uses
+  # a negated logic using forall following the laws of logic quantors:
+  #        exists x in xs suchthat p(x) == true
+  # <==>   not (forall x in xs holds p(x) == false)
+  #
+  # Therefore, the property must be used together with `fails/1`,
+  # i.e. everything is ok if the property fails and the counter example
+  # is the path found from entrance to exit.
   def prop_exit(level_data) do
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
@@ -65,7 +64,7 @@ defmodule PropCheck.Test.LevelTest do
   end
 
   # This property fails, this means that in every situation a path was found
-  # ==> negated logic of the property
+  # ==> see docs of `prop_exit/1`
   property "Default PBT Level 0" do
     prop_exit(Level.level0())
     |> fails()
@@ -96,14 +95,19 @@ defmodule PropCheck.Test.LevelTest do
   #              end).
 
 
-  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose] do
+  # This property uses `forall_targed`, therefore the the condition checked inside
+  # the property is negated and it must be negated outside (see docs of `prop_exit/1` for
+  # more details).
+  # When using a proper-derived generator, we might have to search longer to find
+  # a successful path. Therefore, we increase the amount of search_steps. For more complex
+  # situations, e.g. for level 2, the size of the generated paths may become larger.
+  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose, search_steps: 2_0000] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
-    # When using a proper-derived generator, we might have to search longer to search for
-    # a successful path.
-    numtests(50_000, forall_targeted path <- path_gen() do
+
+    forall_targeted path <- path_gen() do
       case Level.follow_path(entrance, path, level) do
         {:exited, _} -> false
         pos ->
@@ -116,7 +120,8 @@ defmodule PropCheck.Test.LevelTest do
             true
           end
       end
-    end) |> fails()
+    end
+    |> fails()
   end
 
   # prop_exit_targeted(LevelData) ->
