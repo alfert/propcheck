@@ -1,5 +1,9 @@
 # PropCheck Changelog
 
+## 1.1.4
+* Fixes an issue with the setup of regular and targeted properties rendering 1.1.3 unusable
+* Enhanced documentation for targeted properties
+
 ## 1.1.3
 * Better command generator with improved shrinking for complex argument generations. 
 * Support for map-generator, thanks to [https://github.com/IRog](https://github.com/IRog)
