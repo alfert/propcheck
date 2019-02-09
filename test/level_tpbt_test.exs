@@ -42,7 +42,16 @@ defmodule PropCheck.Test.LevelTest do
   #             _ -> true
   #           end).
 
-  # This is a classic parameterized property
+  # This is function taking the test data as parameter and applying
+  # a classic property. The property tests for each path, at least
+  # one connects the entrance with the exit. The construction uses
+  # a negated logic using forall following the laws of logic quantors:
+  #        exists x in xs suchthat p(x) == true
+  # <==>   not (forall x in xs holds p(x) == false)
+  #
+  # Therefore, the property must be used together with `fails/1`,
+  # i.e. everything is ok if the property fails and the counter example
+  # is the path found from entrance to exit.
   def prop_exit(level_data) do
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
@@ -55,7 +64,7 @@ defmodule PropCheck.Test.LevelTest do
   end
 
   # This property fails, this means that in every situation a path was found
-  # ==> negated logic of the property
+  # ==> see docs of `prop_exit/1`
   property "Default PBT Level 0" do
     prop_exit(Level.level0())
     |> fails()
@@ -86,6 +95,9 @@ defmodule PropCheck.Test.LevelTest do
   #              end).
 
 
+  # This property uses `forall_targed`, therefore the the condition checked inside
+  # the property is negated and it must be negated outside (see docs of `prop_exit/1` for
+  # more details).
   property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
