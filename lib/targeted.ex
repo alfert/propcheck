@@ -182,7 +182,7 @@ defmodule PropCheck.TargetedPBT do
   This overwrites the structural matching of PropEr for the generator with the user provided
   `matcher` function.
 
-  The `matcher` should be of type `proper_gen_next:matcher()`
+  The `matcher` should be of type `:proper_gen_next.matcher()`
   """
   defmacro user_matcher(generator, matcher) do
     quote do
