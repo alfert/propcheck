@@ -11,4 +11,13 @@ defmodule PropertiesTest do
       is_integer(n)
     end
   end
+
+  property "can use let-like assignment" do
+    forall [
+      m <- integer(),
+      n <- integer()
+    ] do
+      is_integer(m) and is_integer(n)
+    end
+  end
 end
