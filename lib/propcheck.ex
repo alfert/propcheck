@@ -346,6 +346,16 @@ defmodule PropCheck do
         ...>)
         true
 
+    Similar to `let/2`, multiple types can also be combined in a list of bindings:
+
+        iex> use PropCheck
+        iex> quickcheck(
+        ...> forall [n <- nat(), l <- list(nat())] do
+        ...>   n * Enum.sum(l) >= 0
+        ...> end
+        ...>)
+        true
+
     `forall` allows using `ExUnit` assertions. By default (`:quiet`), no output
     is generated if an assertion does not hold:
 
@@ -554,6 +564,18 @@ defmodule PropCheck do
 
         iex> use PropCheck
         iex> even_factor = let [n <- nat(), m <- nat()] do
+        ...>  n * m * 2
+        ...> end
+        iex> quickcheck(
+        ...>   forall n <- even_factor do
+        ...>     rem(n, 2) == 0
+        ...>   end)
+        true
+
+    Similar to `forall/2`, multiple types can also be put into tuples or lists:
+
+        iex> use PropCheck
+        iex> even_factor = let {n, m} <- {nat(), nat()} do
         ...>  n * m * 2
         ...> end
         iex> quickcheck(
