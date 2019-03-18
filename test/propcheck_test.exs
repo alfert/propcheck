@@ -63,26 +63,37 @@ defmodule PropcheckTest do
     end) == "[1,2,3]\n"
   end
 
-  test "can use assertion in forall" do
+  describe "forall" do
     use PropCheck
-    assert capture_io(fn ->
-      quickcheck(
-        forall _x <- :not_ok, [:verbose] do
-          assert false
-        end
-      )
-    end) =~ "Expected truthy, got false"
-  end
 
-  test "can use assertion in forall without output" do
-    use PropCheck
-    refute capture_io(fn ->
-      quickcheck(
-        forall _x <- :not_ok, [:quiet] do
+    test "can use assertion in forall" do
+      assert capture_io(fn ->
+        quickcheck(
+          forall _x <- :not_ok, [:verbose] do
           assert false
-        end
-      )
-    end) =~ "Expected truthy, got false"
+          end
+        )
+        end) =~ "Expected truthy, got false"
+    end
+
+    test "can use assertion in forall without output" do
+      refute capture_io(fn ->
+        quickcheck(
+          forall _x <- :not_ok, [:quiet] do
+          assert false
+          end
+        )
+        end) =~ "Expected truthy, got false"
+    end
+
+    property "can use let-like assignment in forall" do
+      forall [
+        m <- integer(),
+        n <- integer()
+      ] do
+        is_integer(m) and is_integer(n)
+      end
+    end
   end
 
   def recode_vars({:var, line, n}), do:
