@@ -614,14 +614,13 @@ defmodule PropCheck do
     end
 
     defmacro let([{:<-, _, _} | _rest] = bindings, [{:do, gen}]) do
-        bound = let_bind(bindings) |> Enum.reverse
-        vars = bound |> Enum.map(&(elem(&1, 0)))
-        raw_types = bound |> Enum.map(&(elem(&1, 1)))
+        {vars, raw_types} = bindings |> let_bind() |> Enum.reverse() |> Enum.unzip()
         quote do
           :proper_types.bind(unquote(raw_types),
             fn(unquote(vars)) -> unquote(gen) end, false)
         end
     end
+
     defp let_bind(_bind = {:<-, _, [var, rawtype]}), do: {var, rawtype}
     defp let_bind([{:<-, _, [var, rawtype]}]) do
       [{var, rawtype}]
