@@ -1,14 +1,14 @@
 defmodule PropCheck.FSM do
   @moduledoc """
   The finite state machine approach for stateful systems, which is closer
-  to Erlangs `gen_fsm` model.
+  to Erlang's `gen_fsm` model.
 
   This module defines the `proper_fsm` behaviour, useful for testing
   systems that can be modeled as finite state machines. That is, a finite
   collection of named states and transitions between them. `PropCheck.FSM` is
   closely related to `PropCheck.StateM` and is, in fact, implemented in
-  terms of that. Testcases generated using `PropCheck.FSM` will be on precisely
-  the same form as testcases generated using `PropCheck.StateM`. The
+  terms of that. Test cases generated using `PropCheck.FSM` will be on precisely
+  the same form as test cases generated using `PropCheck.StateM`. The
   difference lies in the way the callback modules are specified.
   The relation between `PropCheck.StateM` and `PropCheck.FSM` is similar
   to the one between `gen_server` and `gen_fsm` in OTP libraries.
@@ -31,7 +31,8 @@ defmodule PropCheck.FSM do
   atom specifying the name of the state, whereas the rest of the elements can
   be arbitrary terms specifying state attributes. For example, when
   implementing the fsm of an elevator which can reach n different floors, the
-  `state_name` for each floor could be `{:floor, k}, 1 <= k <= n`.<br/>
+  `state_name` for each floor could be `{:floor, k}, 1 <= k <= n`.
+
   `state_data` can be an arbitrary term, but is usually a record.
 
   ## Transitions between states
@@ -79,7 +80,7 @@ defmodule PropCheck.FSM do
                   s::type state_data) :: [transition]`
     <br>There should be one instance of this function for each reachable state
     `{state_name, attr1, ..., attrN}` of the finite state machine. The function
-    has similar beaviour to `state_name/1`, described above.
+    has similar behaviour to `state_name/1`, described above.
 
   ## The property used
 

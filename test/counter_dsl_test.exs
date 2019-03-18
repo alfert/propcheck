@@ -4,7 +4,7 @@ defmodule PropCheck.Test.CounterDSL do
   setups, to check that the DSL implementation is capable of shrinking
   failures due to ignoring the modulo features to a minimal set of steps.
 
-  The statemachine model of the counter has only three states:
+  The state machine model of the counter has only three states:
       * `init`: the counter is initialized
       * `zero`: the counter is reset to `0`
       * `one`: the counter has a value above `0`
@@ -48,7 +48,7 @@ defmodule PropCheck.Test.CounterDSL do
   end
 
   @tag will_fail: true
-  property "modulo counter does not increment inifinite times", [:verbose] do
+  property "modulo counter does not increment infinite times", [:verbose] do
     Logger.error "This property will fail in order to show the shrinking results"
     Logger.error "It is excluded from the set of test for the travis build"
     forall cmds <- commands(__MODULE__) do

@@ -88,7 +88,7 @@ defmodule PropCheck.Test.PingPongFSM do
   # no specific preconditions
   def precondition(_from, _target, _state, {:call, _m, _f, _a,}), do: true
 
-  # inprecise get_score due to async play-functions
+  # imprecise get_score due to async play-functions
   def postcondition(_from, _target, %__MODULE__{scores: scores},
                     {:call, _, :get_score, [player]}, res) do
     res <= scores[player]

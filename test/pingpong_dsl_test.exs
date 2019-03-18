@@ -1,6 +1,6 @@
 defmodule PropCheck.Test.PingPongDSL do
   @moduledoc """
-  Applying the  DSL for defining the state machine for property
+  Applying the DSL for defining the state machine for property
   testing the ping player interaction.
   """
 
@@ -131,7 +131,7 @@ defmodule PropCheck.Test.PingPongDSL do
     def args(state), do: fixed_list([known_name(state)])
     def pre(%__MODULE__{players: ps}, [name]), do: Enum.member?(ps, name)
     def post(%__MODULE__{scores: scores}, [name], result) do
-      # playing ping pong is asynchronuous, therefore the counter in scores
+      # playing ping pong is asynchronous, therefore the counter in scores
       # might not be updated properly: our model is eager (and synchronous), but
       # the real machinery might be updated later
       result <= Map.fetch!(scores, name)

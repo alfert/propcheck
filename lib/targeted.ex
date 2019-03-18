@@ -10,7 +10,7 @@ defmodule PropCheck.TargetedPBT do
   The typical structure for a targeted property looks as follows:
 
       property prop_target do          # Try to check that
-        exists input <- params do      # some input exists that fullfills the property.
+        exists input <- params do      # some input exists that fulfills the property.
             uv = sut.run(input)        # Do so by running SUT with input
             maximize(uv)               # and maximize its utility value
             uv < threshold             # up to some threshold, the property condition.
@@ -24,24 +24,24 @@ defmodule PropCheck.TargetedPBT do
   limited experience we currently have.
 
   If you want to test interesting parts of your algorithms or data structures, you would typically invest
-  into more elaborated generators. If you are working on binary trees and youd need more lefty trees then a new
+  into more elaborated generators. If you are working on binary trees and you need more lefty trees, then a new
   generator is required that somehow generates trees of that particular shape. The big advantage here is that
-  you can use all of the standard functions and macros, in particular for collectings statistics about the quality
+  you can use all of the standard functions and macros, in particular for collecting statistics about the quality
   of the generated data (e.g. by `PropCheck.collect/2` and its friends).
 
   Another approach would be to use targeted properties
   as shown in `targeted_tree_test.exs`: You use a rather simple data generator and define a measuring function
   on the data to express the "leftiness" of the tree. Equiped with that, a target property searches automatically
-  for data the maxinizes (or minimizes) the measuring function (often called utility value or function). Not
+  for data the maximizes (or minimizes) the measuring function (often called utility value or function). Not
   inventing a clever data generators comes with a price - there is no free lunch...
   * You need some _relevant_ property of your generated data which you can measure, i.e. you need a function
-    from your data to the real numbers. This is not allways possible.
+    from your data to the real numbers. This is not always possible.
   * Searching for an optimum takes more time than simply generating random data: the run-time of the properties
     increases.
   * Data collecting functions and macros such as `PropCheck.collect/2` are currently not available. This
     it the reason why in `targeted_tree_test.exs` we use print-outs to show and verify the generated data.
-  * Counter examples and shrinking are not abailable
-  * The current implementaion in PropEr does not work well together with recursive data generators, which
+  * Counter examples and shrinking are not available
+  * The current implementation in PropEr does not work well together with recursive data generators, which
     renders the approach unusable for state-based PBT.
 
   But, of course, you gain also something. You can use rather straight data generators and let the searching
@@ -50,7 +50,7 @@ defmodule PropCheck.TargetedPBT do
   In `level_tpbt_test.exs` a very different approach is used. Here the basic idea is to verify that a data
   structure (here: a maze in a computer game) has a proper structure (here: there exists at least one valid
   path from the entrance to the exit of the maze). The function to minimize is the distance from the end of
-  the path to the exit position. The searching alorithm then optimizes the path length for a minimal
+  the path to the exit position. The searching algorithm then optimizes the path length for a minimal
   distance until the exit is found. For more complex mazes, it is required to adopt the amount of `search_steps`
   and the `neighbor_hood` function to find the exit. They takes over the role `numtests` and `resize` to
   enlarge or refit the generated data for the next search step.
@@ -136,7 +136,7 @@ defmodule PropCheck.TargetedPBT do
 
   @doc """
   The `forall_targeted` macros uses the targeted PBT component of PropEr to try
-  that all instances of `xs` fullfill porperty `prop`.
+  that all instances of `xs` fulfill property `prop`.
 
   In contrast to `exists`, often the property here is negated.
   """
@@ -155,8 +155,8 @@ defmodule PropCheck.TargetedPBT do
     end
   end
   @doc """
-  This macro tells the search strategy to minize the value `fitness` and
-  is equivalent to `maximaize(-fitness)`.
+  This macro tells the search strategy to minimize the value `fitness` and
+  is equivalent to `maximize(-fitness)`.
   """
   defmacro minimize(fitness) do
     quote do

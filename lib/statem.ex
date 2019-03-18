@@ -15,14 +15,14 @@ defmodule PropCheck.StateM do
 
   ## The role of commands
 
-  Testcases generated for testing a stateful system are lists of symbolic API
+  Test cases generated for testing a stateful system are lists of symbolic API
   calls to that system. Symbolic representation has several benefits, which
   are listed here in increasing order of importance:
 
-   * Generated testcases are easier to read and understand.
-   * Failing testcases are easier to shrink.
+   * Generated test cases are easier to read and understand.
+   * Failing test cases are easier to shrink.
    * The generation phase is side-effect free and this results in
-    repeatable testcases, which is essential for correct shrinking.
+    repeatable test cases, which is essential for correct shrinking.
 
   Since the actual results of symbolic calls are not known at generation time,
   we use symbolic variables of type `t:symb_var/0` to refer to them.
@@ -113,7 +113,7 @@ defmodule PropCheck.StateM do
   state machine when commands are executed sequentially, it is possible to
   move to parallel testing. The same state machine can be used to generate
   command sequences that will be executed in parallel to test for race
-  conditions. A parallel testcase (`t:parallel_testcase/0` ) consists of
+  conditions. A parallel test case (`t:parallel_testcase/0` ) consists of
   a sequential and a parallel component. The sequential component is a
   command sequence that is run first to put the system in a random state.
   The parallel component is a list containing 2 command sequences to be
@@ -136,7 +136,7 @@ defmodule PropCheck.StateM do
   on screen to inform the user. This usually means that preconditions need
   to become less strict for parallel testing to work.
 
-  After running a parallel testcase, PropEr uses the state machine
+  After running a parallel test case, PropEr uses the state machine
   specification to check if the results observed could have been produced by
   a possible serialization of the parallel component. If no such serialization
   is possible, then an atomicity violation has been detected. In this case,
@@ -158,7 +158,7 @@ defmodule PropCheck.StateM do
   under test should be instrumented with `erlang:yield/0` calls to the
   scheduler.
 
-  ## Acknowldgements
+  ## Acknowledgments
 
   Very much of the documentation is immediately taken from the
   `proper` API documentation.
@@ -215,7 +215,7 @@ defmodule PropCheck.StateM do
   Testing will be stopped in case the `constraint_tries` limit is reached
   (see the `Options` section in the {@link proper} module documentation).
   Preconditions are also important for correct shrinking of failing
-  testcases. When shrinking command sequences, we try to eliminate commands
+  test cases. When shrinking command sequences, we try to eliminate commands
   that do not contribute to failure, ensuring that all preconditions still
   hold. Validating preconditions is necessary because during shrinking we
   usually attempt to perform a call with the system being in a state
@@ -257,7 +257,7 @@ defmodule PropCheck.StateM do
 
   @doc """
   A special PropEr type which generates random command sequences,
-  according to an absract state machine specification.
+  according to an abstract state machine specification.
 
   The function takes as
   input the name of a callback module, which contains the state machine
@@ -299,8 +299,8 @@ defmodule PropCheck.StateM do
   end
 
   @doc """
-  A special PropEr type which generates parallel testcases,
-  according to an absract state machine specification.
+  A special PropEr type which generates parallel test cases,
+  according to an abstract state machine specification.
 
   The function takes as
   input the name of a callback module, which contains the state machine
@@ -350,14 +350,14 @@ defmodule PropCheck.StateM do
   Similar to `run_commands/2`, but also accepts an environment,
   used for symbolic variable evaluation during command execution. The
   environment consists of `{key::atom, value::any}` pairs. Keys may be
-  used in symbolic variables (i.e. `{:var, key}`) whithin the command sequence
+  used in symbolic variables (i.e. `{:var, key}`) within the command sequence
   `cmds`. These symbolic variables will be replaced by their corresponding
   `value` during command execution.
   """
   defdelegate run_commands(mod, cmds, env), to: :proper_statem
 
   @doc """
-  Runs a given parallel testcase according to the state machine
+  Runs a given parallel test case according to the state machine
   specified in `mod`.
 
   The result is a triple of the form
@@ -367,7 +367,7 @@ defmodule PropCheck.StateM do
     sequential component.
   * `Parallel_history` contains the execution history of each of the
     concurrent tasks.
-  * `Result` specifies the outcome of the attemp to serialize command
+  * `Result` specifies the outcome of the attempt to serialize command
     execution, based on the results observed. It can be one of the following:
     <ul><li> `ok` <li> `no_possible_interleaving` </ul>
   """

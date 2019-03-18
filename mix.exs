@@ -24,7 +24,7 @@ defmodule Propcheck.Mixfile do
   defp description do
     """
     PropCheck provides property based testing and is an Elixir layer around
-    PropEr. It is also inspired by Quvic's QuickCheck Elixir library.
+    PropEr. It is also inspired by Quviq's QuickCheck Elixir library.
     """
   end
 

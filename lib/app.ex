@@ -11,7 +11,7 @@ defmodule PropCheck.App do
 
     children = [
       # Define workers and child supervisors to be supervised
-      # worker(Propcheck.Worker, [arg1, arg2, arg3])
+      # worker(PropCheck.Worker, [arg1, arg2, arg3])
       worker(PropCheck.CounterStrike,
         [Mix.counter_example_file(), [name: PropCheck.CounterStrike]])
     ]

@@ -55,7 +55,7 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
-  defmodule DSLLetTest do # shrinks propery
+  defmodule DSLLetTest do # shrinks properly
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM.DSL
@@ -115,7 +115,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     def precondition(_state, _call), do: true
 
     @tag will_fail: true
-    property "let shrinks in Proper's native SM", [numtests: 1000] do
+    property "let shrinks in PropEr's native SM", [numtests: 1000] do
       forall cmds <- commands(__MODULE__) do
           {history, state, result} = run_commands(__MODULE__, cmds)
           (result == :ok)

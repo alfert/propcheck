@@ -1,6 +1,6 @@
 defmodule PropCheck.Mix do
-
   @moduledoc false
+
   def counter_example_file() do
     default_path =
       Mix.Project.build_path()
@@ -73,7 +73,5 @@ defmodule Mix.Tasks.Propcheck do
         _ -> Mix.Shell.IO.error("Could not open counter examples file #{filename}")
       end
     end
-
   end
-
 end
