@@ -94,6 +94,24 @@ defmodule PropcheckTest do
         is_integer(m) and is_integer(n)
       end
     end
+
+    test "syntax errors are reported" do
+      assert_raise ArgumentError, fn ->
+        Code.compile_string("""
+          use PropCheck
+
+          forall [n operator nat()], do: true
+        """) =~ "Usage:"
+      end
+
+      assert_raise ArgumentError, fn ->
+        Code.compile_string("""
+          use PropCheck
+
+          forall {n <- nat()}, do: true
+        """) =~ "Usage:"
+      end
+    end
   end
 
   def recode_vars({:var, line, n}), do:

@@ -373,29 +373,49 @@ defmodule PropCheck do
     @in_ops [:<-, :in]
     defmacro forall(binding, opts \\ [:quiet], property)
     defmacro forall({op, _, [var, rawtype]}, opts, do: prop) when op in @in_ops do
-        quote do
-          :proper.forall(
-            unquote(rawtype),
-            fn(unquote(var)) ->
-              try do
-                unquote(prop)
-              rescue
-                e in ExUnit.AssertionError ->
-                  stacktrace = System.stacktrace
-                  if :verbose in unquote(opts) do
-                    e |> ExUnit.AssertionError.message() |> IO.write()
-                    formatted = Exception.format_stacktrace(stacktrace)
-                    IO.puts("stacktrace:\n#{formatted}")
-                  end
-                  false
-                e ->
-                  stacktrace = System.stacktrace
-                  reraise e, stacktrace
-              end
-            end)
-        end
+      forall1(var, rawtype, opts, prop)
     end
-    defmacro forall(_binding, _opts, _property), do: syntax_error("var <- generator, do: prop")
+
+    defmacro forall(bindings, opts, do: prop) do
+      {vars, rawtypes} = bindings |> forall_bind() |> Enum.unzip()
+      forall1(vars, rawtypes, opts, prop)
+    end
+
+    defp forall1(var, rawtype, opts, prop) do
+      quote do
+        :proper.forall(
+          unquote(rawtype),
+          fn(unquote(var)) ->
+            try do
+              unquote(prop)
+            rescue
+              e in ExUnit.AssertionError ->
+                stacktrace = System.stacktrace
+                if :verbose in unquote(opts) do
+                  e |> ExUnit.AssertionError.message() |> IO.write()
+                  formatted = Exception.format_stacktrace(stacktrace)
+                  IO.puts("stacktrace:\n#{formatted}")
+                end
+                false
+              e ->
+                stacktrace = System.stacktrace
+                reraise e, stacktrace
+            end
+          end)
+      end
+    end
+
+    defp forall_bind({op, _, [var, rawtype]}) when op in @in_ops do
+      {var, rawtype}
+    end
+
+    defp forall_bind(bindings) when is_list(bindings) do
+      Enum.map(bindings, &forall_bind/1)
+    end
+
+    defp forall_bind(_) do
+      syntax_error("var <- generator, do: prop")
+    end
 
     @doc """
     A property that is only tested if a condition is true.
