@@ -19,7 +19,8 @@ end
 
 ## Changes
 
-Relevant changes are documented in the [Changelog](CHANGELOG.md).
+Relevant changes are documented in the [Changelog](CHANGELOG.html), on [GitHub  
+follow this link](CHANGELOG.md).
 
 ## Basic Usage and Build Configuration
 PropCheck allows to define properties, which automatically executed via `ExUnit`
