@@ -1,6 +1,6 @@
 defmodule PropCheck.Test.Cache.DSL do
   @moduledoc """
-  Testing of the cache based on the EQC api and proper as backend.
+  Testing of the cache based on the EQC api and PropEr as backend.
   """
 
   use ExUnit.Case

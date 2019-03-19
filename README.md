@@ -1,7 +1,7 @@
 # PropCheck - Property based testing for Elixir
 
 `PropCheck` is a testing library, that provides a wrapper around PropEr, an Erlang
-based property testing framework in the spirit of QuickCheck. 
+based property testing framework in the spirit of QuickCheck.
 
 [![Build Status](https://travis-ci.org/alfert/propcheck.svg?branch=master)](https://travis-ci.org/alfert/propcheck)
 [![Hex.pm version](https://img.shields.io/hexpm/v/propcheck.svg)](https://hex.pm/packages/propcheck)
@@ -26,15 +26,15 @@ follow this link](CHANGELOG.md).
 PropCheck allows to define properties, which automatically executed via `ExUnit`
 when running `mix test`. You find relevant information here:
 
-* details about the `property` macro are found in `PropCheck.Properties`,  
+* details about the `property` macro are found in `PropCheck.Properties`,
 * details about how to specify the property conditions are documented in
   `PropCheck`,
 * the basic data generators are found in `PropCheck.BasicTypes`,
 * for property testing of state-based systems take a loot at `PropCheck.StateM.DSL`
-  for the new DSL (since Propcheck 1.1.0-rc1), which is a layer on top of
+  for the new DSL (since PropCheck 1.1.0-rc1), which is a layer on top of
   `PropCheck.StateM`.
 * The new targeted property based testing approach (TBPT) employing an automated
-  search strategy towards more interesting test data is described in 
+  search strategy towards more interesting test data is described in
   `PropCheck.TargetedPBT`.
 
 For PropCheck, there is only one configuration option. All counter examples found
@@ -51,7 +51,7 @@ end
 
 Per default, the counter examples file is stored in the build directory (`_build`),
 independent from the build environment, in the file `propcheck.ctex`. The file can
-be removed using `mix propcheck.clean`. Note that this task is only available if propcheck
+be removed using `mix propcheck.clean`. Note that this task is only available if PropCheck
 is also available in `:dev`. Otherwise, `MIX_ENV=test mix propcheck.clean` can be used.
 
 
@@ -77,11 +77,11 @@ QuickCheck with the possibility to add requirement tags):
 Rather new introductory resource are
 
 * [Fred Hebert's PropEr Testing](http://propertesting.com) and
-* Fred Hebert's book [Property-Based Testing With PropEr, Erlang and Elixir](https://pragprog.com/book/fhproper/property-based-testing-with-proper-erlang-and-elixir). 
-  This book explains the new approach of targeted property based testing (TPBT) very nicely 
-  and is way more approachable then the scientific papers regarding TPBT. Some of the 
-  Erlang only examples of the book are ported to Elixir and can be found in the test 
-  [test folder on GitHub](https://github.com/alfert/propcheck/tree/master/test). 
+* Fred Hebert's book [Property-Based Testing With PropEr, Erlang and Elixir](https://pragprog.com/book/fhproper/property-based-testing-with-proper-erlang-and-elixir).
+  This book explains the new approach of targeted property based testing (TPBT) very nicely
+  and is way more approachable then the scientific papers regarding TPBT. Some of the
+  Erlang only examples of the book are ported to Elixir and can be found in the test
+  [test folder on GitHub](https://github.com/alfert/propcheck/tree/master/test).
 
 In contrast to book, the free website is concerned with
 Erlang only. The Erlang examples translate easily into Elixir (beside

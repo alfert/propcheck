@@ -5,18 +5,18 @@
 * Enhanced documentation for targeted properties
 
 ## 1.1.3
-* Better command generator with improved shrinking for complex argument generations. 
+* Better command generator with improved shrinking for complex argument generations.
 * Support for map-generator, thanks to [https://github.com/IRog](https://github.com/IRog)
 * Support for targeted properties, a new feature of Proper 1.3
 * Requires at least Elixir 1.5
 
 ## 1.1.2
 * Proper v1.3.0 is supported (effectively, all 1.x versions are allowed
-  as depedency)
+  as dependency)
 
 ## 1.1.1
 * the weight callback for the DSL was incorrectly specified and documented. Thanks
-  to [https://github.com/adkron](https://github.com/adkron) 
+  to [https://github.com/adkron](https://github.com/adkron)
 
 ## 1.1.0
 * New command oriented DSL for testing stateful systems, inspired by EQC and
@@ -37,7 +37,7 @@
 
 ## 1.0.5
 * Allows to use `ExUnit` assertions as boolean conditions, thanks to [https://github.com/evnu](https://github.com/evnu)
-* `let` and `let_shrink` allow more than two parameters, thanks to [https://github.com/BinaryNoggin](https://github.com/BinaryNoggin) 
+* `let` and `let_shrink` allow more than two parameters, thanks to [https://github.com/BinaryNoggin](https://github.com/BinaryNoggin)
 * Errors, that aren't counter examples, are no longer stored as counter examples,  thanks to [https://github.com/evnu](https://github.com/evnu)
 * new feature `sample_shrink`, thanks to [https://github.com/evnu](https://github.com/evnu)
 * the examples for stateful testing use `GenServer.stop/0` for a reliable

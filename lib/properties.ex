@@ -23,7 +23,7 @@ defmodule PropCheck.Properties do
   is `:quiet` such that execution during ExUnit runs are silent, as normal
   unit tests are. You can change it e.g. to `:verbose` or setting the
   maximum size of the test data generated or what ever may be helpful. For
-  seeing the result of wrapper functions `PropCheck.aggregate/2` etc, the
+  seeing the result of wrapper functions `PropCheck.aggregate/2` etc., the
   verbose mode is required.
 
   ## Counter Examples

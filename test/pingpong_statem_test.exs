@@ -148,7 +148,7 @@ defmodule PropCheck.Test.PingPongStateM do
   def postcondition(_s, {:call, PingPongMaster, :play_tennis, [name]}, {:dead_player, name}), do: true
   def postcondition(_s, {:call, PingPongMaster, :play_football, [name]}, {:dead_player, name}), do: true
   def postcondition(s, {:call, PingPongMaster, :get_score, [name]}, result), do:
-    # playing ping pong is asynchronuous, therefore the counter in scores
+    # playing ping pong is asynchronous, therefore the counter in scores
     # might not be updated properly: our model is eager (and synchronous), but
     # the real machinery might be updated later
     result <= s.scores |> Map.fetch!(name)

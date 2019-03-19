@@ -4,7 +4,7 @@ defmodule PropCheck do
     using `proper` as base implementation. `PropCheck` supports many
     features of `PropEr`, but the automated generation of test data
     generators is only partially supported due to internal features of
-    `PropEr` focussing of Erlang only.
+    `PropEr` focusing of Erlang only.
 
     ## Using PropCheck
 
@@ -15,7 +15,7 @@ defmodule PropCheck do
     here, we directly use the `quickcheck` function, but typically you
     use the `property` macro instead to define test cases for `ExUnit`.
 
-    Also availables are the value generators which are imported directly
+    Also available are the value generators which are imported directly
     from `PropCheck.BasicTypes`.
 
     ## How to write properties
@@ -68,7 +68,7 @@ defmodule PropCheck do
 
     ## Program behaviour
 
-    When running in verbose mode (this is the default for `quickcheck`), each sucessful test
+    When running in verbose mode (this is the default for `quickcheck`), each successful test
     prints a `.` on screen. If a test fails, a `!` is printed, along with the
     failing test case (the instances of the types in every `forall`) and the
     cause of the failure, if it was not simply the falsification of the
@@ -85,7 +85,7 @@ defmodule PropCheck do
     The return value of PropEr can be one of the following:
     * `true`: The property held for all valid produced inputs.
     * `false`: The property failed for some input.
-    * `{error, type_of_error}`: An error occured; see the section Errors
+    * `{error, type_of_error}`: An error occurred; see the section Errors
       section for more information.
 
     To test all properties exported from a module (a property is a 0-arity
@@ -134,7 +134,7 @@ defmodule PropCheck do
     * `true`: The property now holds for this test case.
     * `false`: The test case still fails (although not necessarily for the
       same reason as before).
-    * `{error, type_of_error}`: An error occured - see the section Errors
+    * `{error, type_of_error}`: An error occurred - see the section Errors
       section for more information.
 
     PropEr will not attempt to shrink the input in case it still fails the
@@ -223,7 +223,7 @@ defmodule PropCheck do
 
     The following errors may be encountered during testing. The term provided
     for each error is the error type returned by `quickcheck/2` in case such
-    an error occurs. Normaly, a message is also printed on screen describing
+    an error occurs. Normally, a message is also printed on screen describing
     the error.
 
     * `:arity_limit`<br>
@@ -267,7 +267,7 @@ defmodule PropCheck do
     * `{:unrecognized_option, option}`<br>
       `option` is not an option that PropEr understands.
 
-    ## Acknowldgements
+    ## Acknowledgments
 
     Very much of the documentation is directly taken from the
     `proper` API documentation.
@@ -414,7 +414,7 @@ defmodule PropCheck do
     end
 
     @doc """
-    Exectute an action, if the property fails.
+    Execute an action, if the property fails.
 
     The `action` field should contain an expression or statement block
     that produces some side-effect (e.g. prints something to the screen).

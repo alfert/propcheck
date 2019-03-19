@@ -66,5 +66,4 @@ defmodule PropCheck.Test.TargetPathTest do
     end
   end
 
-
 end

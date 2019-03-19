@@ -59,7 +59,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   end
 
   #####################################################################################
-  # define our own neighborhood function achive even more left-heavy trees
+  # define our own neighborhood function achieve even more left-heavy trees
 
   @doc "Returns the generator function for next value depending on the temperature"
   def next_tree() do
@@ -83,7 +83,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   end
 
   #####################################################################################
-  # Combine regular properties with user-defined neighborhood-fucntion and
+  # Combine regular properties with user-defined neighborhood-function and
   # a search strategy inside.
 
   property "Tree search", [:verbose, search_steps: 100]  do
@@ -102,6 +102,5 @@ defmodule PropCheck.Test.TargetTreeTest do
       end
     end
   end
-
 
 end

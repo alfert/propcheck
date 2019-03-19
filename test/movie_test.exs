@@ -21,7 +21,7 @@ defmodule PropCheck.Test.Movies do
       trap_exit do
         Logger.debug "Start another test"
         {:ok, _pid} = MovieServer.start_link()
-        Logger.debug "Fresh MovieSever is started."
+        Logger.debug "Fresh MovieServer is started."
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         MovieServer.stop
@@ -51,7 +51,7 @@ defmodule PropCheck.Test.Movies do
   # existing copies of this movie
   @available_movies MovieServer.available_movies
 
-  # movies that clients will ask to rent in the testcases
+  # movies that clients will ask to rent in the test cases
   # apart from the movies available, clients will also ask for titanic
   # and inception, in order to test how the server responds to these
   # requests

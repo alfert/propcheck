@@ -89,7 +89,7 @@ defmodule PropCheck.Test.MoviesDSL do
   # existing copies of this movie
   @available_movies MovieServer.available_movies
 
-  # movies that clients will ask to rent in the testcases
+  # movies that clients will ask to rent in the test cases
   # apart from the movies available, clients will also ask for titanic
   # and inception, in order to test how the server responds to these
   # requests
@@ -126,7 +126,7 @@ defmodule PropCheck.Test.MoviesDSL do
     end
     def args(_state), do: fixed_list([name()])
     def next(s = %__MODULE__{users: users}, _name, password) do
-      # Logger.info "created account for passwd #{inspect password}"
+      # Logger.info "created account for password #{inspect password}"
       %__MODULE__{s | users: [password | users]}
     end
     def post(%__MODULE__{users: users}, _name, password), do:

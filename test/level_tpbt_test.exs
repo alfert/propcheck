@@ -95,7 +95,7 @@ defmodule PropCheck.Test.LevelTest do
   #              end).
 
 
-  # This property uses `forall_targed`, therefore the the condition checked inside
+  # This property uses `forall_targeted`, therefore the condition checked inside
   # the property is negated and it must be negated outside (see docs of `prop_exit/1` for
   # more details).
   # When using a proper-derived generator, we might have to search longer to find

@@ -4,7 +4,7 @@ defmodule PropCheck.BasicTypes do
   automatically available by `use PropCheck`.
 
 
-  ## Acknowlodgements
+  ## Acknowledgments
 
   The functions defined here are delegated to the corresponding
   definition `proper_types`. Also most of the documentation is
@@ -104,7 +104,7 @@ defmodule PropCheck.BasicTypes do
 
 
   @doc """
-  A map whose keys are defined by the generator k and values by the generator v.
+  A map whose keys are defined by the generator `k` and values by the generator `v`.
   """
   @spec map(raw_type, raw_type) :: type
   defdelegate map(k, v), to: :proper_types
@@ -163,7 +163,7 @@ defmodule PropCheck.BasicTypes do
   All tuples whose i-th element is an instance of the type at index i of
   `list_of_types`.
 
-   Also written simply as a tuple of types.
+  Also written simply as a tuple of types.
   """
   @spec tuple([raw_type()]) :: type
   defdelegate tuple(list_of_types), to: :proper_types
@@ -312,7 +312,7 @@ defmodule PropCheck.BasicTypes do
 
   ################################################
   #
-  # QuickCheck compatability aliases
+  # QuickCheck compatibility aliases
   #
   ###############################################
 

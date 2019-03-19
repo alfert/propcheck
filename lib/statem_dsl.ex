@@ -157,7 +157,6 @@ defmodule PropCheck.StateM.DSL do
         end
       end
 
-
   """
 
   use PropCheck
@@ -464,7 +463,7 @@ defmodule PropCheck.StateM.DSL do
         end
       rescue exc ->
         stacktrace = Exception.format_stacktrace(System.stacktrace())
-        Logger.error("Got exeception: #{inspect(exc)}\nstacktrace: #{stacktrace}")
+        Logger.error("Got exception: #{inspect(exc)}\nstacktrace: #{stacktrace}")
         {:exception, {exc, stacktrace}}
       catch
         value -> {:exception, value}
