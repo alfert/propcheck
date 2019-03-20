@@ -485,7 +485,10 @@ defmodule PropCheck.StateM.DSL do
 
   # replaces all symbolic variables of form `{:var, n}` with
   # the value in `env` (i.e. mapping of symbolic vars to values)
-  @spec replace_symb_vars(symbolic_call | symbolic_var | [symbolic_call | symbolic_var] | any, environment) :: symbolic_call
+  @spec replace_symb_vars(
+          symbolic_call | symbolic_var | [symbolic_call | symbolic_var] | any,
+          environment
+        ) :: symbolic_call
   defp replace_symb_vars({:call, m, f, args}, env) do
     replaced_m = replace_symb_vars(m, env)
     replaced_f = replace_symb_vars(f, env)
