@@ -1,4 +1,5 @@
 defmodule PropCheck.Test.MovieServer do
+  @moduledoc false
 
   use GenServer
 
