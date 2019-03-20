@@ -100,7 +100,7 @@ defmodule PropcheckTest do
 
         for {:attribute, _, kind, {name, _, args}} = type <- abstract_code, kind
              in [:opaque, :type, :export_type] do
-          if (name == type_name and arg_count == length(args)) do
+          if name == type_name and arg_count == length(args) do
             type
           else
             nil

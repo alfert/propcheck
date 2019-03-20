@@ -99,7 +99,7 @@ defmodule PropCheck.Test.Movies do
       {1, {:call, MovieServer, :rent_dvd, [password(state), movie()]}}]
 
     calls =
-      if (movies_rented) do
+      if movies_rented do
         pms = user_movie_pairs(rented)
         #IO.puts "User/movie pairs: #{inspect pms}"
         [{5, let {p, m} <- elements(pms) do

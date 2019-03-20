@@ -150,7 +150,7 @@ defmodule PropCheck.Test.PingPongMaster do
   end
   def handle_call({:ping, from_name}, _from, scores) do
     # Logger.debug "Master: Ping Pong Game for #{inspect from_name}"
-    if (scores |> Map.has_key?(from_name)) do
+    if scores |> Map.has_key?(from_name) do
       {:reply, :pong, scores |> Map.update!(from_name, &(&1 + 1))}
     else
       {:reply, {:removed, from_name}, scores}
