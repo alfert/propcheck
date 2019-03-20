@@ -104,13 +104,13 @@ defmodule PropCheck.Test.PingPongFSM do
 
   # state data is updates for adding, removing, playing.
   def next_state_data(_from, :player_state, state, _res, {:call, _m, :add_player, [p]}) do
-    if not Enum.member?(state.players, p) do
+    if Enum.member?(state.players, p) do
+      state
+    else
       %__MODULE__{state |
           players: [p | state.players],
           scores: Map.put_new(state.scores, p, 0)
         }
-    else
-      state
     end
   end
   def next_state_data(:player_state, _target, state, _res, {:call, _, :remove_player, [p]}) do
