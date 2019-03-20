@@ -10,10 +10,10 @@ defmodule PropCheck.Test.TargetPathTest do
 
   def path, do: list(oneof([:left, :right, :up, :down]))
 
-  def move(:left, {x, y}),  do: {x-1, y}
-  def move(:right, {x, y}), do: {x+1, y}
-  def move(:up, {x, y}),    do: {x, y+1}
-  def move(:down, {x, y}),  do: {x, y-1}
+  def move(:left, {x, y}),  do: {x - 1, y}
+  def move(:right, {x, y}), do: {x + 1, y}
+  def move(:up, {x, y}),    do: {x, y + 1}
+  def move(:down, {x, y}),  do: {x, y - 1}
 
   property "trivial path", [:verbose, numtests: 10] do
     forall p <- path() do
@@ -28,7 +28,7 @@ defmodule PropCheck.Test.TargetPathTest do
     forall_targeted p <- path() do
       {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       IO.write "(#{x},#{y})."
-      maximize(x-y)
+      maximize(x - y)
       true
     end
     )
@@ -44,7 +44,7 @@ defmodule PropCheck.Test.TargetPathTest do
     forall_targeted p <- path() do
       {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       IO.write "(#{x},#{y})."
-      distance_square = (x*x + y*y)
+      distance_square = (x * x + y * y)
       maximize(distance_square)
       distance_square < 100
     end
@@ -59,7 +59,7 @@ defmodule PropCheck.Test.TargetPathTest do
     exists p <- path() do
       {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       IO.write "(#{x},#{y})."
-      distance_square = (x*x + y*y)
+      distance_square = (x * x + y * y)
       maximize(distance_square)
       distance_square >= 100
     end

@@ -126,7 +126,7 @@ defmodule PropCheck.Test.PingPongFSM do
   def next_state_data(:player_state, _target, state, _res, {:call, _, :play_ping_pong, [p]}) do
     if Enum.member?(state.players, p) do
       %__MODULE__{state |
-          scores: Map.update!(state.scores, p, fn v -> v+1 end)}
+          scores: Map.update!(state.scores, p, fn v -> v + 1 end)}
     else
       state
     end

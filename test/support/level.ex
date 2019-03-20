@@ -92,19 +92,19 @@ defmodule PropCheck.Test.Level do
       build_level_line(t, acc, x, y + 1)
     defp build_level_line("#" <> t, acc, x, y) do
       m = Map.put(acc, {x, y}, :wall)
-      build_level_line(t, m, x, y+1)
+      build_level_line(t, m, x, y + 1)
     end
     defp build_level_line("X" <> t, acc, x, y) do
       m = acc
       |> Map.put({x, y}, :exit)
       |> Map.put(:exit, {x, y})
-      build_level_line(t, m, x, y+1)
+      build_level_line(t, m, x, y + 1)
     end
     defp build_level_line("E" <> t, acc, x, y) do
       m = acc
       |> Map.put({x, y}, :entrance)
       |> Map.put(:entrance, {x, y})
-      build_level_line(t, m, x, y+1)
+      build_level_line(t, m, x, y + 1)
     end
 
     #######################################################################

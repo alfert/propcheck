@@ -12,7 +12,7 @@ defmodule PropCheck.Test.BasicTypes do
     sized(size, dict_autosymb(size, {:"$call", :dict, :new, []}))
   def dict_autosymb(0, dict), do: dict
   def dict_autosymb(n, dict), do:
-    dict_autosymb(n-1, {:"$call", :dict, :store, [integer(), integer(), dict]})
+    dict_autosymb(n - 1, {:"$call", :dict, :store, [integer(), integer(), dict]})
 
   property "symbolic auto calls on dict - expected to fail" do
     forall d <- dict_autosymb() do

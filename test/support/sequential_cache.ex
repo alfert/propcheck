@@ -45,7 +45,7 @@ defmodule PropCheck.Test.Cache do
     # Logger.debug "Current: #{current}, Max: #{inspect max}"
     if current < max do
       # Logger.debug "Cache: Incrementally add at pos #{current + 1}"
-      :ets.insert(@cache_name, [{current+1, {key, val}},
+      :ets.insert(@cache_name, [{current + 1, {key, val}},
                          {:count, current + 1, max}])
     else
       # table is full, override from the beginning

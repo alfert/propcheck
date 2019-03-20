@@ -45,7 +45,7 @@ defmodule PropCheck.Test.TargetTreeTest do
       {left, right} = weight
       IO.write(" #{inspect weight}")
       # ensure that the left tree is larger than the right one
-      maximize(left-right)
+      maximize(left - right)
       true # this property holds always
     end
   end
@@ -77,7 +77,7 @@ defmodule PropCheck.Test.TargetTreeTest do
       {left, right} = weight
       IO.write(" #{inspect weight}")
       # ensure that the left tree is larger than the right one
-      maximize(left-right)
+      maximize(left - right)
       true # this property holds always
     end
   end
@@ -97,7 +97,7 @@ defmodule PropCheck.Test.TargetTreeTest do
         {left, right} = weight
         IO.write(" #{inspect weight}")
         # ensure that the left tree is larger than the right one
-        maximize(left-right)
+        maximize(left - right)
         false # guarantees a full search for exists
       end
     end

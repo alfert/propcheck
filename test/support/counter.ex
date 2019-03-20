@@ -13,7 +13,7 @@ defmodule PropCheck.Test.Counter do
   @spec start_link() :: {:ok, pid}
   @spec start_link(atom) :: {:ok, pid}
   @spec start_link(reset_t, atom) :: {:ok, pid}
-  def start_link(reset \\:infinity, name \\ __MODULE__) when is_atom(name) and
+  def start_link(reset \\ :infinity, name \\ __MODULE__) when is_atom(name) and
     (reset == :infinity or is_integer(reset))
   do
     Agent.start_link(fn -> {-1, reset} end, name: name)

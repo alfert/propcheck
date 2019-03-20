@@ -140,7 +140,7 @@ defmodule PropCheck.Test.Cache.DSL do
     # generator for args of cache
     def args(_state), do: [key(), val()]
     # what is the next state?
-    def next(s=%__MODULE__{entries: l, count: n, max: m}, [k, v], _res) do
+    def next(s = %__MODULE__{entries: l, count: n, max: m}, [k, v], _res) do
       case List.keyfind(l, k, 0, false) do
           # When the cache is at capacity, the first element is dropped (tl(L))
           # before adding the new one at the end
