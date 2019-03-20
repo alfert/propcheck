@@ -17,7 +17,7 @@ defmodule PropCheck.Test.TargetPathTest do
 
   property "trivial path", [:verbose, numtests: 10] do
     forall p <- path() do
-      {x,y} = Enum.reduce(p, {0, 0}, &move/2)
+      {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       IO.write "(#{x},#{y})."
       true
     end
@@ -26,7 +26,7 @@ defmodule PropCheck.Test.TargetPathTest do
   property "simple targeted path", [:verbose, search_steps: 100] do
     numtests(10,
     forall_targeted p <- path() do
-      {x,y} = Enum.reduce(p, {0, 0}, &move/2)
+      {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       IO.write "(#{x},#{y})."
       maximize(x-y)
       true
@@ -42,7 +42,7 @@ defmodule PropCheck.Test.TargetPathTest do
   """
   property "reach a path of distance sqrt(100)", [:verbose, search_steps: 100] do
     forall_targeted p <- path() do
-      {x,y} = Enum.reduce(p, {0, 0}, &move/2)
+      {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       IO.write "(#{x},#{y})."
       distance_square = (x*x + y*y)
       maximize(distance_square)
@@ -57,7 +57,7 @@ defmodule PropCheck.Test.TargetPathTest do
   """
   property "exists: at least one path with distance >= sqrt(100) exists", [:verbose, search_steps: 100] do
     exists p <- path() do
-      {x,y} = Enum.reduce(p, {0, 0}, &move/2)
+      {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       IO.write "(#{x},#{y})."
       distance_square = (x*x + y*y)
       maximize(distance_square)

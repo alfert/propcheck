@@ -286,7 +286,7 @@ defmodule PropCheck do
     @type user_opts :: [user_opt] | user_opt
     @type outer_test :: :proper.outer_test
     @type test :: :proper.test
-    @type output_fun :: ((charlist,[term]) -> :ok)
+    @type output_fun :: ((charlist, [term]) -> :ok)
     @type size :: non_neg_integer
     @type user_opt :: :quiet
       | :verbose
@@ -317,7 +317,7 @@ defmodule PropCheck do
     @type long_result :: :true | counterexample | error
     @type short_result :: boolean | error
     @type result :: long_result | short_result
-    @type long_module_result :: [{mfa,counterexample}] | error
+    @type long_module_result :: [{mfa, counterexample}] | error
     @type short_module_result :: [mfa] | error
     @type module_result :: long_module_result | short_module_result
 
@@ -402,7 +402,7 @@ defmodule PropCheck do
         iex> require Integer
         iex> quickcheck(
         ...> forall n <- nat() do
-        ...>    implies rem(n,2) == 0, do: Integer.is_even n
+        ...>    implies rem(n, 2) == 0, do: Integer.is_even n
         ...> end
         ...>)
         true
@@ -794,7 +794,7 @@ defmodule PropCheck do
     Returns a counterexample for each failing property of the most recent
     module testing run.
     """
-    @spec counterexamples() :: [{mfa,counterexample}] | :undefined
+    @spec counterexamples() :: [{mfa, counterexample}] | :undefined
     def counterexamples, do: :erlang.get(:"$counterexamples")
 
     @doc "Runs PropEr on the property `outer_test`."

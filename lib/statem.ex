@@ -172,7 +172,7 @@ defmodule PropCheck.StateM do
   @type dynamic_state :: any
   @type symb_call :: :proper_statem.symb_call
   @type command :: :proper_statem.command
-  @type parallel_testcase :: {command_list,[command_list]}
+  @type parallel_testcase :: {command_list, [command_list]}
   @type command_list :: [command]
 
   @doc """

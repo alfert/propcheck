@@ -30,7 +30,7 @@ defmodule PropCheck.Test.Tree do
   @doc "Corrected delete implementation"
   @spec delete2(tree(t), t) :: tree(t) when t: var
   def delete2(:leaf, _), do: :leaf
-  def delete2({:node, x, l, r}, x), do: join(delete2(l, x), delete2(r,x))
+  def delete2({:node, x, l, r}, x), do: join(delete2(l, x), delete2(r, x))
   def delete2({:node, y, l, r}, x), do: {:node, y, delete2(l, x), delete2(r, x)}
 
   @spec tree_sum(tree(number)) :: number

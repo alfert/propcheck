@@ -9,7 +9,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   require Logger
 
   @doc "Make a tree from a list"
-  def to_tree(l), do: Enum.reduce(l,:undefined, &insert/2)
+  def to_tree(l), do: Enum.reduce(l, :undefined, &insert/2)
 
   @doc "Insert into a tree, the empty tree is `:undefined`"
   def insert(n, node = {:node, m, _l, _r}) when n == m, do: node
@@ -26,7 +26,7 @@ defmodule PropCheck.Test.TargetTreeTest do
     {rl, rr} = sides(right)
     {count_inner(left) + ll + lr, count_inner(right) + rl + rr}
   end
-  def sides(_), do: {0,0}
+  def sides(_), do: {0, 0}
   def count_inner({:node, _, _, _}), do: 1
   def count_inner(_), do: 0
 

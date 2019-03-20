@@ -313,7 +313,7 @@ defmodule PropCheck.StateM.DSL do
     do
       new_name = String.to_atom("#{name}_#{suffix_name}")
       # Logger.error "Found suffix: #{new_name}"
-      {:def, c1,[{new_name, c2, args}, body]}
+      {:def, c1, [{new_name, c2, args}, body]}
     end
   defp rename_def_in_command(ast, _name) do
     # Logger.warn "Found ast = #{inspect ast}"

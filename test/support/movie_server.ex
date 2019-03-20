@@ -2,8 +2,8 @@ defmodule PropCheck.Test.MovieServer do
 
   use GenServer
 
-  @movies [{:mary_poppins,3}, {:finding_nemo,2}, {:despicable_me,3},
-      {:toy_story,5}, {:the_lion_king,2}, {:peter_pan,1}]
+  @movies [{:mary_poppins, 3}, {:finding_nemo, 2}, {:despicable_me, 3},
+      {:toy_story, 5}, {:the_lion_king, 2}, {:peter_pan, 1}]
 
   @type name :: atom
   @type movie :: atom
@@ -67,7 +67,7 @@ defmodule PropCheck.Test.MovieServer do
   def handle_call({:delete_account, p}, _from, %__MODULE__{users: u} = s) do
     reply = case :ets.lookup(u, p) do
       []          -> :not_a_client
-      [{_,_,[]}]  -> :ets.delete(u, p)
+      [{_, _, []}]  -> :ets.delete(u, p)
                      :account_deleted
       [{_, _, _}] -> :return_movies_first
     end
@@ -76,7 +76,7 @@ defmodule PropCheck.Test.MovieServer do
   def handle_call({:rent, pass, movie}, _from, %__MODULE__{users: u, movies: m}=s) do
     reply = case :ets.lookup(u, pass) do
       []             -> :not_a_client
-      [{_,_,rented}] -> case :ets.lookup(m, movie)  do
+      [{_, _, rented}] -> case :ets.lookup(m, movie)  do
         [] -> rented
         [{_, 0}] -> rented
         [{_, n}] ->
@@ -91,11 +91,11 @@ defmodule PropCheck.Test.MovieServer do
   def handle_call({:return, pass, movie}, _from, %__MODULE__{users: u, movies: m}=s) do
     reply = case :ets.lookup(u, pass) do
       []             -> :not_a_client
-      [{_,_,rented}] -> case :ets.lookup(m, movie) do
+      [{_, _, rented}] -> case :ets.lookup(m, movie) do
         [] -> rented
         [{_, n}] ->
           new_rented = rented |> List.delete(movie)
-          :ets.update_element(u, pass, {3,new_rented})
+          :ets.update_element(u, pass, {3, new_rented})
           :ets.update_element(m, movie, {2, n+1})
           new_rented
       end

@@ -140,7 +140,7 @@ defmodule PropCheck.BasicTypes do
   instance of a type union to an instance of the first type in `list_of_types`,
   thus you should write the simplest case first.
   """
-  @spec union([raw_type,...]) :: type
+  @spec union([raw_type, ...]) :: type
   defdelegate union(list_of_types), to: :proper_types
 
   @doc """
@@ -152,7 +152,7 @@ defmodule PropCheck.BasicTypes do
   by the random instance generator. The shrinking subsystem will ignore the
   frequencies and try to shrink towards the first type in the list.
   """
-  @spec weighted_union([{frequency, raw_type},...]) :: type
+  @spec weighted_union([{frequency, raw_type}, ...]) :: type
   defdelegate weighted_union(list_of_types), to: :proper_types
 
   @doc """
@@ -289,7 +289,7 @@ defmodule PropCheck.BasicTypes do
   def char_list, do: list(char())
 
   @doc "weighted_union(FreqChoices)"
-  @spec wunion([{frequency,raw_type},...]) :: type
+  @spec wunion([{frequency, raw_type}, ...]) :: type
   def wunion(freq_choices), do: weighted_union(freq_choices)
 
   @doc "Term is a synonym for `any`"
@@ -344,15 +344,15 @@ defmodule PropCheck.BasicTypes do
   def choose(low, high), do: integer(low, high)
 
   @doc "elements is equivalent to `union([..])`"
-  @spec elements([raw_type,...]) :: type
+  @spec elements([raw_type, ...]) :: type
   def elements(choices), do: union(choices)
 
   @doc "oneof is equivalent to `union([..])`"
-  @spec oneof([raw_type,...]) :: type
+  @spec oneof([raw_type, ...]) :: type
   def oneof(choices), do: union(choices)
 
   @doc "frequency is equivalent to `weighted_union([..])`"
-  @spec frequency([{frequency,raw_type},...]) :: type
+  @spec frequency([{frequency, raw_type}, ...]) :: type
   def frequency(freq_choices), do: weighted_union(freq_choices)
 
   @doc "return is equivalent to `exactly`"
@@ -386,7 +386,7 @@ defmodule PropCheck.BasicTypes do
   shrinking subsystem will ignore the weights and try to shrink using the
   default value.
   """
-  @spec weighted_default({frequency,raw_type}, {frequency,raw_type}) :: type
+  @spec weighted_default({frequency, raw_type}, {frequency, raw_type}) :: type
   def weighted_default(default, type), do: weighted_union([default, type])
 
   @doc "A function with 0 parameters, i.e. `function(0, ret_type)`"
@@ -465,7 +465,7 @@ defmodule PropCheck.BasicTypes do
   """
   @spec with_parameter(atom, value, raw_type) :: type
   def with_parameter(parameter, value, type), do:
-      with_parameters([{parameter,value}], type)
+      with_parameters([{parameter, value}], type)
 
   @doc """
   Similar to `with_parameter/3`, but accepts a list of

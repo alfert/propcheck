@@ -86,9 +86,9 @@ defmodule PropCheck.Test.PingPongStateM do
       {:call, PingPongMaster, :add_player, [name()]},
       {:call, PingPongMaster, :remove_player, [name(state)]},
       {:call, PingPongMaster, :get_score, [name(state)]},
-      {:call, PingPongMaster, :play_ping_pong,[name(state)]},
-      {:call, PingPongMaster, :play_tennis,[name(state)]},
-      {:call, PingPongMaster, :play_football,[name(state)]}
+      {:call, PingPongMaster, :play_ping_pong, [name(state)]},
+      {:call, PingPongMaster, :play_tennis, [name(state)]},
+      {:call, PingPongMaster, :play_football, [name(state)]}
       ])
   end
 

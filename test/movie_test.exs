@@ -162,18 +162,18 @@ defmodule PropCheck.Test.Movies do
   def precondition(_state, _call), do: true
 
   @doc "Postconditions ensure that the expected effect has taken place"
-  def postcondition(%__MODULE__{users: users}, {:call, _, :create_account,[_name]}, result) do
+  def postcondition(%__MODULE__{users: users}, {:call, _, :create_account, [_name]}, result) do
     # the new user was formerly not available
     not (users |> Enum.member?(result))
   end
-  def postcondition(%__MODULE__{rented: rented}, {:call, _, :delete_account,[passwd]}, result) do
+  def postcondition(%__MODULE__{rented: rented}, {:call, _, :delete_account, [passwd]}, result) do
     # deletion does not work always
     case rented |> Map.get(passwd, []) do
       [] -> result == :account_deleted
       _any_movie ->  result == :return_movies_first
     end
   end
-  def postcondition(state, {:call, _, :rent_dvd,[passwd, movie]}, result) do
+  def postcondition(state, {:call, _, :rent_dvd, [passwd, movie]}, result) do
     # if the movie exists, then it must there, otherwise not
     case is_available(state, movie) do
       true ->
