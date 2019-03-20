@@ -580,7 +580,7 @@ defmodule PropCheck do
             fn(unquote(vars)) -> unquote(gen) end, false)
         end
     end
-    defp let_bind({:<-, _, [var, rawtype]} = _bind), do: {var, rawtype}
+    defp let_bind(_bind = {:<-, _, [var, rawtype]}), do: {var, rawtype}
     defp let_bind([{:<-, _, [var, rawtype]}]) do
       [{var, rawtype}]
     end

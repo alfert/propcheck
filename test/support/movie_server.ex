@@ -61,11 +61,11 @@ defmodule PropCheck.Test.MovieServer do
 
   def handle_call(:popcorn, _from, s), do: {:reply, :bon_appetit, s}
   def handle_call(:stop, _from, s), do: {:stop, :normal, :stopped, s}
-  def handle_call({:new_account, name}, _from, %__MODULE__{next_pass: p, users: u} = s) do
+  def handle_call({:new_account, name}, _from, s = %__MODULE__{next_pass: p, users: u}) do
     :ets.insert(u, {p, name, []})
     {:reply, p, %__MODULE__{s | next_pass: p + 1}}
   end
-  def handle_call({:delete_account, p}, _from, %__MODULE__{users: u} = s) do
+  def handle_call({:delete_account, p}, _from, s = %__MODULE__{users: u}) do
     reply = case :ets.lookup(u, p) do
       []          -> :not_a_client
       [{_, _, []}]  -> :ets.delete(u, p)
@@ -74,7 +74,7 @@ defmodule PropCheck.Test.MovieServer do
     end
     {:reply, reply, s}
   end
-  def handle_call({:rent, pass, movie}, _from, %__MODULE__{users: u, movies: m} = s) do
+  def handle_call({:rent, pass, movie}, _from, s = %__MODULE__{users: u, movies: m}) do
     reply = case :ets.lookup(u, pass) do
       []             -> :not_a_client
       [{_, _, rented}] -> case :ets.lookup(m, movie)  do
@@ -89,7 +89,7 @@ defmodule PropCheck.Test.MovieServer do
     end
     {:reply, reply, s}
   end
-  def handle_call({:return, pass, movie}, _from, %__MODULE__{users: u, movies: m} = s) do
+  def handle_call({:return, pass, movie}, _from, s = %__MODULE__{users: u, movies: m}) do
     reply = case :ets.lookup(u, pass) do
       []             -> :not_a_client
       [{_, _, rented}] -> case :ets.lookup(m, movie) do
