@@ -26,6 +26,20 @@ jobs:
             - _build
             - deps
             - ~/.mix
+  lint:
+    parameters:
+      version:
+        description: Elixir version
+        type: string
+    docker:
+      - image: elixir:<< parameters.version >>
+    steps:
+      - checkout
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: MIX_ENV=test mix do deps.get, compile
+      - run: mix credo --strict
+
 workflows:
   build:
     jobs:
@@ -40,4 +54,6 @@ workflows:
           version: "1.7"
       - build:
           name: "Elixir v1.8"
+          version: "1.8"
+      - lint:
           version: "1.8"
