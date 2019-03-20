@@ -12,11 +12,9 @@ defmodule PropCheck.Result do
     :gen_server.start_link({ :local, __MODULE__ }, __MODULE__, [], [])
   end
   def stop do
-    try do
-      :gen_server.call(__MODULE__, :stop)
-    catch
-      _ -> :ok
-    end
+    :gen_server.call(__MODULE__, :stop)
+  catch
+    _ -> :ok
   end
   def status do
     :gen_server.call(__MODULE__, :status)

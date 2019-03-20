@@ -111,12 +111,10 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   defp robust_send(name, msg) do
-    try do
-      send(name, msg)
-      :ok
-    catch
-      :error, :badarg -> {:dead_player, name}
-    end
+    send(name, msg)
+    :ok
+  catch
+    :error, :badarg -> {:dead_player, name}
   end
 
   # -------------------------------------------------------------------
