@@ -94,7 +94,7 @@ defmodule PropCheck.Test.PingPongDSL do
       |> Map.put(:players, List.delete(ps, name))
       |> Map.put(:scores, Map.delete(scores, name))
     end
-    def pre(%__MODULE{players: ps}, [name]), do: Enum.member?(ps, name)
+    def pre(%__MODULE__{players: ps}, [name]), do: Enum.member?(ps, name)
   end
 
   defcommand :play_ping_pong do
