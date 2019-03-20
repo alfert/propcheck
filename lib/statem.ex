@@ -12,7 +12,6 @@ defmodule PropCheck.StateM do
   failure, the shrinking mechanism attempts to find a minimal sequence of
   calls provoking the same error.
 
-
   ## The role of commands
 
   Test cases generated for testing a stateful system are lists of symbolic API
@@ -63,7 +62,6 @@ defmodule PropCheck.StateM do
      dynamic state. After running the previous command sequence, the model state
     will be `[b: 42]`.
 
-
   ## The callback functions
 
   The following functions must be exported from the callback module
@@ -74,7 +72,6 @@ defmodule PropCheck.StateM do
    * `c:precondition/2`
    * `c:postcondition/3`
    * `c:next_state/3`
-
 
   ## The property used
 
@@ -88,7 +85,6 @@ defmodule PropCheck.StateM do
     `run_commands/2`, a function that evaluates a symbolic command
     sequence according to an abstract state machine specification.
 
-
   These two phases are encapsulated in the following property, which can be
   used for testing the process dictionary:
 
@@ -99,7 +95,6 @@ defmodule PropCheck.StateM do
           result == ok
         end
       end
-
 
   When testing impure code, it is very important to keep each test
   self-contained. For this reason, almost every property for testing stateful

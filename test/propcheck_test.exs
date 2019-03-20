@@ -12,7 +12,6 @@ defmodule PropcheckTest do
   @type my_stack(t) :: [t]
   @type tagged_stack(t) :: {:stack, [t]}
 
-
   test "find types in proper_gen.erl" do
     types = Kernel.Typespec.beam_types(:proper_gen)
     refute nil == types

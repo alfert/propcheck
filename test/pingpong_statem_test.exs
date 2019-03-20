@@ -98,7 +98,6 @@ defmodule PropCheck.Test.PingPongStateM do
   ##
   #####################################################
 
-
   @doc "initial model state of the state machine"
   def initial_state, do: %__MODULE__{}
 

@@ -122,7 +122,6 @@ defmodule PropCheck.FSM do
   @type command  :: {:set ,symb_var,symb_call} | {:init, fsm_state()}
   @type command_list:: [command]
 
-
   @doc """
   Specifies the initial state of the finite state machine. As with
   `c:PropCheck.StateM.initial_state/0`, its result should be deterministic.

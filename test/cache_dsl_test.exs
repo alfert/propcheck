@@ -10,7 +10,6 @@ defmodule PropCheck.Test.Cache.DSL do
   alias PropCheck.Test.Cache
   # require Logger
 
-
   @cache_size 10
 
   property "run the sequential cache", [:verbose] do
@@ -77,7 +76,6 @@ defmodule PropCheck.Test.Cache.DSL do
     |> Enum.map(fn {state, _call, _result} -> state end)
   end
 
-
   ###########################
   # Testing the command generators and such
 
@@ -118,7 +116,6 @@ defmodule PropCheck.Test.Cache.DSL do
   ##################
   # The command weight distribution
   def weight(_state), do: %{find: 1, cache: 3, flush: 1}
-
 
   ###### Command: find
 
@@ -167,7 +164,6 @@ defmodule PropCheck.Test.Cache.DSL do
     # pre condition: do not call flush() twice
     def pre(%__MODULE__{count: c}, _args), do: c != 0
   end
-
 
   defp update_entries(s = %__MODULE__{}, l) do
     %__MODULE__{s | entries: l, count: Enum.count(l)}

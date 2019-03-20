@@ -168,5 +168,4 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
-
 end

@@ -955,7 +955,6 @@ defmodule PropCheck do
         a === b, IO.puts("#{inspect a, [pretty: true]} != #{inspect b, [pretty: true]}"))
     end
 
-
     @doc """
     A predefined function that accepts an atom or string and returns a
     stats printing function which is equivalent to the default one, but prints

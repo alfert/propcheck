@@ -15,7 +15,6 @@ defmodule PropCheck.Test.TargetPathTest do
   def move(:up, {x, y}),    do: {x, y+1}
   def move(:down, {x, y}),  do: {x, y-1}
 
-
   property "trivial path", [:verbose, numtests: 10] do
     forall p <- path() do
       {x,y} = Enum.reduce(p, {0, 0}, &move/2)

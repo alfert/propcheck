@@ -252,7 +252,6 @@ defmodule PropCheck.StateM.DSL do
   @callback weight(symbolic_state) :: %{required(command_name) => pos_integer}
   @optional_callbacks weight: 1
 
-
   defmacro __using__(_options) do
     quote do
       import unquote(__MODULE__)
@@ -556,7 +555,6 @@ defmodule PropCheck.StateM.DSL do
       {m, f, length(args)}
     end)
   end
-
 
   # Detects alls commands within `mod_bin_code`, i.e. all functions with the
   # same prefix and a suffix `_command` or `_args` and a prefix `_next`.

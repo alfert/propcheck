@@ -94,7 +94,6 @@ defmodule PropCheck.Test.LevelTest do
   #                  end
   #              end).
 
-
   # This property uses `forall_targeted`, therefore the condition checked inside
   # the property is negated and it must be negated outside (see docs of `prop_exit/1` for
   # more details).
@@ -140,7 +139,6 @@ defmodule PropCheck.Test.LevelTest do
   #                            true
   #                        end
   #                    end).
-
 
   def prop_forall_targeted(level_data) do
     level = Level.build_level(level_data)
@@ -217,6 +215,5 @@ defmodule PropCheck.Test.LevelTest do
       end
     end
   end
-
 
 end

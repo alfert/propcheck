@@ -67,7 +67,6 @@ defmodule PropCheck.TargetedPBT do
         end
       end
 
-
   ## How the targeted properties relate
 
   The targeted macros `forall_targeted`, `exists` and `not_exists` are related to each other.
@@ -87,7 +86,6 @@ defmodule PropCheck.TargetedPBT do
 
       not_exists x <- x_gen(), do: p(x)
          <==> forall_targeted x <- x_gen(), do: not(p(x))
-
 
   ## Options
 
@@ -201,7 +199,6 @@ defmodule PropCheck.TargetedPBT do
       :proper_target.targeted(make_ref(), tmap_val)
     end
   end
-
 
   # For backward compatibility with the scientific papers.
   # -define(STRATEGY(Strat, Prop), ?SETUP(fun (Opts) ->

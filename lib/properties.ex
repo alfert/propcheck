@@ -7,7 +7,6 @@ defmodule PropCheck.Properties do
   alias PropCheck.CounterStrike
   require Logger
 
-
   @doc """
   Defines a property as part of an ExUnit test.
 

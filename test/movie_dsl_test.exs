@@ -46,7 +46,6 @@ defmodule PropCheck.Test.MoviesDSL do
   @doc "Initialize the model"
   def initial_state, do: %__MODULE__{}
 
-
   #########################################################################
   ### Test local preconditions, helpers and the like
   #########################################################################
@@ -56,7 +55,6 @@ defmodule PropCheck.Test.MoviesDSL do
     Logger.debug "test u_m_p: #{inspect s}"
     assert [{{:var, 1}, :mary_poppins}] == user_movie_pairs(s)
   end
-
 
   #########################################################################
   ### Weights of the commands
@@ -75,7 +73,6 @@ defmodule PropCheck.Test.MoviesDSL do
       std_commands
     end
   end
-
 
   #########################################################################
   ### Value generators
@@ -100,7 +97,6 @@ defmodule PropCheck.Test.MoviesDSL do
 
   @doc "generator for movies"
   def movie, do: oneof @movie_titles
-
 
   @doc """
   Generate only valid passwords, i.e those from existing users.

@@ -30,7 +30,6 @@ defmodule PropCheck.Test.PingPongTest do
     end)
   end
 
-
   test "Strange Call Sequence" do
     PingPongMaster.start_link
     PingPongMaster.add_player :player_73

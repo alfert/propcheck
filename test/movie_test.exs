@@ -190,7 +190,6 @@ defmodule PropCheck.Test.Movies do
     result == :bon_appetit
   end
 
-
   @doc "is the movie available?"
   def is_available(%__MODULE__{rented: rented}, movie) do
     max_av = @available_movies |> Keyword.get(movie, -1)

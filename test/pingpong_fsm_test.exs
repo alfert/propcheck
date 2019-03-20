@@ -53,7 +53,6 @@ defmodule PropCheck.Test.PingPongFSM do
     log_state
   end
 
-
   # State is modelled as tuples of `{state_name, state}`
   defstruct players: [], scores: %{}
 

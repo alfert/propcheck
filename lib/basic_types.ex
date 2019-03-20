@@ -3,7 +3,6 @@ defmodule PropCheck.BasicTypes do
   This modules contains all basic type generators from PropEr. It is
   automatically available by `use PropCheck`.
 
-
   ## Acknowledgments
 
   The functions defined here are delegated to the corresponding
@@ -102,7 +101,6 @@ defmodule PropCheck.BasicTypes do
   @spec bitstring(non_neg_integer) :: type
   defdelegate bitstring(length), to: :proper_types
 
-
   @doc """
   A map whose keys are defined by the generator `k` and values by the generator `v`.
   """
@@ -116,7 +114,6 @@ defmodule PropCheck.BasicTypes do
   """
   @spec list(raw_type) :: type
   defdelegate list(elem_type), to: :proper_types
-
 
   @doc """
   A type that generates exactly the list `list`.
@@ -158,7 +155,6 @@ defmodule PropCheck.BasicTypes do
   @spec weighted_union([{frequency, raw_type},...]) :: type
   defdelegate weighted_union(list_of_types), to: :proper_types
 
-
   @doc """
   All tuples whose i-th element is an instance of the type at index i of
   `list_of_types`.
@@ -183,7 +179,6 @@ defmodule PropCheck.BasicTypes do
   """
   @spec exactly(any) :: type
   defdelegate exactly(value), to: :proper_types
-
 
   @doc """
   All lists whose i-th element is an instance of the type at index i of
@@ -259,7 +254,6 @@ defmodule PropCheck.BasicTypes do
   @doc "Char values (16 bit for some reason), i.e. `integer(0, 0xffff)`"
   @spec char() :: type
   def char, do: integer(0, 0xffff)
-
 
   @doc """
   Bounded upper size utf8 binary, `codepoint length =< MaxCodePointSize`.

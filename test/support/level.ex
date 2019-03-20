@@ -51,7 +51,6 @@ defmodule PropCheck.Test.Level do
      "#                                                                    #",
      "######################################################################"]
 
-
   @spec level2() :: level_data()
   def level2, do:
     ["######################################################################",
@@ -138,6 +137,5 @@ defmodule PropCheck.Test.Level do
             end
       end)
     end
-
 
 end
