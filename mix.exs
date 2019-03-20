@@ -65,7 +65,7 @@ defmodule Propcheck.Mixfile do
   defp deps do
     [
       {:dialyxir, "~> 0.5.1", only: [:dev, :test]},
-      {:coverex, "~> 1.4", only: :test},
+      {:coverex, "~> 1.4.15", only: :test},
       {:ex_doc, "~>0.16", only: :dev},
       {:earmark, ">= 0.2.1", only: :dev},
       {:proper, "~> 1.3"}
