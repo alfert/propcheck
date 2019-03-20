@@ -67,7 +67,7 @@ defmodule PropCheck.CounterStrike do
 
   defp check_counter_example(counter_examples, mfa) do
     # Logger.debug "#{inspect self()}: Asked for mfa #{inspect mfa} in #{inspect counter_examples}"
-    if (Enum.count(counter_examples) == 0) do
+    if Enum.empty?(counter_examples) do
       :none
     else
       case Map.fetch(counter_examples, mfa) do
