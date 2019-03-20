@@ -104,16 +104,16 @@ defmodule PropCheck.Test.Cache.DSL do
   code related to key reuse or matching, but without losing the ability
   to 'fuzz' the system.
   """
-  def key(), do: oneof([
+  def key, do: oneof([
     integer(1, @cache_size),
     integer()
     ])
   @doc "our values are integers"
-  def val(), do: integer()
+  def val, do: integer()
 
   ###################
   # the initial state of our model
-  def initial_state(), do: %__MODULE__{}
+  def initial_state, do: %__MODULE__{}
 
   ##################
   # The command weight distribution
@@ -159,7 +159,7 @@ defmodule PropCheck.Test.Cache.DSL do
 
   defcommand :flush do
     # implement flush
-    def impl(), do: Cache.flush()
+    def impl, do: Cache.flush()
     # next state is: cache is empty
     def next(state, _args, _res) do
       update_entries(state, [])

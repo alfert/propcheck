@@ -60,7 +60,7 @@ defmodule PropCheck.Test.PingPongFSM do
   @max_players 100
   @players 1..@max_players |> Enum.map(&("player_#{&1}") |> String.to_atom)
 
-  def initial_state(), do: :empty_state
+  def initial_state, do: :empty_state
   def initial_state_data, do: %__MODULE__{}
 
   def empty_state(_) do
@@ -135,7 +135,7 @@ defmodule PropCheck.Test.PingPongFSM do
   def next_state_data(_from, _target, state, _res, _call), do: state
 
   # ensure all player processes are dead
-  defp kill_all_player_processes() do
+  defp kill_all_player_processes do
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
     |> Enum.each(fn name ->

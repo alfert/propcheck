@@ -66,7 +66,7 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards the empty atom, `:""`.
   """
   @spec atom :: type
-  defdelegate atom(), to: :proper_types
+  defdelegate atom, to: :proper_types
 
   @doc """
   All binaries.
@@ -74,7 +74,7 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards the empty binary, `""`.
   """
   @spec binary() :: type
-  defdelegate binary(), to: :proper_types
+  defdelegate binary, to: :proper_types
 
   @doc """
   All binaries with a byte size of `length`.
@@ -91,7 +91,7 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards the empty bitstring, `""`.
   """
   @spec bitstring() :: type
-  defdelegate bitstring(), to: :proper_types
+  defdelegate bitstring, to: :proper_types
 
   @doc """
   All bitstrings with a bit size of `length`.
@@ -212,7 +212,7 @@ defmodule PropCheck.BasicTypes do
   type if you are certain that you need it.
   """
   @spec any() :: type
-  defdelegate any(), to: :proper_types
+  defdelegate any, to: :proper_types
 
   ################################################
   #
@@ -222,16 +222,16 @@ defmodule PropCheck.BasicTypes do
 
   @doc "All integers, i.e. `integer(:inf, :inf)`"
   @spec integer() :: type
-  def integer(), do: integer(:inf, :inf)
+  def integer, do: integer(:inf, :inf)
   @doc "Strictly positive integers, i.e. `integer(1, :inf)`"
   @spec pos_integer :: type
-  def pos_integer(), do: integer(1, :inf)
+  def pos_integer, do: integer(1, :inf)
   @doc "Non negative integers, i.e. `integer(0, :inf)`"
   @spec non_neg_integer :: type
-  def non_neg_integer(), do: integer(0, :inf)
+  def non_neg_integer, do: integer(0, :inf)
   @doc "Negative integers, i.e. `integer(:inf, -1)`"
   @spec neg_integer :: type
-  def neg_integer(), do: integer(:inf, -1)
+  def neg_integer, do: integer(:inf, -1)
 
   @doc "A range is equivalent to integers"
   @spec range(ext_int, ext_int) ::type
@@ -239,26 +239,26 @@ defmodule PropCheck.BasicTypes do
 
   @doc "All floats, i.e. `float(:inf, :inf)`"
   @spec float() :: type
-  def float(), do: float(:inf, :inf)
+  def float, do: float(:inf, :inf)
   @doc "Non negative floats, i.e. `float(0.0, inf)`"
   @spec non_neg_float() :: type
-  def non_neg_float(), do: float(0.0, :inf)
+  def non_neg_float, do: float(0.0, :inf)
 
   @doc "Numbers are integers or floats, i.e. `union([integer(), float()])`"
   @spec number() :: type
-  def number(), do: union([integer(), float()])
+  def number, do: union([integer(), float()])
 
   @doc "The atoms `true` and `false`. Instances shrink towards `false`."
   @spec boolean() :: type
-  def boolean(), do: union([false, true])
+  def boolean, do: union([false, true])
 
   @doc "Byte values, i.e. `integer(0, 255)`"
   @spec byte() :: type
-  def byte(), do: integer(0, 255)
+  def byte, do: integer(0, 255)
 
   @doc "Char values (16 bit for some reason), i.e. `integer(0, 0xffff)`"
   @spec char() :: type
-  def char(), do: integer(0, 0xffff)
+  def char, do: integer(0, 0xffff)
 
 
   @doc """
@@ -276,7 +276,7 @@ defmodule PropCheck.BasicTypes do
 
   @doc "utf8-encoded unbounded size binary"
   @spec utf8() :: type
-  def utf8(), do: utf8(:inf, 4)
+  def utf8, do: utf8(:inf, 4)
 
   @doc "utf8-encoded bounded upper size binary."
   @spec utf8(ext_non_neg_integer) :: type
@@ -284,15 +284,15 @@ defmodule PropCheck.BasicTypes do
 
   @doc "List of any types, i.e. `list(any)`"
   @spec list() :: type
-  def list(), do: list(any())
+  def list, do: list(any())
 
   @doc "Tuples of any types, i.e. `loose_tuple(any)`"
   @spec tuple() :: type
-  def tuple(), do: loose_tuple(any())
+  def tuple, do: loose_tuple(any())
 
   @doc "An Erlang string, i.e. `list(char)`"
   @spec char_list() :: type
-  def char_list(), do: list(char())
+  def char_list, do: list(char())
 
   @doc "weighted_union(FreqChoices)"
   @spec wunion([{frequency,raw_type},...]) :: type
@@ -300,15 +300,15 @@ defmodule PropCheck.BasicTypes do
 
   @doc "Term is a synonym for `any`"
   @spec term() :: type
-  def term(), do: any()
+  def term, do: any()
 
   @doc "timeout values, i.e. `union([non_neg_integer() | :infinity])`"
   @spec timeout() :: type
-  def timeout(), do: union([non_neg_integer(), :infinity])
+  def timeout, do: union([non_neg_integer(), :infinity])
 
   @doc "Arity is a byte value, i.e. `integer(0, 255)`"
   @spec arity() :: type
-  def arity(), do: integer(0, 255)
+  def arity, do: integer(0, 255)
 
   ################################################
   #
@@ -322,7 +322,7 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards `0`.
   """
   @spec int() :: type
-  def int(), do: sized(size, integer(-size, size))
+  def int, do: sized(size, integer(-size, size))
 
   @doc """
   Small Small non-negative integers (bound by the current value of the `size`
@@ -331,19 +331,19 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards `0`.
   """
   @spec nat() :: type
-  def nat(), do: sized(size, integer(0, size))
+  def nat, do: sized(size, integer(0, size))
 
   @doc "Large_int is equivalent to `integer`"
   @spec large_int() :: type
-  def large_int(), do: integer()
+  def large_int, do: integer()
 
   @doc "real is equivalent to `float`"
   @spec real() :: type
-  def real(), do: float()
+  def real, do: float()
 
   @doc "bool is equivalent to `boolean`"
   @spec bool() :: type
-  def bool(), do: boolean()
+  def bool, do: boolean()
 
   @doc "choose is equivalent to `integer(low, high)`"
   @spec choose(ext_int, ext_int) :: type

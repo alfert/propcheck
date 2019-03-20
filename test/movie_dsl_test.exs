@@ -44,7 +44,7 @@ defmodule PropCheck.Test.MoviesDSL do
   defstruct users: [], rented: %{}
 
   @doc "Initialize the model"
-  def initial_state(), do: %__MODULE__{}
+  def initial_state, do: %__MODULE__{}
 
 
   #########################################################################
@@ -96,10 +96,10 @@ defmodule PropCheck.Test.MoviesDSL do
   @movie_titles Keyword.keys(@available_movies) ++ [:titanic, :inception]
 
   @doc "generator for name"
-  def name(), do: oneof @names
+  def name, do: oneof @names
 
   @doc "generator for movies"
-  def movie(), do: oneof @movie_titles
+  def movie, do: oneof @movie_titles
 
 
   @doc """
@@ -160,7 +160,7 @@ defmodule PropCheck.Test.MoviesDSL do
   end
 
   defcommand :ask_for_popcorn do
-    def impl(), do: MovieServer.ask_for_popcorn()
+    def impl, do: MovieServer.ask_for_popcorn()
     def post(_state, [], result), do: result == :bon_appetit
   end
 

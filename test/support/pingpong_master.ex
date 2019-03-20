@@ -21,11 +21,11 @@ defmodule PropCheck.Test.PingPongMaster do
   # Master's API
   # -------------------------------------------------------------------
 
-  def start_link() do
+  def start_link do
     GenServer.start_link(__MODULE__, [], [name: __MODULE__])
   end
 
-  def stop() do
+  def stop do
     GenServer.stop(__MODULE__, :normal)
   end
 

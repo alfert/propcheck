@@ -263,7 +263,7 @@ defmodule PropCheck.StateM.DSL do
 
   defmacro __before_compile__(_env) do
     quote do
-      def __all_commands__(), do: @commands
+      def __all_commands__, do: @commands
     end
   end
 

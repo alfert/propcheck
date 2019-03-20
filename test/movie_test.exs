@@ -58,10 +58,10 @@ defmodule PropCheck.Test.Movies do
   @movie_titles (@available_movies |> Keyword.keys) ++ [:titanic, :inception]
 
   @doc "generator for name"
-  def name(), do: elements @names
+  def name, do: elements @names
 
   @doc "generator for movies"
-  def movie(), do: elements @movie_titles
+  def movie, do: elements @movie_titles
 
   # The state of the state machine
   # first components holds the return value of create_account,
@@ -125,7 +125,7 @@ defmodule PropCheck.Test.Movies do
   end
 
   @doc "Initialize the model"
-  def initial_state(), do: %__MODULE__{}
+  def initial_state, do: %__MODULE__{}
 
   @doc "The state machine entries"
   def next_state(s = %__MODULE__{users: users}, v, {:call, _, :create_account, [_name]}), do:

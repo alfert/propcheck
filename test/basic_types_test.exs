@@ -8,7 +8,7 @@ defmodule PropCheck.Test.BasicTypes do
   # Symbolic calls
   # as explained in http://propertesting.com/book_custom_generators.html#_symbolic_calls
   # work also in PropCheck.
-  def dict_autosymb(), do:
+  def dict_autosymb, do:
     sized(size, dict_autosymb(size, {:"$call", :dict, :new, []}))
   def dict_autosymb(0, dict), do: dict
   def dict_autosymb(n, dict), do:

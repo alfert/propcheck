@@ -31,7 +31,7 @@ defmodule PropCheck.Test.PingPongDSL do
   end
 
   @spec player_processes() :: [String.t]
-  defp player_processes() do
+  defp player_processes do
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1)
     |> String.starts_with?("player_")))
@@ -47,7 +47,7 @@ defmodule PropCheck.Test.PingPongDSL do
   defstruct players: [], scores: %{}
 
   @doc "initial model state of the state machine"
-  def initial_state(), do: %__MODULE__{}
+  def initial_state, do: %__MODULE__{}
 
   def weight(%__MODULE__{players: []}), do: %{add_player: 1}
   def weight(_), do:
@@ -66,7 +66,7 @@ defmodule PropCheck.Test.PingPongDSL do
     |> Enum.map(&("player_#{&1}")
     |> String.to_atom)
 
-  def any_name(), do: elements @players
+  def any_name, do: elements @players
   def known_name(%__MODULE__{players: player_list}), do: elements player_list
 
   defcommand :add_player do

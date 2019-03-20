@@ -34,7 +34,7 @@ defmodule PropCheck.Test.PingPongStateM do
   end
 
   # ensure all player processes are dead
-  defp kill_all_player_processes() do
+  defp kill_all_player_processes do
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1)
     |> String.starts_with?("player_")))
@@ -76,7 +76,7 @@ defmodule PropCheck.Test.PingPongStateM do
     |> Enum.map(&("player_#{&1}")
     |> String.to_atom)
 
-  def name(), do: elements @players
+  def name, do: elements @players
   def name(%__MODULE__{players: player_list}), do: elements player_list
 
   def command(%__MODULE__{players: []}), do:
@@ -100,7 +100,7 @@ defmodule PropCheck.Test.PingPongStateM do
 
 
   @doc "initial model state of the state machine"
-  def initial_state(), do: %__MODULE__{}
+  def initial_state, do: %__MODULE__{}
 
   @doc """
   Update the model state after a successful call. The `state` parameter has

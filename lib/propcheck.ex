@@ -788,14 +788,14 @@ defmodule PropCheck do
     the most recent testing run.
     """
     @spec counterexample() :: counterexample | :undefined
-    def counterexample(), do: :erlang.get(:"$counterexample")
+    def counterexample, do: :erlang.get(:"$counterexample")
 
     @doc """
     Returns a counterexample for each failing property of the most recent
     module testing run.
     """
     @spec counterexamples() :: [{mfa,counterexample}] | :undefined
-    def counterexamples(), do: :erlang.get(:"$counterexamples")
+    def counterexamples, do: :erlang.get(:"$counterexamples")
 
     @doc "Runs PropEr on the property `outer_test`."
     @spec quickcheck(outer_test) :: result

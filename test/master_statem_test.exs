@@ -33,7 +33,7 @@ defmodule PropCheck.Test.MasterStateM do
   end
 
   # ensure all player processes are dead
-  defp kill_all_player_processes() do
+  defp kill_all_player_processes do
     require Logger
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
@@ -63,7 +63,7 @@ defmodule PropCheck.Test.MasterStateM do
   @max_players 100
   @players 1..@max_players |> Enum.map(&("player_#{&1}") |> String.to_atom)
 
-  def name(), do: oneof @players
+  def name, do: oneof @players
 
   def command(players) do
     if (Enum.count(players) > 0) do
@@ -86,7 +86,7 @@ defmodule PropCheck.Test.MasterStateM do
   #####################################################
 
   @doc "initial model state of the state machine"
-  def initial_state(), do: MapSet.new
+  def initial_state, do: MapSet.new
 
   @doc """
   Update the model state after a successful call. The `state` parameter has

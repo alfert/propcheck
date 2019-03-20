@@ -90,13 +90,13 @@ defmodule PropCheck.Test.CounterDSL do
   ### The model
   #########################################################################
 
-  def initial_state(), do: :init
+  def initial_state, do: :init
 
   def weight(:init), do: %{inc: 1, clear: 1}
   def weight(_), do: %{get: 1, inc: 2, clear: 1}
 
   defcommand :inc do
-    def impl(), do: Counter.inc()
+    def impl, do: Counter.inc()
     def args(_), do: []
     def next(:init, [], _res), do: :zero
     def next(:zero, [], _res), do: :one
@@ -107,7 +107,7 @@ defmodule PropCheck.Test.CounterDSL do
   end
 
   defcommand :get do
-    def impl(), do: Counter.get()
+    def impl, do: Counter.get()
     def args(_), do: []
     def post(_state, [], res), do: res >= 0
     def pre(:init, _, _), do: false
@@ -115,7 +115,7 @@ defmodule PropCheck.Test.CounterDSL do
   end
 
   defcommand :clear do
-    def impl(), do: Counter.clear()
+    def impl, do: Counter.clear()
     def args(_), do: []
     def next(_state, [], _res), do: :zero
     def post(_state, [], res), do: res == :ok

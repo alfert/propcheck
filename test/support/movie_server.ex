@@ -13,10 +13,10 @@ defmodule PropCheck.Test.MovieServer do
     movies: nil,
     next_pass: 0
 
-  def start_link(), do:
+  def start_link, do:
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
-  def stop() do
+  def stop do
     ref = Process.monitor(__MODULE__)
     GenServer.call(__MODULE__, :stop)
     receive do
@@ -39,9 +39,9 @@ defmodule PropCheck.Test.MovieServer do
     GenServer.call(__MODULE__, {:return, password, movie})
 
   @spec ask_for_popcorn() :: :bon_appetit
-  def ask_for_popcorn(), do: GenServer.call(__MODULE__, :popcorn)
+  def ask_for_popcorn, do: GenServer.call(__MODULE__, :popcorn)
 
-  def available_movies(), do: @movies
+  def available_movies, do: @movies
 
   ##########################################################
 

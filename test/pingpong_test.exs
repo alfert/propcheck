@@ -8,7 +8,7 @@ defmodule PropCheck.Test.PingPongTest do
   alias PropCheck.Test.PingPongMaster
 
   # ensure all player processes are dead
-  defp kill_all_player_processes() do
+  defp kill_all_player_processes do
     require Logger
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))

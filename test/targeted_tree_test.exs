@@ -33,7 +33,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   #####################################################################################
 
   ## Generator for trees
-  def tree() do
+  def tree do
     let l <- non_empty(list(integer())) do
       to_tree(l)
     end
@@ -62,7 +62,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   # define our own neighborhood function achieve even more left-heavy trees
 
   @doc "Returns the generator function for next value depending on the temperature"
-  def next_tree() do
+  def next_tree do
     fn old_tree, {_, temperature} ->
       let n <- integer() do
         scaled_value = trunc(n * temperature * 100)

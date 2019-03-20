@@ -1,7 +1,7 @@
 defmodule PropCheck.Mix do
   @moduledoc false
 
-  def counter_example_file() do
+  def counter_example_file do
     default_path =
       Mix.Project.build_path()
       |> Path.dirname()

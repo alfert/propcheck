@@ -8,7 +8,7 @@ defmodule PropCheck.Test.TargetPathTest do
 
   require Logger
 
-  def path(), do: list(oneof([:left, :right, :up, :down]))
+  def path, do: list(oneof([:left, :right, :up, :down]))
 
   def move(:left, {x, y}),  do: {x-1, y}
   def move(:right, {x, y}), do: {x+1, y}

@@ -19,13 +19,13 @@ defmodule PropCheck.Test.Level do
   #######################################################################
 
   @spec level0() :: level_data()
-  def level0(), do:
+  def level0, do:
     ["#########",
      "#X     E#",
      "#########"]
 
   @spec level1() :: level_data()
-  def level1(), do:
+  def level1, do:
     ["######################################################################",
      "#                                                                    #",
      "#   E                                                                #",
@@ -53,7 +53,7 @@ defmodule PropCheck.Test.Level do
 
 
   @spec level2() :: level_data()
-  def level2(), do:
+  def level2, do:
     ["######################################################################",
      "#                                                                    #",
      "#    X                                                               #",

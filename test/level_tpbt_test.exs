@@ -11,14 +11,14 @@ defmodule PropCheck.Test.LevelTest do
   # Generators
   #######################################################################
 
-  def step(), do: oneof([:left, :right, :up, :down])
+  def step, do: oneof([:left, :right, :up, :down])
 
-  def path_gen(), do: list(step())
+  def path_gen, do: list(step())
 
-  def path_gen_sa(), do: %{first: path_gen(), next: path_next()}
+  def path_gen_sa, do: %{first: path_gen(), next: path_next()}
 
   @spec path_next() :: ([Level.step], any() -> PropCheck.BasicTypes.t)
-  def path_next() do
+  def path_next do
     fn
       (prev_path, _temperature) when is_list(prev_path) ->
         let next_steps <- vector(20, step()), do:
