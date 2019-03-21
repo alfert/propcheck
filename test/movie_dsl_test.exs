@@ -44,8 +44,7 @@ defmodule PropCheck.Test.MoviesDSL do
   defstruct users: [], rented: %{}
 
   @doc "Initialize the model"
-  def initial_state(), do: %__MODULE__{}
-
+  def initial_state, do: %__MODULE__{}
 
   #########################################################################
   ### Test local preconditions, helpers and the like
@@ -56,7 +55,6 @@ defmodule PropCheck.Test.MoviesDSL do
     Logger.debug "test u_m_p: #{inspect s}"
     assert [{{:var, 1}, :mary_poppins}] == user_movie_pairs(s)
   end
-
 
   #########################################################################
   ### Weights of the commands
@@ -75,7 +73,6 @@ defmodule PropCheck.Test.MoviesDSL do
       std_commands
     end
   end
-
 
   #########################################################################
   ### Value generators
@@ -96,11 +93,10 @@ defmodule PropCheck.Test.MoviesDSL do
   @movie_titles Keyword.keys(@available_movies) ++ [:titanic, :inception]
 
   @doc "generator for name"
-  def name(), do: oneof @names
+  def name, do: oneof @names
 
   @doc "generator for movies"
-  def movie(), do: oneof @movie_titles
-
+  def movie, do: oneof @movie_titles
 
   @doc """
   Generate only valid passwords, i.e those from existing users.
@@ -160,7 +156,7 @@ defmodule PropCheck.Test.MoviesDSL do
   end
 
   defcommand :ask_for_popcorn do
-    def impl(), do: MovieServer.ask_for_popcorn()
+    def impl, do: MovieServer.ask_for_popcorn()
     def post(_state, [], result), do: result == :bon_appetit
   end
 

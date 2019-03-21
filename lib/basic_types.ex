@@ -3,7 +3,6 @@ defmodule PropCheck.BasicTypes do
   This modules contains all basic type generators from PropEr. It is
   automatically available by `use PropCheck`.
 
-
   ## Acknowledgments
 
   The functions defined here are delegated to the corresponding
@@ -66,7 +65,7 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards the empty atom, `:""`.
   """
   @spec atom :: type
-  defdelegate atom(), to: :proper_types
+  defdelegate atom, to: :proper_types
 
   @doc """
   All binaries.
@@ -74,7 +73,7 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards the empty binary, `""`.
   """
   @spec binary() :: type
-  defdelegate binary(), to: :proper_types
+  defdelegate binary, to: :proper_types
 
   @doc """
   All binaries with a byte size of `length`.
@@ -91,7 +90,7 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards the empty bitstring, `""`.
   """
   @spec bitstring() :: type
-  defdelegate bitstring(), to: :proper_types
+  defdelegate bitstring, to: :proper_types
 
   @doc """
   All bitstrings with a bit size of `length`.
@@ -101,7 +100,6 @@ defmodule PropCheck.BasicTypes do
   """
   @spec bitstring(non_neg_integer) :: type
   defdelegate bitstring(length), to: :proper_types
-
 
   @doc """
   A map whose keys are defined by the generator `k` and values by the generator `v`.
@@ -116,7 +114,6 @@ defmodule PropCheck.BasicTypes do
   """
   @spec list(raw_type) :: type
   defdelegate list(elem_type), to: :proper_types
-
 
   @doc """
   A type that generates exactly the list `list`.
@@ -143,7 +140,7 @@ defmodule PropCheck.BasicTypes do
   instance of a type union to an instance of the first type in `list_of_types`,
   thus you should write the simplest case first.
   """
-  @spec union([raw_type,...]) :: type
+  @spec union([raw_type, ...]) :: type
   defdelegate union(list_of_types), to: :proper_types
 
   @doc """
@@ -155,9 +152,8 @@ defmodule PropCheck.BasicTypes do
   by the random instance generator. The shrinking subsystem will ignore the
   frequencies and try to shrink towards the first type in the list.
   """
-  @spec weighted_union([{frequency, raw_type},...]) :: type
+  @spec weighted_union([{frequency, raw_type}, ...]) :: type
   defdelegate weighted_union(list_of_types), to: :proper_types
-
 
   @doc """
   All tuples whose i-th element is an instance of the type at index i of
@@ -183,7 +179,6 @@ defmodule PropCheck.BasicTypes do
   """
   @spec exactly(any) :: type
   defdelegate exactly(value), to: :proper_types
-
 
   @doc """
   All lists whose i-th element is an instance of the type at index i of
@@ -212,7 +207,7 @@ defmodule PropCheck.BasicTypes do
   type if you are certain that you need it.
   """
   @spec any() :: type
-  defdelegate any(), to: :proper_types
+  defdelegate any, to: :proper_types
 
   ################################################
   #
@@ -222,16 +217,16 @@ defmodule PropCheck.BasicTypes do
 
   @doc "All integers, i.e. `integer(:inf, :inf)`"
   @spec integer() :: type
-  def integer(), do: integer(:inf, :inf)
+  def integer, do: integer(:inf, :inf)
   @doc "Strictly positive integers, i.e. `integer(1, :inf)`"
   @spec pos_integer :: type
-  def pos_integer(), do: integer(1, :inf)
+  def pos_integer, do: integer(1, :inf)
   @doc "Non negative integers, i.e. `integer(0, :inf)`"
   @spec non_neg_integer :: type
-  def non_neg_integer(), do: integer(0, :inf)
+  def non_neg_integer, do: integer(0, :inf)
   @doc "Negative integers, i.e. `integer(:inf, -1)`"
   @spec neg_integer :: type
-  def neg_integer(), do: integer(:inf, -1)
+  def neg_integer, do: integer(:inf, -1)
 
   @doc "A range is equivalent to integers"
   @spec range(ext_int, ext_int) ::type
@@ -239,27 +234,26 @@ defmodule PropCheck.BasicTypes do
 
   @doc "All floats, i.e. `float(:inf, :inf)`"
   @spec float() :: type
-  def float(), do: float(:inf, :inf)
+  def float, do: float(:inf, :inf)
   @doc "Non negative floats, i.e. `float(0.0, inf)`"
   @spec non_neg_float() :: type
-  def non_neg_float(), do: float(0.0, :inf)
+  def non_neg_float, do: float(0.0, :inf)
 
   @doc "Numbers are integers or floats, i.e. `union([integer(), float()])`"
   @spec number() :: type
-  def number(), do: union([integer(), float()])
+  def number, do: union([integer(), float()])
 
   @doc "The atoms `true` and `false`. Instances shrink towards `false`."
   @spec boolean() :: type
-  def boolean(), do: union([false, true])
+  def boolean, do: union([false, true])
 
   @doc "Byte values, i.e. `integer(0, 255)`"
   @spec byte() :: type
-  def byte(), do: integer(0, 255)
+  def byte, do: integer(0, 255)
 
   @doc "Char values (16 bit for some reason), i.e. `integer(0, 0xffff)`"
   @spec char() :: type
-  def char(), do: integer(0, 0xffff)
-
+  def char, do: integer(0, 0xffff)
 
   @doc """
   Bounded upper size utf8 binary, `codepoint length =< MaxCodePointSize`.
@@ -276,7 +270,7 @@ defmodule PropCheck.BasicTypes do
 
   @doc "utf8-encoded unbounded size binary"
   @spec utf8() :: type
-  def utf8(), do: utf8(:inf, 4)
+  def utf8, do: utf8(:inf, 4)
 
   @doc "utf8-encoded bounded upper size binary."
   @spec utf8(ext_non_neg_integer) :: type
@@ -284,31 +278,31 @@ defmodule PropCheck.BasicTypes do
 
   @doc "List of any types, i.e. `list(any)`"
   @spec list() :: type
-  def list(), do: list(any())
+  def list, do: list(any())
 
   @doc "Tuples of any types, i.e. `loose_tuple(any)`"
   @spec tuple() :: type
-  def tuple(), do: loose_tuple(any())
+  def tuple, do: loose_tuple(any())
 
   @doc "An Erlang string, i.e. `list(char)`"
   @spec char_list() :: type
-  def char_list(), do: list(char())
+  def char_list, do: list(char())
 
   @doc "weighted_union(FreqChoices)"
-  @spec wunion([{frequency,raw_type},...]) :: type
+  @spec wunion([{frequency, raw_type}, ...]) :: type
   def wunion(freq_choices), do: weighted_union(freq_choices)
 
   @doc "Term is a synonym for `any`"
   @spec term() :: type
-  def term(), do: any()
+  def term, do: any()
 
   @doc "timeout values, i.e. `union([non_neg_integer() | :infinity])`"
   @spec timeout() :: type
-  def timeout(), do: union([non_neg_integer(), :infinity])
+  def timeout, do: union([non_neg_integer(), :infinity])
 
   @doc "Arity is a byte value, i.e. `integer(0, 255)`"
   @spec arity() :: type
-  def arity(), do: integer(0, 255)
+  def arity, do: integer(0, 255)
 
   ################################################
   #
@@ -322,7 +316,7 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards `0`.
   """
   @spec int() :: type
-  def int(), do: sized(size, integer(-size, size))
+  def int, do: sized(size, integer(-size, size))
 
   @doc """
   Small Small non-negative integers (bound by the current value of the `size`
@@ -331,34 +325,34 @@ defmodule PropCheck.BasicTypes do
   Instances shrink towards `0`.
   """
   @spec nat() :: type
-  def nat(), do: sized(size, integer(0, size))
+  def nat, do: sized(size, integer(0, size))
 
   @doc "Large_int is equivalent to `integer`"
   @spec large_int() :: type
-  def large_int(), do: integer()
+  def large_int, do: integer()
 
   @doc "real is equivalent to `float`"
   @spec real() :: type
-  def real(), do: float()
+  def real, do: float()
 
   @doc "bool is equivalent to `boolean`"
   @spec bool() :: type
-  def bool(), do: boolean()
+  def bool, do: boolean()
 
   @doc "choose is equivalent to `integer(low, high)`"
   @spec choose(ext_int, ext_int) :: type
   def choose(low, high), do: integer(low, high)
 
   @doc "elements is equivalent to `union([..])`"
-  @spec elements([raw_type,...]) :: type
+  @spec elements([raw_type, ...]) :: type
   def elements(choices), do: union(choices)
 
   @doc "oneof is equivalent to `union([..])`"
-  @spec oneof([raw_type,...]) :: type
+  @spec oneof([raw_type, ...]) :: type
   def oneof(choices), do: union(choices)
 
   @doc "frequency is equivalent to `weighted_union([..])`"
-  @spec frequency([{frequency,raw_type},...]) :: type
+  @spec frequency([{frequency, raw_type}, ...]) :: type
   def frequency(freq_choices), do: weighted_union(freq_choices)
 
   @doc "return is equivalent to `exactly`"
@@ -392,7 +386,7 @@ defmodule PropCheck.BasicTypes do
   shrinking subsystem will ignore the weights and try to shrink using the
   default value.
   """
-  @spec weighted_default({frequency,raw_type}, {frequency,raw_type}) :: type
+  @spec weighted_default({frequency, raw_type}, {frequency, raw_type}) :: type
   def weighted_default(default, type), do: weighted_union([default, type])
 
   @doc "A function with 0 parameters, i.e. `function(0, ret_type)`"
@@ -471,7 +465,7 @@ defmodule PropCheck.BasicTypes do
   """
   @spec with_parameter(atom, value, raw_type) :: type
   def with_parameter(parameter, value, type), do:
-      with_parameters([{parameter,value}], type)
+      with_parameters([{parameter, value}], type)
 
   @doc """
   Similar to `with_parameter/3`, but accepts a list of

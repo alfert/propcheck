@@ -11,14 +11,14 @@ defmodule PropCheck.Test.LevelTest do
   # Generators
   #######################################################################
 
-  def step(), do: oneof([:left, :right, :up, :down])
+  def step, do: oneof([:left, :right, :up, :down])
 
-  def path_gen(), do: list(step())
+  def path_gen, do: list(step())
 
-  def path_gen_sa(), do: %{first: path_gen(), next: path_next()}
+  def path_gen_sa, do: %{first: path_gen(), next: path_next()}
 
   @spec path_next() :: ([Level.step], any() -> PropCheck.BasicTypes.t)
-  def path_next() do
+  def path_next do
     fn
       (prev_path, _temperature) when is_list(prev_path) ->
         let next_steps <- vector(20, step()), do:
@@ -94,14 +94,13 @@ defmodule PropCheck.Test.LevelTest do
   #                  end
   #              end).
 
-
   # This property uses `forall_targeted`, therefore the condition checked inside
   # the property is negated and it must be negated outside (see docs of `prop_exit/1` for
   # more details).
   # When using a proper-derived generator, we might have to search longer to find
   # a successful path. Therefore, we increase the amount of search_steps. For more complex
   # situations, e.g. for level 2, the size of the generated paths may become larger.
-  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose, search_steps: 2_0000] do
+  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose, search_steps: 20_000] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
@@ -140,7 +139,6 @@ defmodule PropCheck.Test.LevelTest do
   #                            true
   #                        end
   #                    end).
-
 
   def prop_forall_targeted(level_data) do
     level = Level.build_level(level_data)
@@ -217,6 +215,5 @@ defmodule PropCheck.Test.LevelTest do
       end
     end
   end
-
 
 end

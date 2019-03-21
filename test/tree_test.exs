@@ -91,10 +91,10 @@ defmodule PropCheck.TreeTest do
   def tree5(g), do: sized(s, tree5(s, g))
   def tree5(0, _), do: :leaf
   def tree5(s, g), do:
-    frequency [
+    frequency([
       {1, tree5(0, g)},
       {9, lazy {:node, g, tree5(div(s, 2), g), tree5(div(s, 2), g)}}
-    ]
+    ])
 
   @doc """
   Finally, we set up a more efficient shrinking strategy: pick each of the

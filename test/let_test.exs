@@ -9,7 +9,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     end
   end
 
-  def kilo_numbers() do
+  def kilo_numbers do
     let [num <- integer(1, 1000)] do
       num
     end
@@ -28,7 +28,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     use PropCheck
     use PropCheck.StateM.DSL
 
-    def initial_state(), do: %{}
+    def initial_state, do: %{}
 
     defcommand :equal do
       def impl(_number), do: :ok
@@ -60,7 +60,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     use PropCheck
     use PropCheck.StateM.DSL
 
-    def initial_state(), do: %{}
+    def initial_state, do: %{}
 
     defcommand :equal do
       def impl(_number), do: :ok
@@ -97,9 +97,9 @@ defmodule PropCheck.Test.LetAndShrinks do
     use PropCheck
     use PropCheck.StateM
 
-    def initial_state(), do: %{}
+    def initial_state, do: %{}
 
-    def args() do
+    def args do
       let ([num <- integer(1, 1000)]) do
         [num]
       end
@@ -136,7 +136,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     use PropCheck
     use PropCheck.StateM.DSL
 
-    def initial_state(), do: %{}
+    def initial_state, do: %{}
 
     defcommand :equal do
       def impl(_number), do: :ok
@@ -167,6 +167,5 @@ defmodule PropCheck.Test.LetAndShrinks do
     end
 
   end
-
 
 end

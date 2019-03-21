@@ -114,14 +114,13 @@ defmodule PropCheck.FSM do
   @type symb_var :: PropCheck.StateM.symb_var
   @type fsm_state()    :: {state_name, state_data}
   @type transition()   :: {state_name, symb_call}
-  @type history()      :: [{fsm_state,cmd_result}]
+  @type history()      :: [{fsm_state, cmd_result}]
 
   @type result :: :proper_statem.statem_result
   @type fsm_result :: result
   @type cmd_result :: any
-  @type command  :: {:set ,symb_var,symb_call} | {:init, fsm_state()}
+  @type command  :: {:set, symb_var, symb_call} | {:init, fsm_state()}
   @type command_list:: [command]
-
 
   @doc """
   Specifies the initial state of the finite state machine. As with
@@ -212,7 +211,7 @@ defmodule PropCheck.FSM do
   The result is a triple of the form `{history, fsm_state, result}`,
   similar to `PropCheck.StateM.run_commands/2`.
   """
-  @spec run_commands(mod_name, command_list) :: {history,fsm_state,fsm_result}
+  @spec run_commands(mod_name, command_list) :: {history, fsm_state, fsm_result}
   def run_commands(mod, cmds), do: :proper_fsm.run_commands(mod, cmds)
 
   @doc """
@@ -221,7 +220,7 @@ defmodule PropCheck.FSM do
   `PropCheck.StateM.run_commands/3`.
   """
   @spec run_commands(mod_name, command_list, :proper_symb.var_values) ::
-           {history,fsm_state,fsm_result}
+           {history, fsm_state, fsm_result}
   def run_commands(mod, cmds, env), do: :proper_fsm.run_commands(mod, cmds, env)
 
   @doc """

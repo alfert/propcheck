@@ -252,7 +252,6 @@ defmodule PropCheck.StateM.DSL do
   @callback weight(symbolic_state) :: %{required(command_name) => pos_integer}
   @optional_callbacks weight: 1
 
-
   defmacro __using__(_options) do
     quote do
       import unquote(__MODULE__)
@@ -263,7 +262,7 @@ defmodule PropCheck.StateM.DSL do
 
   defmacro __before_compile__(_env) do
     quote do
-      def __all_commands__(), do: @commands
+      def __all_commands__, do: @commands
     end
   end
 
@@ -314,7 +313,7 @@ defmodule PropCheck.StateM.DSL do
     do
       new_name = String.to_atom("#{name}_#{suffix_name}")
       # Logger.error "Found suffix: #{new_name}"
-      {:def, c1,[{new_name, c2, args}, body]}
+      {:def, c1, [{new_name, c2, args}, body]}
     end
   defp rename_def_in_command(ast, _name) do
     # Logger.warn "Found ast = #{inspect ast}"
@@ -486,7 +485,10 @@ defmodule PropCheck.StateM.DSL do
 
   # replaces all symbolic variables of form `{:var, n}` with
   # the value in `env` (i.e. mapping of symbolic vars to values)
-  @spec replace_symb_vars(symbolic_call | symbolic_var | [symbolic_call | symbolic_var] | any, environment) :: symbolic_call
+  @spec replace_symb_vars(
+          symbolic_call | symbolic_var | [symbolic_call | symbolic_var] | any,
+          environment
+        ) :: symbolic_call
   defp replace_symb_vars({:call, m, f, args}, env) do
     replaced_m = replace_symb_vars(m, env)
     replaced_f = replace_symb_vars(f, env)
@@ -556,7 +558,6 @@ defmodule PropCheck.StateM.DSL do
       {m, f, length(args)}
     end)
   end
-
 
   # Detects alls commands within `mod_bin_code`, i.e. all functions with the
   # same prefix and a suffix `_command` or `_args` and a prefix `_next`.

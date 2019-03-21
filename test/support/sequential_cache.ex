@@ -13,7 +13,7 @@ defmodule PropCheck.Test.Cache do
     GenServer.start_link(__MODULE__, [n], name: @cache_name)
   end
 
-  def stop(), do: GenServer.stop(__MODULE__)
+  def stop, do: GenServer.stop(__MODULE__)
 
   @doc """
   Finding keys is done through scanning an ETS table with `:ets.match/2`
@@ -45,7 +45,7 @@ defmodule PropCheck.Test.Cache do
     # Logger.debug "Current: #{current}, Max: #{inspect max}"
     if current < max do
       # Logger.debug "Cache: Incrementally add at pos #{current + 1}"
-      :ets.insert(@cache_name, [{current+1, {key, val}},
+      :ets.insert(@cache_name, [{current + 1, {key, val}},
                          {:count, current + 1, max}])
     else
       # table is full, override from the beginning
@@ -57,13 +57,13 @@ defmodule PropCheck.Test.Cache do
   @doc """
   The cache gets flushed by removing all the entries and resetting its counters
   """
-  def flush() do
+  def flush do
     [{:count, _, max}] = :ets.lookup(@cache_name, :count)
     :ets.delete_all_objects(@cache_name)
     :ets.insert(@cache_name, {:count, 0, max})
   end
 
-  def dump() do
+  def dump do
     :ets.tab2list(@cache_name)
     |> Enum.sort_by(fn
       {index, {_k, _v}} -> index

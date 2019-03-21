@@ -12,7 +12,6 @@ defmodule PropcheckTest do
   @type my_stack(t) :: [t]
   @type tagged_stack(t) :: {:stack, [t]}
 
-
   test "find types in proper_gen.erl" do
     types = Kernel.Typespec.beam_types(:proper_gen)
     refute nil == types
@@ -101,7 +100,7 @@ defmodule PropcheckTest do
 
         for {:attribute, _, kind, {name, _, args}} = type <- abstract_code, kind
              in [:opaque, :type, :export_type] do
-          if (name == type_name and arg_count == length(args)) do
+          if name == type_name and arg_count == length(args) do
             type
           else
             nil

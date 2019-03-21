@@ -1,9 +1,10 @@
 defmodule PropCheck.Test.MovieServer do
+  @moduledoc false
 
   use GenServer
 
-  @movies [{:mary_poppins,3}, {:finding_nemo,2}, {:despicable_me,3},
-      {:toy_story,5}, {:the_lion_king,2}, {:peter_pan,1}]
+  @movies [{:mary_poppins, 3}, {:finding_nemo, 2}, {:despicable_me, 3},
+      {:toy_story, 5}, {:the_lion_king, 2}, {:peter_pan, 1}]
 
   @type name :: atom
   @type movie :: atom
@@ -13,10 +14,10 @@ defmodule PropCheck.Test.MovieServer do
     movies: nil,
     next_pass: 0
 
-  def start_link(), do:
+  def start_link, do:
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
-  def stop() do
+  def stop do
     ref = Process.monitor(__MODULE__)
     GenServer.call(__MODULE__, :stop)
     receive do
@@ -39,9 +40,9 @@ defmodule PropCheck.Test.MovieServer do
     GenServer.call(__MODULE__, {:return, password, movie})
 
   @spec ask_for_popcorn() :: :bon_appetit
-  def ask_for_popcorn(), do: GenServer.call(__MODULE__, :popcorn)
+  def ask_for_popcorn, do: GenServer.call(__MODULE__, :popcorn)
 
-  def available_movies(), do: @movies
+  def available_movies, do: @movies
 
   ##########################################################
 
@@ -60,43 +61,43 @@ defmodule PropCheck.Test.MovieServer do
 
   def handle_call(:popcorn, _from, s), do: {:reply, :bon_appetit, s}
   def handle_call(:stop, _from, s), do: {:stop, :normal, :stopped, s}
-  def handle_call({:new_account, name}, _from, %__MODULE__{next_pass: p, users: u} = s) do
+  def handle_call({:new_account, name}, _from, s = %__MODULE__{next_pass: p, users: u}) do
     :ets.insert(u, {p, name, []})
-    {:reply, p, %__MODULE__{s | next_pass: p+1}}
+    {:reply, p, %__MODULE__{s | next_pass: p + 1}}
   end
-  def handle_call({:delete_account, p}, _from, %__MODULE__{users: u} = s) do
+  def handle_call({:delete_account, p}, _from, s = %__MODULE__{users: u}) do
     reply = case :ets.lookup(u, p) do
       []          -> :not_a_client
-      [{_,_,[]}]  -> :ets.delete(u, p)
+      [{_, _, []}]  -> :ets.delete(u, p)
                      :account_deleted
       [{_, _, _}] -> :return_movies_first
     end
     {:reply, reply, s}
   end
-  def handle_call({:rent, pass, movie}, _from, %__MODULE__{users: u, movies: m}=s) do
+  def handle_call({:rent, pass, movie}, _from, s = %__MODULE__{users: u, movies: m}) do
     reply = case :ets.lookup(u, pass) do
       []             -> :not_a_client
-      [{_,_,rented}] -> case :ets.lookup(m, movie)  do
+      [{_, _, rented}] -> case :ets.lookup(m, movie)  do
         [] -> rented
         [{_, 0}] -> rented
         [{_, n}] ->
           new_rented = [movie | rented]
           :ets.update_element(u, pass, {3, new_rented})
-          :ets.update_element(m, movie, {2, n-1})
+          :ets.update_element(m, movie, {2, n - 1})
           new_rented
       end
     end
     {:reply, reply, s}
   end
-  def handle_call({:return, pass, movie}, _from, %__MODULE__{users: u, movies: m}=s) do
+  def handle_call({:return, pass, movie}, _from, s = %__MODULE__{users: u, movies: m}) do
     reply = case :ets.lookup(u, pass) do
       []             -> :not_a_client
-      [{_,_,rented}] -> case :ets.lookup(m, movie) do
+      [{_, _, rented}] -> case :ets.lookup(m, movie) do
         [] -> rented
         [{_, n}] ->
           new_rented = rented |> List.delete(movie)
-          :ets.update_element(u, pass, {3,new_rented})
-          :ets.update_element(m, movie, {2, n+1})
+          :ets.update_element(u, pass, {3, new_rented})
+          :ets.update_element(m, movie, {2, n + 1})
           new_rented
       end
     end

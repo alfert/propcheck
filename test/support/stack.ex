@@ -1,5 +1,5 @@
 defmodule PropCheck.Test.Stack do
-
+  @moduledoc false
 
   @opaque stack(t) :: [t] # when t: var
   @opaque stack :: stack(any)

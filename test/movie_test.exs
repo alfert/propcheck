@@ -58,10 +58,10 @@ defmodule PropCheck.Test.Movies do
   @movie_titles (@available_movies |> Keyword.keys) ++ [:titanic, :inception]
 
   @doc "generator for name"
-  def name(), do: elements @names
+  def name, do: elements @names
 
   @doc "generator for movies"
-  def movie(), do: elements @movie_titles
+  def movie, do: elements @movie_titles
 
   # The state of the state machine
   # first components holds the return value of create_account,
@@ -99,7 +99,7 @@ defmodule PropCheck.Test.Movies do
       {1, {:call, MovieServer, :rent_dvd, [password(state), movie()]}}]
 
     calls =
-      if (movies_rented) do
+      if movies_rented do
         pms = user_movie_pairs(rented)
         #IO.puts "User/movie pairs: #{inspect pms}"
         [{5, let {p, m} <- elements(pms) do
@@ -125,7 +125,7 @@ defmodule PropCheck.Test.Movies do
   end
 
   @doc "Initialize the model"
-  def initial_state(), do: %__MODULE__{}
+  def initial_state, do: %__MODULE__{}
 
   @doc "The state machine entries"
   def next_state(s = %__MODULE__{users: users}, v, {:call, _, :create_account, [_name]}), do:
@@ -162,18 +162,18 @@ defmodule PropCheck.Test.Movies do
   def precondition(_state, _call), do: true
 
   @doc "Postconditions ensure that the expected effect has taken place"
-  def postcondition(%__MODULE__{users: users}, {:call, _, :create_account,[_name]}, result) do
+  def postcondition(%__MODULE__{users: users}, {:call, _, :create_account, [_name]}, result) do
     # the new user was formerly not available
     not (users |> Enum.member?(result))
   end
-  def postcondition(%__MODULE__{rented: rented}, {:call, _, :delete_account,[passwd]}, result) do
+  def postcondition(%__MODULE__{rented: rented}, {:call, _, :delete_account, [passwd]}, result) do
     # deletion does not work always
     case rented |> Map.get(passwd, []) do
       [] -> result == :account_deleted
       _any_movie ->  result == :return_movies_first
     end
   end
-  def postcondition(state, {:call, _, :rent_dvd,[passwd, movie]}, result) do
+  def postcondition(state, {:call, _, :rent_dvd, [passwd, movie]}, result) do
     # if the movie exists, then it must there, otherwise not
     case is_available(state, movie) do
       true ->
@@ -189,7 +189,6 @@ defmodule PropCheck.Test.Movies do
   def postcondition(_state, {:call, _, :ask_for_popcorn, []}, result) do
     result == :bon_appetit
   end
-
 
   @doc "is the movie available?"
   def is_available(%__MODULE__{rented: rented}, movie) do

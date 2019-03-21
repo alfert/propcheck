@@ -7,7 +7,6 @@ defmodule PropCheck.Properties do
   alias PropCheck.CounterStrike
   require Logger
 
-
   @doc """
   Defines a property as part of an ExUnit test.
 
@@ -84,14 +83,14 @@ defmodule PropCheck.Properties do
     should_fail = is_tuple(p) and elem(p, 0) == :fails
     # Logger.debug "Execute property #{inspect name} "
     case CounterStrike.counter_example(name) do
-      :none -> PropCheck.quickcheck(p, [:long_result] ++opts)
+      :none -> PropCheck.quickcheck(p, [:long_result] ++ opts)
       :others ->
         # since the tag is set, we execute everything. You can limit
         # the amount of checks by using either --stale or --only failing_prop
         qc(p, opts)
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
-        result = PropCheck.check(p, counter_example, [:long_result] ++opts)
+        result = PropCheck.check(p, counter_example, [:long_result] ++ opts)
         with true <- result do
           qc(p, opts)
         else

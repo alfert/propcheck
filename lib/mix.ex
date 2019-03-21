@@ -1,7 +1,7 @@
 defmodule PropCheck.Mix do
   @moduledoc false
 
-  def counter_example_file() do
+  def counter_example_file do
     default_path =
       Mix.Project.build_path()
       |> Path.dirname()
@@ -31,9 +31,11 @@ defmodule Mix.Tasks.Propcheck do
   with `mix propcheck.clean` the file is deleted afterwards.
   """
 
+  alias Mix.Tasks.Help
+
   def run(_) do
     Mix.shell.info("Available PropCheck tasks:\n")
-    Mix.Tasks.Help.run(["--search", "propcheck."])
+    Help.run(["--search", "propcheck."])
   end
 
   defmodule Clean do

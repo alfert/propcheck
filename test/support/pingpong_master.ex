@@ -21,11 +21,11 @@ defmodule PropCheck.Test.PingPongMaster do
   # Master's API
   # -------------------------------------------------------------------
 
-  def start_link() do
+  def start_link do
     GenServer.start_link(__MODULE__, [], [name: __MODULE__])
   end
 
-  def stop() do
+  def stop do
     GenServer.stop(__MODULE__, :normal)
   end
 
@@ -111,12 +111,10 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   defp robust_send(name, msg) do
-    try do
-      send(name, msg)
-      :ok
-    catch
-      :error, :badarg -> {:dead_player, name}
-    end
+    send(name, msg)
+    :ok
+  catch
+    :error, :badarg -> {:dead_player, name}
   end
 
   # -------------------------------------------------------------------
@@ -152,7 +150,7 @@ defmodule PropCheck.Test.PingPongMaster do
   end
   def handle_call({:ping, from_name}, _from, scores) do
     # Logger.debug "Master: Ping Pong Game for #{inspect from_name}"
-    if (scores |> Map.has_key?(from_name)) do
+    if scores |> Map.has_key?(from_name) do
       {:reply, :pong, scores |> Map.update!(from_name, &(&1 + 1))}
     else
       {:reply, {:removed, from_name}, scores}

@@ -17,7 +17,7 @@ defmodule PropCheck.CounterStrike do
 
   defstruct [counter_examples: %{}, dets: nil]
 
-  def start_link(filename \\ 'propcheck.dets', opts \\[])
+  def start_link(filename \\ 'propcheck.dets', opts \\ [])
   def start_link(filename, opts) when is_binary(filename), do: start_link(String.to_charlist(filename), opts)
   def start_link(filename, opts) when is_list(filename) do
     # Logger.info "Filename: #{filename}, options: #{inspect opts}"
@@ -67,7 +67,7 @@ defmodule PropCheck.CounterStrike do
 
   defp check_counter_example(counter_examples, mfa) do
     # Logger.debug "#{inspect self()}: Asked for mfa #{inspect mfa} in #{inspect counter_examples}"
-    if (Enum.count(counter_examples) == 0) do
+    if Enum.empty?(counter_examples) do
       :none
     else
       case Map.fetch(counter_examples, mfa) do

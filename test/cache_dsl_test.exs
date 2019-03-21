@@ -10,7 +10,6 @@ defmodule PropCheck.Test.Cache.DSL do
   alias PropCheck.Test.Cache
   # require Logger
 
-
   @cache_size 10
 
   property "run the sequential cache", [:verbose] do
@@ -77,7 +76,6 @@ defmodule PropCheck.Test.Cache.DSL do
     |> Enum.map(fn {state, _call, _result} -> state end)
   end
 
-
   ###########################
   # Testing the command generators and such
 
@@ -104,21 +102,20 @@ defmodule PropCheck.Test.Cache.DSL do
   code related to key reuse or matching, but without losing the ability
   to 'fuzz' the system.
   """
-  def key(), do: oneof([
+  def key, do: oneof([
     integer(1, @cache_size),
     integer()
     ])
   @doc "our values are integers"
-  def val(), do: integer()
+  def val, do: integer()
 
   ###################
   # the initial state of our model
-  def initial_state(), do: %__MODULE__{}
+  def initial_state, do: %__MODULE__{}
 
   ##################
   # The command weight distribution
   def weight(_state), do: %{find: 1, cache: 3, flush: 1}
-
 
   ###### Command: find
 
@@ -143,7 +140,7 @@ defmodule PropCheck.Test.Cache.DSL do
     # generator for args of cache
     def args(_state), do: [key(), val()]
     # what is the next state?
-    def next(s=%__MODULE__{entries: l, count: n, max: m}, [k, v], _res) do
+    def next(s = %__MODULE__{entries: l, count: n, max: m}, [k, v], _res) do
       case List.keyfind(l, k, 0, false) do
           # When the cache is at capacity, the first element is dropped (tl(L))
           # before adding the new one at the end
@@ -159,7 +156,7 @@ defmodule PropCheck.Test.Cache.DSL do
 
   defcommand :flush do
     # implement flush
-    def impl(), do: Cache.flush()
+    def impl, do: Cache.flush()
     # next state is: cache is empty
     def next(state, _args, _res) do
       update_entries(state, [])
@@ -167,7 +164,6 @@ defmodule PropCheck.Test.Cache.DSL do
     # pre condition: do not call flush() twice
     def pre(%__MODULE__{count: c}, _args), do: c != 0
   end
-
 
   defp update_entries(s = %__MODULE__{}, l) do
     %__MODULE__{s | entries: l, count: Enum.count(l)}

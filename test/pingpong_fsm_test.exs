@@ -53,14 +53,13 @@ defmodule PropCheck.Test.PingPongFSM do
     log_state
   end
 
-
   # State is modelled as tuples of `{state_name, state}`
   defstruct players: [], scores: %{}
 
   @max_players 100
   @players 1..@max_players |> Enum.map(&("player_#{&1}") |> String.to_atom)
 
-  def initial_state(), do: :empty_state
+  def initial_state, do: :empty_state
   def initial_state_data, do: %__MODULE__{}
 
   def empty_state(_) do
@@ -86,7 +85,7 @@ defmodule PropCheck.Test.PingPongFSM do
   end
 
   # no specific preconditions
-  def precondition(_from, _target, _state, {:call, _m, _f, _a,}), do: true
+  def precondition(_from, _target, _state, {:call, _m, _f, _a}), do: true
 
   # imprecise get_score due to async play-functions
   def postcondition(_from, _target, %__MODULE__{scores: scores},
@@ -105,13 +104,13 @@ defmodule PropCheck.Test.PingPongFSM do
 
   # state data is updates for adding, removing, playing.
   def next_state_data(_from, :player_state, state, _res, {:call, _m, :add_player, [p]}) do
-    if not Enum.member?(state.players, p) do
+    if Enum.member?(state.players, p) do
+      state
+    else
       %__MODULE__{state |
           players: [p | state.players],
           scores: Map.put_new(state.scores, p, 0)
         }
-    else
-      state
     end
   end
   def next_state_data(:player_state, _target, state, _res, {:call, _, :remove_player, [p]}) do
@@ -127,7 +126,7 @@ defmodule PropCheck.Test.PingPongFSM do
   def next_state_data(:player_state, _target, state, _res, {:call, _, :play_ping_pong, [p]}) do
     if Enum.member?(state.players, p) do
       %__MODULE__{state |
-          scores: Map.update!(state.scores, p, fn v -> v+1 end)}
+          scores: Map.update!(state.scores, p, fn v -> v + 1 end)}
     else
       state
     end
@@ -135,7 +134,7 @@ defmodule PropCheck.Test.PingPongFSM do
   def next_state_data(_from, _target, state, _res, _call), do: state
 
   # ensure all player processes are dead
-  defp kill_all_player_processes() do
+  defp kill_all_player_processes do
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
     |> Enum.each(fn name ->

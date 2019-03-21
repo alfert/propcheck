@@ -9,7 +9,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   require Logger
 
   @doc "Make a tree from a list"
-  def to_tree(l), do: Enum.reduce(l,:undefined, &insert/2)
+  def to_tree(l), do: Enum.reduce(l, :undefined, &insert/2)
 
   @doc "Insert into a tree, the empty tree is `:undefined`"
   def insert(n, node = {:node, m, _l, _r}) when n == m, do: node
@@ -26,14 +26,14 @@ defmodule PropCheck.Test.TargetTreeTest do
     {rl, rr} = sides(right)
     {count_inner(left) + ll + lr, count_inner(right) + rl + rr}
   end
-  def sides(_), do: {0,0}
+  def sides(_), do: {0, 0}
   def count_inner({:node, _, _, _}), do: 1
   def count_inner(_), do: 0
 
   #####################################################################################
 
   ## Generator for trees
-  def tree() do
+  def tree do
     let l <- non_empty(list(integer())) do
       to_tree(l)
     end
@@ -45,7 +45,7 @@ defmodule PropCheck.Test.TargetTreeTest do
       {left, right} = weight
       IO.write(" #{inspect weight}")
       # ensure that the left tree is larger than the right one
-      maximize(left-right)
+      maximize(left - right)
       true # this property holds always
     end
   end
@@ -62,7 +62,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   # define our own neighborhood function achieve even more left-heavy trees
 
   @doc "Returns the generator function for next value depending on the temperature"
-  def next_tree() do
+  def next_tree do
     fn old_tree, {_, temperature} ->
       let n <- integer() do
         scaled_value = trunc(n * temperature * 100)
@@ -77,7 +77,7 @@ defmodule PropCheck.Test.TargetTreeTest do
       {left, right} = weight
       IO.write(" #{inspect weight}")
       # ensure that the left tree is larger than the right one
-      maximize(left-right)
+      maximize(left - right)
       true # this property holds always
     end
   end
@@ -91,13 +91,13 @@ defmodule PropCheck.Test.TargetTreeTest do
       not_exists t <- user_nf(
           # trick: wrap the list value l into the let to construct the
           # required generator for user_nf
-          ( let x <- l, do: to_tree(x) ),
+          (let x <- l, do: to_tree(x)),
           next_tree()) do
         weight = sides(t)
         {left, right} = weight
         IO.write(" #{inspect weight}")
         # ensure that the left tree is larger than the right one
-        maximize(left-right)
+        maximize(left - right)
         false # guarantees a full search for exists
       end
     end

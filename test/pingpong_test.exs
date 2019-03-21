@@ -5,9 +5,10 @@ defmodule PropCheck.Test.PingPongTest do
 
   @moduletag capture_log: true
 
+  alias PropCheck.Test.PingPongMaster
 
   # ensure all player processes are dead
-  defp kill_all_player_processes() do
+  defp kill_all_player_processes do
     require Logger
     Process.registered
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
@@ -29,15 +30,14 @@ defmodule PropCheck.Test.PingPongTest do
     end)
   end
 
-
   test "Strange Call Sequence" do
-    PropCheck.Test.PingPongMaster.start_link
-    PropCheck.Test.PingPongMaster.add_player :player_73
-    PropCheck.Test.PingPongMaster.play_ping_pong :player_73
-    PropCheck.Test.PingPongMaster.play_ping_pong :player_73
+    PingPongMaster.start_link
+    PingPongMaster.add_player :player_73
+    PingPongMaster.play_ping_pong :player_73
+    PingPongMaster.play_ping_pong :player_73
     :timer.sleep(50)
-    score = PropCheck.Test.PingPongMaster.get_score :player_73
-    PropCheck.Test.PingPongMaster.stop
+    score = PingPongMaster.get_score :player_73
+    PingPongMaster.stop
     kill_all_player_processes()
 
     assert score <= 2
