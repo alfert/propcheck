@@ -83,7 +83,7 @@ Rather new introductory resource are
   Erlang only examples of the book are ported to Elixir and can be found in the test
   [test folder on GitHub](https://github.com/alfert/propcheck/tree/master/test).
 
-In contrast to book, the free website is concerned with
+In contrast to the book, the free website is concerned with
 Erlang only. The Erlang examples translate easily into Elixir (beside
 that at least a reading knowledge of Erlang is extremely helpful to survive
 in the BEAM ecosystem ...). Eventually I will port some of the examples to
