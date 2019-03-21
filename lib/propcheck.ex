@@ -346,6 +346,16 @@ defmodule PropCheck do
         ...>)
         true
 
+    Similar to `let/2`, multiple types can also be combined in a list of bindings:
+
+        iex> use PropCheck
+        iex> quickcheck(
+        ...> forall [n <- nat(), l <- list(nat())] do
+        ...>   n * Enum.sum(l) >= 0
+        ...> end
+        ...>)
+        true
+
     `forall` allows using `ExUnit` assertions. By default (`:quiet`), no output
     is generated if an assertion does not hold:
 
@@ -363,29 +373,49 @@ defmodule PropCheck do
     @in_ops [:<-, :in]
     defmacro forall(binding, opts \\ [:quiet], property)
     defmacro forall({op, _, [var, rawtype]}, opts, do: prop) when op in @in_ops do
-        quote do
-          :proper.forall(
-            unquote(rawtype),
-            fn(unquote(var)) ->
-              try do
-                unquote(prop)
-              rescue
-                e in ExUnit.AssertionError ->
-                  stacktrace = System.stacktrace
-                  if :verbose in unquote(opts) do
-                    e |> ExUnit.AssertionError.message() |> IO.write()
-                    formatted = Exception.format_stacktrace(stacktrace)
-                    IO.puts("stacktrace:\n#{formatted}")
-                  end
-                  false
-                e ->
-                  stacktrace = System.stacktrace
-                  reraise e, stacktrace
-              end
-            end)
-        end
+      forall_impl(var, rawtype, opts, prop)
     end
-    defmacro forall(_binding, _opts, _property), do: syntax_error("var <- generator, do: prop")
+
+    defmacro forall(bindings, opts, do: prop) do
+      {vars, rawtypes} = bindings |> forall_bind() |> Enum.unzip()
+      forall_impl(vars, rawtypes, opts, prop)
+    end
+
+    defp forall_impl(var, rawtype, opts, prop) do
+      quote do
+        :proper.forall(
+          unquote(rawtype),
+          fn(unquote(var)) ->
+            try do
+              unquote(prop)
+            rescue
+              e in ExUnit.AssertionError ->
+                stacktrace = System.stacktrace
+                if :verbose in unquote(opts) do
+                  e |> ExUnit.AssertionError.message() |> IO.write()
+                  formatted = Exception.format_stacktrace(stacktrace)
+                  IO.puts("stacktrace:\n#{formatted}")
+                end
+                false
+              e ->
+                stacktrace = System.stacktrace
+                reraise e, stacktrace
+            end
+          end)
+      end
+    end
+
+    defp forall_bind({op, _, [var, rawtype]}) when op in @in_ops do
+      {var, rawtype}
+    end
+
+    defp forall_bind(bindings) when is_list(bindings) do
+      Enum.map(bindings, &forall_bind/1)
+    end
+
+    defp forall_bind(_) do
+      syntax_error("var <- generator, do: prop")
+    end
 
     @doc """
     A property that is only tested if a condition is true.
@@ -562,6 +592,18 @@ defmodule PropCheck do
         ...>   end)
         true
 
+    Similar to `forall/2`, multiple types can also be put into tuples or lists:
+
+        iex> use PropCheck
+        iex> even_factor = let {n, m} <- {nat(), nat()} do
+        ...>  n * m * 2
+        ...> end
+        iex> quickcheck(
+        ...>   forall n <- even_factor do
+        ...>     rem(n, 2) == 0
+        ...>   end)
+        true
+
     """
     defmacro let({:<-, _, [var, rawtype]}, generator) do
         [{:do, gen}] = generator
@@ -572,14 +614,13 @@ defmodule PropCheck do
     end
 
     defmacro let([{:<-, _, _} | _rest] = bindings, [{:do, gen}]) do
-        bound = let_bind(bindings) |> Enum.reverse
-        vars = bound |> Enum.map(&(elem(&1, 0)))
-        raw_types = bound |> Enum.map(&(elem(&1, 1)))
+        {vars, raw_types} = bindings |> let_bind() |> Enum.reverse() |> Enum.unzip()
         quote do
           :proper_types.bind(unquote(raw_types),
             fn(unquote(vars)) -> unquote(gen) end, false)
         end
     end
+
     defp let_bind(_bind = {:<-, _, [var, rawtype]}), do: {var, rawtype}
     defp let_bind([{:<-, _, [var, rawtype]}]) do
       [{var, rawtype}]
