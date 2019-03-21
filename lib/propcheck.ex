@@ -373,15 +373,15 @@ defmodule PropCheck do
     @in_ops [:<-, :in]
     defmacro forall(binding, opts \\ [:quiet], property)
     defmacro forall({op, _, [var, rawtype]}, opts, do: prop) when op in @in_ops do
-      forall1(var, rawtype, opts, prop)
+      forall_impl(var, rawtype, opts, prop)
     end
 
     defmacro forall(bindings, opts, do: prop) do
       {vars, rawtypes} = bindings |> forall_bind() |> Enum.unzip()
-      forall1(vars, rawtypes, opts, prop)
+      forall_impl(vars, rawtypes, opts, prop)
     end
 
-    defp forall1(var, rawtype, opts, prop) do
+    defp forall_impl(var, rawtype, opts, prop) do
       quote do
         :proper.forall(
           unquote(rawtype),
