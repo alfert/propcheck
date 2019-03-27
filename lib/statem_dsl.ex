@@ -405,15 +405,16 @@ defmodule PropCheck.StateM.DSL do
   defp filter_freq_cmds(cmd_list, state, mod) do
     state
     |> mod.weight()
-    |> Enum.map(fn {f, w} ->
-      {w, find_call(cmd_list, Atom.to_string(f))}
-    end)
-
+    |> Enum.map(&find_call(&1, cmd_list, mod))
   end
 
-  defp find_call(cmd_list, fun) do
-    cmd_list
-    |> Enum.find(fn {:cmd, _m, f, _a} -> f == fun end)
+  defp find_call({fun, weight}, cmd_list, mod) do
+    expected = Atom.to_string(fun)
+
+    case Enum.find(cmd_list, fn {:cmd, _m, f, _a} -> f == expected end) do
+      nil -> raise "Command `#{fun}` is included in `#{inspect(mod)}.weight/1` but is not defined in that module."
+      found -> {weight, found}
+    end
   end
 
   @doc """
