@@ -59,7 +59,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
       use ExUnit.Case
       use PropCheck
 
-      @tag :skip # will be run manually
+      @tag will_fail: true # must be run manually
       property "cant_generate" do
         # Check that no counterexample is stored if PropEr reported an error
         gen = such_that b <- false, when: b
