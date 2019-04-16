@@ -74,7 +74,7 @@ defmodule PropCheck.StateM.DSL do
       defcommand :find do
         def impl(key), do: Cache.find(key)
         def args(_state), do: [key()]
-        def pre(_state, [_key]}), do: true
+        def pre(_state, [_key]), do: true
       end
 
   If the precondition is satisfied, the call can happen. After the call, the SUT
@@ -89,7 +89,7 @@ defmodule PropCheck.StateM.DSL do
       defcommand :find do
         def impl(key), do: Cache.find(key)
         def args(_state), do: [key()]
-        def pre(_state, [_key]}), do: true
+        def pre(_state, [_key]), do: true
         def next(old_state, _args, call_result), do: old_state
       end
 
@@ -105,7 +105,7 @@ defmodule PropCheck.StateM.DSL do
       defcommand :find do
         def impl(key), do: Cache.find(key)
         def args(_state), do: [key()]
-        def pre(_state, [_key]}), do: true
+        def pre(_state, [_key]), do: true
         def next(old_state, _args, _call_result), do: old_state
         def post(entries, [key], call_result) do
           case List.keyfind(entries, key, 0, false) do
