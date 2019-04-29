@@ -1,22 +1,12 @@
-defmodule CheckCounterExample do
-  @moduledoc false
-  alias PropCheck.CounterStrike
-
-  def check(mfa) do
-    CounterStrike.counter_example(mfa)
-  end
-end
-
+#
+# Tests to verify the behaviour of storing counter examples. These tests here
+# intentionally fail, but no counter examples should be stored. In VerifyCounterExampleTest,
+# we can verify that no test here resulted in a stored counter example.
+#
 defmodule StoreCounterExample.ModuleTag do
   use ExUnit.Case
   use PropCheck
   @moduletag store_counter_example: false
-
-  setup_all do
-    on_exit fn ->
-      assert :none == CheckCounterExample.check({__MODULE__, :"property failing", []})
-    end
-  end
 
   @tag will_fail: true
   property "failing" do
@@ -29,12 +19,6 @@ end
 defmodule StoreCounterExample.DescribeTag do
   use ExUnit.Case
   use PropCheck
-
-  setup_all do
-    on_exit fn ->
-      assert :none == CheckCounterExample.check({__MODULE__, :"property failing", []})
-    end
-  end
 
   describe "store counter example with describe" do
     @describetag store_counter_example: false
@@ -51,12 +35,6 @@ end
 defmodule StoreCounter.ExampleTag do
   use ExUnit.Case
   use PropCheck
-
-  setup_all do
-    on_exit fn ->
-      assert :none == CheckCounterExample.check({__MODULE__, :"property failing", []})
-    end
-  end
 
   @tag store_counter_example: false
   @tag will_fail: true
