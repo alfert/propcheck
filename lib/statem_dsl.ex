@@ -157,12 +157,11 @@ defmodule PropCheck.StateM.DSL do
         end
       end
 
-
   ## Increasing the Number of Commands in a Sequence
   Sometimes issues can hide when the command sequences are short. In order to
   tease out these hidden bugs we can increase the number of commands generated
   by using the `max_size` option in our property.
-  
+
         property "run the sequential cache", [max_size: 250] do
         forall cmds <- commands(__MODULE__) do
           Cache.start_link(@cache_size)
