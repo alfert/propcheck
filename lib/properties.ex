@@ -106,6 +106,9 @@ defmodule PropCheck.Properties do
           tags = [[failing_prop: tag_property({module, name, []})]]
           prop_name = ExUnit.Case.register_test(__ENV__, :property, name, tags)
           def unquote(prop_name)(unquote(var)) do
+            # Store opts in process dictionary to make them available within macros such
+            # as forall
+            Process.put(:property_opts, unquote(opts))
             p = unquote(block)
             mfa = {unquote(module), unquote(prop_name), []}
             execute_property(p, mfa, unquote(opts), unquote(store_counter_example))
