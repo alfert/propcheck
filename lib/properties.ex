@@ -179,7 +179,7 @@ defmodule PropCheck.Properties do
             CounterStrike.add_counter_example(name, counter_example)
             "Counter example stored."
           else
-            "Counter example NOT stored, :store_counter_example is set."
+            "Counter example NOT stored, :store_counter_example is set to false."
           end
 
         raise ExUnit.AssertionError, [
