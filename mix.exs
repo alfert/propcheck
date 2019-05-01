@@ -1,4 +1,5 @@
-defmodule Propcheck.Mixfile do
+defmodule PropCheck.Mixfile do
+  @moduledoc "Buildfile for PropCheckc"
   use Mix.Project
 
   def project do
@@ -48,8 +49,7 @@ defmodule Propcheck.Mixfile do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_),     do: ["lib"]
 
-
-  def aliases() do
+  def aliases do
     [clean: ["clean", "propcheck.clean"]]
   end
 
