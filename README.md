@@ -74,7 +74,7 @@ QuickCheck with the possibility to add requirement tags):
 * [Jesper Andersen's Breaking Erlang Maps (4 part series)](https://medium.com/@jlouis666/breaking-erlang-maps-4-4ebc3c64068c#.4d61kua92)
 * [Roberto Aloi's Notes on Erlang Quickcheck](http://roberto-aloi.com/erlang/notes-on-erlang-quickcheck)
 
-Rather new introductory resource are
+Rather new introductory resources are
 
 * [Fred Hebert's PropEr Testing](http://propertesting.com) and
 * Fred Hebert's book [Property-Based Testing With PropEr, Erlang and Elixir](https://pragprog.com/book/fhproper/property-based-testing-with-proper-erlang-and-elixir).

@@ -1,5 +1,19 @@
 # PropCheck Changelog
 
+## 1.1.5
+* `:verbose` option is propagated from the property directly to `forall`. 
+    Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Storing of counter-examples can excluded by tag `:store_counter_example`
+    Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Improved documentation for longer statemachine runs. Thanks
+  to [https://github.com/adkron](https://github.com/adkron)
+* Improved error message for missing command in `StateM.DSL`. 
+  Thanks to [https://github.com/devonestes](https://github.com/devonestes)
+* Introduction of linter `credo` and CircleCi as new CI tool. 
+  Thanks to [https://github.com/evnu](https://github.com/evnu)
+* `let` syntax is the same now as `forall`.
+  Thanks to [https://github.com/evnu](https://github.com/evnu)
+
 ## 1.1.4
 * Fixes an issue with the setup of regular and targeted properties rendering 1.1.3 unusable
 * Enhanced documentation for targeted properties
