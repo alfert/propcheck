@@ -1,5 +1,5 @@
 defmodule PropCheck.Mixfile do
-  @moduledoc "Buildfile for PropCheckc"
+  @moduledoc "Buildfile for PropCheck"
   use Mix.Project
 
   def project do
