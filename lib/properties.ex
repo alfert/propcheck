@@ -81,7 +81,7 @@ defmodule PropCheck.Properties do
   ```
 
   """
-  defmacro property(name, opts \\ [:quiet], var \\ quote(do: _), do: p_block) do
+  defmacro property(name, opts \\ [], var \\ quote(do: _), do: p_block) do
       block = quote do
         unquote(p_block)
       end
@@ -91,6 +91,7 @@ defmodule PropCheck.Properties do
           ExUnit.plural_rule("property", "properties")
           %{module: module} = __ENV__
 
+          module_default_opts = Module.get_attribute(module, :propcheck_default_opts) || [:quiet]
           moduletag = Module.get_attribute(module, :moduletag) |> List.flatten()
           describetag = Module.get_attribute(module, :describetag) |> List.flatten()
           tag = Module.get_attribute(module, :tag) |> List.flatten()
@@ -106,15 +107,30 @@ defmodule PropCheck.Properties do
           tags = [[failing_prop: tag_property({module, name, []})]]
           prop_name = ExUnit.Case.register_test(__ENV__, :property, name, tags)
           def unquote(prop_name)(unquote(var)) do
+            merged_opts = PropCheck.Properties.merge_opts(unquote(opts), unquote(module_default_opts))
+
             # Store opts in process dictionary to make them available within macros such
             # as forall
-            Process.put(:property_opts, unquote(opts))
+            Process.put(:property_opts, merged_opts)
             p = unquote(block)
             mfa = {unquote(module), unquote(prop_name), []}
-            execute_property(p, mfa, unquote(opts), unquote(store_counter_example))
+            execute_property(p, mfa, merged_opts, unquote(store_counter_example))
             :ok
           end
       end
+  end
+
+  def merge_opts(opts, module_default_opts) do
+    module_default_opts = case is_function(module_default_opts) do
+                            true -> module_default_opts.()
+                            false -> module_default_opts
+                          end
+    case {is_list(opts), is_list(module_default_opts)} do
+      {true, true} -> opts ++ module_default_opts
+      {true, false} -> opts ++ [module_default_opts]
+      {false, true} -> [opts | module_default_opts]
+      {false, false} -> [opts, module_default_opts]
+    end
   end
 
   @doc false
