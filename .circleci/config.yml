@@ -70,5 +70,8 @@ workflows:
       - build:
           name: "Elixir v1.8"
           version: "1.8"
+      - build:
+          name: "Elixir v1.9"
+          version: "1.9"
       - lint:
           version: "1.8"
