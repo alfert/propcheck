@@ -8,10 +8,13 @@ defmodule PropCheck do
 
     ## Using PropCheck
 
-    To use `PropCheck`, you need to add `use PropCheck` to your
-    Elixir files. This gives you access to the functions and macros
-    defined here as well as to the `property` macro, defined in
-    `PropCheck.Properties.property/4`. In most examples shown
+    To use `PropCheck`, you need to add `use PropCheck` to your Elixir
+    files. This gives you access to the functions and macros defined
+    here as well as to the `property` macro, defined in
+    `PropCheck.Properties.property/4`. To set default options for your
+    properties, you can use `use PropCheck, default_opts: [numtests:
+    50]`. `default_opts` can be a list of options defined below or a
+    function that returns a list of option. In most examples shown
     here, we directly use the `quickcheck` function, but typically you
     use the `property` macro instead to define test cases for `ExUnit`.
 
@@ -272,14 +275,20 @@ defmodule PropCheck do
     Very much of the documentation is directly taken from the
     `proper` API documentation.
     """
-    defmacro __using__(_) do
-        quote do
-            import PropCheck
-            import PropCheck.Properties
-            # import :proper_types, except: [lazy: 1, to_binary: 1, function: 2]
-            import PropCheck.BasicTypes
-            import PropCheck.TargetedPBT
-        end
+    defmacro __using__(opts) do
+      default_opts = Keyword.get(opts, :default_opts, [:quiet])
+      if __CALLER__.module do
+        Module.put_attribute(__CALLER__.module,
+          :propcheck_default_opts, default_opts)
+      end
+
+      quote do
+        import PropCheck
+        import PropCheck.Properties
+        # import :proper_types, except: [lazy: 1, to_binary: 1, function: 2]
+        import PropCheck.BasicTypes
+        import PropCheck.TargetedPBT
+      end
     end
 
     @type counterexample :: :proper.counterexample
