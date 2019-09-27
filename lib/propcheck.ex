@@ -393,7 +393,9 @@ defmodule PropCheck do
     defp forall_impl(var, rawtype, opts, prop) do
       quote do
         property_opts = Process.get(:property_opts, [])
-        verbose = :verbose in property_opts || :verbose in unquote(opts)
+        env_verbose? = System.get_env("PROPCHECK_VERBOSE") == "1"
+        verbose =
+          :verbose in property_opts || :verbose in unquote(opts) || env_verbose?
         :proper.forall(
           unquote(rawtype),
           fn(unquote(var)) ->
