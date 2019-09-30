@@ -270,6 +270,11 @@ defmodule PropCheck do
     * `{:unrecognized_option, option}`<br>
       `option` is not an option that PropEr understands.
 
+    ## Commandline Options
+
+    As noted above, `:verbose` can be used to enable verbose output. This can also be
+    achieved using the environment variable `PROPCHECK_VERBOSE`.
+
     ## Acknowledgments
 
     Very much of the documentation is directly taken from the
@@ -377,6 +382,11 @@ defmodule PropCheck do
         false
 
     Use `:verbose` to enable output on failed `ExUnit` assertions.
+
+    ## Setting Verbosity on the Command Line
+
+    Apart from setting `:verbose` explicitly in the source code, the `PROPCHECK_VERBOSE`
+    environment variable can also be used to set the tests into verbose mode.
 
     """
     @in_ops [:<-, :in]
