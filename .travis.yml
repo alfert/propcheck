@@ -8,4 +8,6 @@ elixir:
 before_script:
   - mix local.hex --force
   - mix do deps.get, deps.compile, compile --warnings-as-errors
-script: "mix test --cover --trace --exclude will_fail:true --exclude unstable_test:true"
+script:
+  - mix test --cover --trace --exclude will_fail:true --exclude unstable_test:true
+  - ./.travis-scripts/verify_storing_counterexamples.sh
