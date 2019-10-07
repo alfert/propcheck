@@ -5,6 +5,10 @@ elixir:
   - 1.7
   - 1.8
   - 1.9
+cache:
+    - deps
+    - ~/.mix
+    - _build
 before_script:
   - mix local.hex --force
   - mix do deps.get, deps.compile, compile --warnings-as-errors
