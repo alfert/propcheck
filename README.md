@@ -3,7 +3,7 @@
 `PropCheck` is a testing library, that provides a wrapper around PropEr, an Erlang
 based property testing framework in the spirit of QuickCheck.
 
-[![CircleCI](https://img.shields.io/circleci/project/github/alfert/propcheck/master.svg)](https://circleci.com/gh/alfert/propcheck)
+[![Build Status](https://travis-ci.org/alfert/propcheck.svg?branch=master)](https://travis-ci.org/alfert/propcheck)
 [![Hex.pm version](https://img.shields.io/hexpm/v/propcheck.svg)](https://hex.pm/packages/propcheck)
 
 ## Installation

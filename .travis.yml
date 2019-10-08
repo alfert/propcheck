@@ -1,0 +1,17 @@
+language: elixir
+elixir:
+  - 1.5
+  - 1.6
+  - 1.7
+  - 1.8
+  - 1.9
+cache:
+    - deps
+    - ~/.mix
+    - _build
+before_script:
+  - mix local.hex --force
+  - mix do deps.get, deps.compile, compile --warnings-as-errors
+script:
+  - mix test --cover --trace --exclude will_fail:true --exclude unstable_test:true
+  - ./.travis-scripts/verify_storing_counterexamples.sh
