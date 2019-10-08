@@ -92,9 +92,11 @@ defmodule PropCheck.Properties do
           %{module: module} = __ENV__
 
           module_default_opts = Module.get_attribute(module, :propcheck_default_opts) || [:quiet]
-          moduletag = Module.get_attribute(module, :moduletag) |> List.flatten()
-          describetag = Module.get_attribute(module, :describetag) |> List.flatten()
-          tag = Module.get_attribute(module, :tag) |> List.flatten()
+
+          # Get the attributes and allow using the Keyword module by filtering for tuple entries in the tags
+          moduletag = Module.get_attribute(module, :moduletag) |> List.flatten() |> Enum.filter(&is_tuple/1)
+          describetag = Module.get_attribute(module, :describetag) |> List.flatten() |> Enum.filter(&is_tuple/1)
+          tag = Module.get_attribute(module, :tag) |> List.flatten() |> Enum.filter(&is_tuple/1)
 
           # intended precedence: tag > describetag > moduletag
           store_counter_example =
