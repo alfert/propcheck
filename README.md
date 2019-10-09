@@ -54,6 +54,11 @@ independent from the build environment, in the file `propcheck.ctex`. The file c
 be removed using `mix propcheck.clean`. Note that this task is only available if PropCheck
 is also available in `:dev`. Otherwise, `MIX_ENV=test mix propcheck.clean` can be used.
 
+### Setting PropCheck into Verbose Mode
+
+Properties in PropCheck can be run in quiet or verbose mode. Usually, quiet is the default. To
+enable verbose mode without requiring to touch the source code, the environment variable `PROPCHECK_VERBOSE`
+can be used. If this is set to 1, the `forall` macro prints verbose output.
 
 ## Links to other documentation
 
