@@ -1,5 +1,16 @@
 # PropCheck Changelog
 
+## 1.2.0
+* Handling of tags corrected. This changes slighty existing the behavior and gives
+  reason to introduce a new minor version. 
+  Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Verbose settings can be configured at the command line via environment variable
+  `PROPCHECK_VERBOSE`. Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Setting default options to `forall` on module or describe level.
+  Thanks to [https://github.com/x4lldux](https://github.com/x4lldux).
+* Support for Elixir 1.9 in tests. Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Moving back from CircleCI to TravisCI. Thanks to [https://github.com/evnu](https://github.com/evnu)
+
 ## 1.1.5
 * `:verbose` option is propagated from the property directly to `forall`. 
     Thanks to [https://github.com/evnu](https://github.com/evnu)
