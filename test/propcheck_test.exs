@@ -16,7 +16,7 @@ defmodule PropcheckTest do
     types = Kernel.Typespec.beam_types(:proper_gen)
     refute nil == types
 
-    Logger.debug(inspect types, pretty: true)
+    Logger.debug(fn -> inspect types end, pretty: true)
   end
 
   test "let/2 generates larger lists of bindings" do

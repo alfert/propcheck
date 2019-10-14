@@ -104,10 +104,10 @@ defmodule PropCheck.Test.PingPongDSL do
     def post(_state, [_name], result), do: result == :ok
     def next(state =  %__MODULE__{scores: scores}, [name], _res) do
       new_scores = Map.update!(scores, name, & (&1 + 1))
-      Logger.debug "New Scores are: #{inspect new_scores}"
+      Logger.debug(fn -> "New Scores are: #{inspect new_scores}" end)
       # x = put_in(state, :scores, new_scores)
       x = %__MODULE__{state | scores: new_scores}
-      Logger.debug "new state: #{inspect x}"
+      Logger.debug(fn -> "new state: #{inspect x}" end)
       x
     end
   end

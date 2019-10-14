@@ -195,7 +195,7 @@ defmodule PropCheck.TargetedPBT do
   defmacro target(tmap) do
     quote do
       tmap_val = unquote(tmap)
-      Logger.debug "target: tmap = #{inspect tmap_val}"
+      Logger.debug(fn -> "target: tmap = #{inspect tmap_val}" end)
       :proper_target.targeted(make_ref(), tmap_val)
     end
   end

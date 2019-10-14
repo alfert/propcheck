@@ -136,13 +136,13 @@ defmodule PropCheck.Test.PingPongMaster do
           true = Process.register(pid, name)
           {:reply, :ok, scores |> Map.put(name, 0)}
       {:ok, _} ->
-          Logger.debug "add_player: player #{name} already exists!"
+          Logger.debug(fn -> "add_player: player #{name} already exists!" end)
           {:reply, :ok, scores}
     end
   end
   def handle_call({:remove_player, name}, _from, scores) do
     case Process.whereis(name) do
-      nil -> Logger.debug("Process #{name} is unknown / not running")
+      nil -> Logger.debug(fn -> "Process #{name} is unknown / not running" end)
       pid -> kill_process(pid)
     end
     # Process.whereis(name) |> Process.exit(:kill)

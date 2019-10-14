@@ -45,7 +45,7 @@ defmodule PropCheck.Test.MasterStateM do
         try do
           Process.exit(pid, :kill)
         catch
-          _what, _value -> Logger.debug "Already killed process #{name}"
+          _what, _value -> Logger.debug(fn -> "Already killed process #{name}" end)
         end
       end
       # ... and wait for the DOWN message.
