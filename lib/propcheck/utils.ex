@@ -5,15 +5,13 @@ defmodule PropCheck.Utils do
   # `PropCheck.check/2` with global options. Global options
   # take precedence.
   def merge_global_opts(local_opts) do
-    global_verbose? = System.get_env("PROPCHECK_VERBOSE") == "1"
-
-    if global_verbose? do
+    if Application.get_env(:propcheck, :verbose) do
       [:verbose | local_opts]
     else
       local_opts
     end
   end
-  
+
   # Merge options
   def merge(opts1, opts2) do
     opts1
