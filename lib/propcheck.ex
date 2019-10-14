@@ -402,10 +402,13 @@ defmodule PropCheck do
 
     defp forall_impl(var, rawtype, opts, prop) do
       quote do
-        property_opts = Process.get(:property_opts, [])
-        env_verbose? = System.get_env("PROPCHECK_VERBOSE") == "1"
-        verbose =
-          :verbose in property_opts || :verbose in unquote(opts) || env_verbose?
+        opts =
+          PropCheck.Utils.get_opts()
+          |> PropCheck.Utils.merge(unquote(opts))
+          |> PropCheck.Utils.put_opts()
+
+        verbose? = :verbose in opts
+
         :proper.forall(
           unquote(rawtype),
           fn(unquote(var)) ->
@@ -414,7 +417,7 @@ defmodule PropCheck do
             rescue
               e in ExUnit.AssertionError ->
                 stacktrace = System.stacktrace
-                if verbose do
+                if verbose? do
                   e |> ExUnit.AssertionError.message() |> IO.write()
                   formatted = Exception.format_stacktrace(stacktrace)
                   IO.puts("stacktrace:\n#{formatted}")

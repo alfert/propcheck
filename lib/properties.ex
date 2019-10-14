@@ -109,22 +109,13 @@ defmodule PropCheck.Properties do
           tags = [[failing_prop: tag_property({module, name, []})]]
           prop_name = ExUnit.Case.register_test(__ENV__, :property, name, tags)
           def unquote(prop_name)(unquote(var)) do
-            merged_opts = PropCheck.Properties.merge_opts(unquote(opts), unquote(module_default_opts))
+            merged_opts =
+              PropCheck.Properties.merge_opts(unquote(opts), unquote(module_default_opts))
+              |> PropCheck.Utils.merge_global_opts()
+              |> PropCheck.Utils.put_opts()
 
-            # Store opts in process dictionary to make them available within macros such
-            # as forall
-            Process.put(:property_opts, merged_opts)
             p = unquote(block)
             mfa = {unquote(module), unquote(prop_name), []}
-
-            env_verbose? = System.get_env("PROPCHECK_VERBOSE") == "1"
-
-            merged_opts =
-              if env_verbose? do
-                [:verbose | merged_opts]
-              else
-                merged_opts
-              end
 
             execute_property(p, mfa, merged_opts, unquote(store_counter_example))
             :ok
