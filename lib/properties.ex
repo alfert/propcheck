@@ -116,6 +116,16 @@ defmodule PropCheck.Properties do
             Process.put(:property_opts, merged_opts)
             p = unquote(block)
             mfa = {unquote(module), unquote(prop_name), []}
+
+            env_verbose? = System.get_env("PROPCHECK_VERBOSE") == "1"
+
+            merged_opts =
+              if env_verbose? do
+                [:verbose | merged_opts]
+              else
+                merged_opts
+              end
+
             execute_property(p, mfa, merged_opts, unquote(store_counter_example))
             :ok
           end
