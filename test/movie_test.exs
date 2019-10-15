@@ -19,9 +19,9 @@ defmodule PropCheck.Test.Movies do
   property "server works fine" do
     numtests(1_000, forall cmds <- commands(__MODULE__) do
       trap_exit do
-        Logger.debug "Start another test"
+        Logger.debug(fn -> "Start another test" end)
         {:ok, _pid} = MovieServer.start_link()
-        Logger.debug "Fresh MovieServer is started."
+        Logger.debug(fn -> "Fresh MovieServer is started." end)
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         MovieServer.stop
@@ -179,7 +179,7 @@ defmodule PropCheck.Test.Movies do
       true ->
         result |> Enum.member?(movie)
       false ->
-        Logger.debug "rent_dvd #{movie} for passwd #{passwd} did not succeed"
+        Logger.debug(fn -> "rent_dvd #{movie} for passwd #{passwd} did not succeed" end)
         not (result |> Enum.member?(movie))
     end
   end

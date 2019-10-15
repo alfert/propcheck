@@ -37,19 +37,27 @@ defmodule PropCheck.Test.PingPongFSM do
   end
 
   defp log_message(log_state, {:in, msg}, proc_state) do
-    Logger.debug("Got message #{inspect msg, :pretty} in state #{inspect proc_state, :pretty}")
+    Logger.debug(fn ->
+      "Got message #{inspect msg, :pretty} in state #{inspect proc_state, :pretty}"
+    end)
     log_state
   end
   defp log_message(log_state, {:in, msg, client}, proc_state) do
-    Logger.debug("Got message #{inspect msg, :pretty} from client #{inspect client} in state #{inspect proc_state, :pretty}")
+    Logger.debug(fn ->
+      "Got message #{inspect msg, :pretty} from client #{inspect client} in state #{inspect proc_state, :pretty}"
+    end)
     log_state
   end
   defp log_message(log_state, {:out, msg, client}, proc_state) do
-    Logger.error("Send message #{inspect msg, :pretty} to client #{inspect client} in state #{inspect proc_state, :pretty}")
+    Logger.error(fn ->
+      "Send message #{inspect msg, :pretty} to client #{inspect client} in state #{inspect proc_state, :pretty}"
+    end)
     log_state
   end
   defp log_message(log_state, any, proc_state) do
-    Logger.debug("Got unknown message #{inspect any, :pretty} in state #{inspect proc_state, :pretty}")
+    Logger.debug(fn ->
+      "Got unknown message #{inspect any, :pretty} in state #{inspect proc_state, :pretty}"
+    end)
     log_state
   end
 
@@ -143,7 +151,7 @@ defmodule PropCheck.Test.PingPongFSM do
         try do
           Process.exit(pid, :kill)
         catch
-          _what, _value -> Logger.debug "Already killed process #{name}"
+          _what, _value -> Logger.debug(fn -> "Already killed process #{name}" end)
         end
       end
     end)

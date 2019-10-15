@@ -52,7 +52,7 @@ defmodule PropCheck.Test.MoviesDSL do
 
   test "user_movie_pairs works with symb vars" do
     s = %__MODULE__{rented: %{{:var, 1} => [:mary_poppins]}, users: [{:var, 1}]}
-    Logger.debug "test u_m_p: #{inspect s}"
+    Logger.debug(fn -> "test u_m_p: #{inspect s}" end)
     assert [{{:var, 1}, :mary_poppins}] == user_movie_pairs(s)
   end
 
