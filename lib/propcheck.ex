@@ -385,8 +385,10 @@ defmodule PropCheck do
 
     ## Setting Verbosity on the Command Line
 
-    Apart from setting `:verbose` explicitly in the source code, the `PROPCHECK_VERBOSE`
-    environment variable can also be used to set the tests into verbose mode.
+    Apart from setting `:verbose` or `:quiet` explicitly in the source code,
+    the `PROPCHECK_VERBOSE` environment variable can also be used to set the
+    verbosity. `PROPCHECK_VERBOSE=1` sets `:verbose`, while `PROPCHECK_VERBOSE=0`
+    sets `:quiet`.
 
     """
     @in_ops [:<-, :in]
