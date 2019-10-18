@@ -25,6 +25,16 @@ defmodule PropCheck.App do
   end
 
   defp populate_application_env do
-    Application.put_env(:propcheck, :verbose, System.get_env("PROPCHECK_VERBOSE") == "1")
+    Application.put_env(:propcheck, :global_verbose,  global_verbose())
+  end
+
+  defp global_verbose do
+      "PROPCHECK_VERBOSE"
+      |> System.get_env()
+      |> case do
+        "1" -> true
+        "0" -> false
+        _ -> nil
+      end
   end
 end

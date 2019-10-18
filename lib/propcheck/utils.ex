@@ -5,10 +5,13 @@ defmodule PropCheck.Utils do
   # `PropCheck.check/2` with global options. Global options
   # take precedence.
   def merge_global_opts(local_opts) do
-    if Application.get_env(:propcheck, :verbose) do
-      [:verbose | local_opts]
-    else
-      local_opts
+    case Application.get_env(:propcheck, :global_verbose) do
+      true ->
+        [:verbose | local_opts]
+      false ->
+        [:quiet | local_opts]
+      nil ->
+        local_opts
     end
   end
 
@@ -28,5 +31,20 @@ defmodule PropCheck.Utils do
   # Retrieve stored options from the process dictionary.
   def get_opts do
     Process.get(:property_opts, []) || []
+  end
+
+  # Check if verbose should be enabled
+  def verbose?(opts) do
+    verbose_index = Enum.find_index(opts, & &1 == :verbose)
+    if verbose_index do
+      quiet_index = Enum.find_index(opts, & &1 == :quiet)
+      if quiet_index do
+        verbose_index < quiet_index
+      else
+        true
+      end
+    else
+      false
+    end
   end
 end

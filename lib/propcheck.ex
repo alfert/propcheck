@@ -407,7 +407,7 @@ defmodule PropCheck do
           |> PropCheck.Utils.merge(unquote(opts))
           |> PropCheck.Utils.put_opts()
 
-        verbose? = :verbose in opts
+        verbose? = PropCheck.Utils.verbose?(opts)
 
         :proper.forall(
           unquote(rawtype),

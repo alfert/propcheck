@@ -10,4 +10,10 @@ defmodule VerifyVerbose do
       x >= 0
     end
   end
+
+  property "some other property", [:verbose] do
+    forall x <- nat() do
+      x >= 0
+    end
+  end
 end
