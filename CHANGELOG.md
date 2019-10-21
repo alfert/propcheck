@@ -1,5 +1,10 @@
 # PropCheck Changelog
 
+## 1.2.1
+
+* Fix `PROPCHECK_VERBOSE` to work with `property`
+* Allow `PROPCHECK_VERBOSE=0` to make all properties quiet
+
 ## 1.2.0
 * Handling of tags corrected. This changes slighty existing the behavior and gives
   reason to introduce a new minor version. 

@@ -385,8 +385,10 @@ defmodule PropCheck do
 
     ## Setting Verbosity on the Command Line
 
-    Apart from setting `:verbose` explicitly in the source code, the `PROPCHECK_VERBOSE`
-    environment variable can also be used to set the tests into verbose mode.
+    Apart from setting `:verbose` or `:quiet` explicitly in the source code,
+    the `PROPCHECK_VERBOSE` environment variable can also be used to set the
+    verbosity. `PROPCHECK_VERBOSE=1` sets `:verbose`, while `PROPCHECK_VERBOSE=0`
+    sets `:quiet`.
 
     """
     @in_ops [:<-, :in]
@@ -402,10 +404,13 @@ defmodule PropCheck do
 
     defp forall_impl(var, rawtype, opts, prop) do
       quote do
-        property_opts = Process.get(:property_opts, [])
-        env_verbose? = System.get_env("PROPCHECK_VERBOSE") == "1"
-        verbose =
-          :verbose in property_opts || :verbose in unquote(opts) || env_verbose?
+        opts =
+          PropCheck.Utils.get_opts()
+          |> PropCheck.Utils.merge(unquote(opts))
+          |> PropCheck.Utils.put_opts()
+
+        verbose? = PropCheck.Utils.verbose?(opts)
+
         :proper.forall(
           unquote(rawtype),
           fn(unquote(var)) ->
@@ -414,7 +419,7 @@ defmodule PropCheck do
             rescue
               e in ExUnit.AssertionError ->
                 stacktrace = System.stacktrace
-                if verbose do
+                if verbose? do
                   e |> ExUnit.AssertionError.message() |> IO.write()
                   formatted = Exception.format_stacktrace(stacktrace)
                   IO.puts("stacktrace:\n#{formatted}")
