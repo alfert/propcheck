@@ -54,6 +54,15 @@ def project() do
 end
 ```
 
+Note that the path can also be set as part of the application environment:
+
+```
+config :propcheck, counter_examples: "filename"
+```
+
+If both the project configuration and the application environment are present, the
+application environment is chosen.
+
 Per default, the counter examples file is stored in the build directory (`_build`),
 independent from the build environment, in the file `propcheck.ctex`. The file can
 be removed using `mix propcheck.clean`. Note that this task is only available if PropCheck
