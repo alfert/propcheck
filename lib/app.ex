@@ -17,7 +17,7 @@ defmodule PropCheck.App do
         start: {
           PropCheck.CounterStrike,
           :start_link,
-          [Mix.counter_example_file(), [name: PropCheck.CounterStrike]]
+          [[name: PropCheck.CounterStrike]]
         }
       }
     ]
@@ -31,6 +31,7 @@ defmodule PropCheck.App do
   defp populate_application_env do
     Application.put_env(:propcheck, :global_verbose,  global_verbose())
     Application.put_env(:propcheck, :global_detect_exceptions,  global_detect_exceptions())
+    Application.put_env(:propcheck, :counter_example_file, counter_example_file())
   end
 
   defp global_verbose do
@@ -43,6 +44,13 @@ defmodule PropCheck.App do
       "PROPCHECK_DETECT_EXCEPTIONS"
       |> System.get_env()
       |> env_to_terniary()
+  end
+
+  defp counter_example_file do
+    case Application.get_env(:propcheck, :counter_examples) do
+      nil -> Mix.counter_example_file() || Mix.default_counter_examples_file()
+      counter_example_file -> counter_example_file
+    end
   end
 
   defp env_to_terniary("1"), do: true
