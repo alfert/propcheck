@@ -4,7 +4,13 @@ defmodule AssertTest do
 
   property "failing raise" do
     forall _ <- nat() do
-      raise "fail"
+      raise "raise-fail"
+    end
+  end
+
+  property "failing throw" do
+    forall _ <- nat() do
+      throw "throw-fail"
     end
   end
 

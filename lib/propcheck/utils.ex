@@ -8,8 +8,10 @@ defmodule PropCheck.Utils do
     case Application.get_env(:propcheck, :global_verbose) do
       true ->
         [:verbose | local_opts]
+
       false ->
         [:quiet | local_opts]
+
       nil ->
         local_opts
     end
@@ -35,9 +37,11 @@ defmodule PropCheck.Utils do
 
   # Check if verbose should be enabled
   def verbose?(opts) do
-    verbose_index = Enum.find_index(opts, & &1 == :verbose)
+    verbose_index = Enum.find_index(opts, &(&1 == :verbose))
+
     if verbose_index do
-      quiet_index = Enum.find_index(opts, & &1 == :quiet)
+      quiet_index = Enum.find_index(opts, &(&1 == :quiet))
+
       if quiet_index do
         verbose_index < quiet_index
       else
@@ -45,6 +49,21 @@ defmodule PropCheck.Utils do
       end
     else
       false
+    end
+  end
+
+  @doc """
+  Find the output agent in `opts`.
+  """
+  def output_agent(opts) do
+    opts
+    |> Enum.find(fn
+      {:output_agent, _output_agent} -> true
+      _ -> false
+    end)
+    |> case do
+      nil -> nil
+      {:output_agent, output_agent} -> output_agent
     end
   end
 end

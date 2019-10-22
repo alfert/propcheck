@@ -409,6 +409,7 @@ defmodule PropCheck do
           |> PropCheck.Utils.merge(unquote(opts))
           |> PropCheck.Utils.put_opts()
 
+        output_agent = PropCheck.Utils.output_agent(opts)
         verbose? = PropCheck.Utils.verbose?(opts)
 
         :proper.forall(
@@ -427,7 +428,34 @@ defmodule PropCheck do
                 false
               e ->
                 stacktrace = System.stacktrace
+
+                output = """
+                PropCheck detected an error:
+                #{Exception.format(:error, e, stacktrace)}
+                """
+
+                if output_agent != nil do
+                  PropCheck.OutputAgent.put(output_agent, output)
+                else
+                  IO.write(output)
+                end
+
                 reraise e, stacktrace
+            catch
+              kind, exception ->
+                stacktrace = System.stacktrace
+                output = """
+                PropCheck detected an exception:
+                #{Exception.format(kind, exception, stacktrace)}
+                """
+
+                if output_agent != nil do
+                  PropCheck.OutputAgent.put(output_agent, output)
+                else
+                  IO.write(output)
+                end
+
+                throw exception
             end
           end)
       end
