@@ -39,10 +39,10 @@ defmodule PropCheck.Utils do
   def verbose?(opts) do
     verbose_index = Enum.find_index(opts, &(&1 == :verbose))
 
-    if verbose_index do
+    if verbose_index != nil do
       quiet_index = Enum.find_index(opts, &(&1 == :quiet))
 
-      if quiet_index do
+      if quiet_index != nil do
         verbose_index < quiet_index
       else
         true
