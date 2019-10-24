@@ -18,7 +18,7 @@ defmodule VerifyExceptionDetectionTest do
     end
   end
 
-  def failing_throw() do
+  def failing_throw do
     forall _ <- nat() do
       throw "throw-fail"
     end
@@ -40,7 +40,7 @@ defmodule VerifyExceptionDetectionTest do
     end
   end
 
-  property "lengthy output?", [numtests: 10000] do
+  property "lengthy output?", [numtests: 10_000] do
     forall n <- integer(1, :inf) do
       if n > 500 && rem(n, 2) == 0 do
         raise "#{n}"
