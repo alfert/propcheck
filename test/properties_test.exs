@@ -13,6 +13,8 @@ defmodule PropertiesTest do
   end
 
   property "default options are set", [max_size: 1] do
-    assert Process.get(:property_opts) == [max_size: 1, numtests: 1]
+    opts = Process.get(:property_opts)
+    assert {:max_size, 1} in opts
+    assert {:numtests, 1} in opts
   end
 end
