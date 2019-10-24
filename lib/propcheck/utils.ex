@@ -37,18 +37,12 @@ defmodule PropCheck.Utils do
 
   # Check if verbose should be enabled
   def verbose?(opts) do
-    verbose_index = Enum.find_index(opts, &(&1 == :verbose))
-
-    if verbose_index != nil do
-      quiet_index = Enum.find_index(opts, &(&1 == :quiet))
-
-      if quiet_index != nil do
-        verbose_index < quiet_index
-      else
-        true
-      end
-    else
-      false
+    opts
+    |> Enum.drop_while(&(&1 not in [:verbose, :quiet]))
+    |> case do
+      [:verbose | _] -> true
+      [:quiet | _] -> false
+      _ -> false
     end
   end
 
