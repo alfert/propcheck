@@ -52,9 +52,7 @@ defmodule PropCheck.Utils do
     end
   end
 
-  @doc """
-  Find the output agent in `opts`.
-  """
+  # Find the output agent in `opts`.
   def output_agent(opts) do
     opts
     |> Enum.find(fn
@@ -67,9 +65,7 @@ defmodule PropCheck.Utils do
     end
   end
 
-  @doc """
-  Filter options which are PropCheck specific and not handled by PropEr.
-  """
+  # Filter options which are PropCheck specific and not handled by PropEr.
   def to_proper_opts(opts) do
     Enum.reject(opts, fn
       {:output_agent, _} -> true
