@@ -161,22 +161,19 @@ defmodule PropCheck.Properties do
     should_fail = is_tuple(p) and elem(p, 0) == :fails
     # Logger.debug "Execute property #{inspect name} "
 
-    clean_opts = Enum.reject(opts, fn
-      {:output_agent, _} -> true
-      _ -> false
-    end)
+    proper_opts = PropCheck.Utils.to_proper_opts(opts)
 
     case CounterStrike.counter_example(name) do
-      :none -> PropCheck.quickcheck(p, [:long_result] ++ clean_opts)
+      :none -> PropCheck.quickcheck(p, [:long_result] ++ proper_opts)
       :others ->
         # since the tag is set, we execute everything. You can limit
         # the amount of checks by using either --stale or --only failing_prop
-        qc(p, clean_opts)
+        qc(p, proper_opts)
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
-        result = PropCheck.check(p, counter_example, [:long_result] ++ clean_opts)
+        result = PropCheck.check(p, counter_example, [:long_result] ++ proper_opts)
         with true <- result do
-          qc(p, clean_opts)
+          qc(p, proper_opts)
         else
           false -> {:rerun_failed, counter_example}
           e = {:error, _} -> e
