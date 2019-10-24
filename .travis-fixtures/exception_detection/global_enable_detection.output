@@ -1,0 +1,452 @@
+
+
+  1) property default failing_raise (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property default failing_raise() failed. Counter-Example is:
+     [0]
+     
+     Counter example stored.
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1244: :proper.perform/7
+         (proper) src/proper.erl:1120: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property default failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1676: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property default failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1888: :proper.apply_skip/2
+         (proper) src/proper.erl:1728: :proper.shrink/8
+         (proper) src/proper.erl:1707: :proper.fix_shrink/6
+         (proper) src/proper.erl:1673: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property default failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+  2) property default failing_throw (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property default failing_throw() failed. Counter-Example is:
+     [1]
+     
+     Counter example stored.
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1244: :proper.perform/7
+         (proper) src/proper.erl:1120: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property default failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1676: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property default failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1794: :proper.still_fails/4
+         (proper) src/proper_arith.erl:145: :proper_arith.find_first_tr/3
+         (proper) src/proper.erl:1746: :proper.shrink/8
+         (proper) src/proper.erl:1707: :proper.fix_shrink/6
+         (proper) src/proper.erl:1673: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property default failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1888: :proper.apply_skip/2
+         (proper) src/proper.erl:1728: :proper.shrink/8
+         (proper) src/proper.erl:1707: :proper.fix_shrink/6
+         (proper) src/proper.erl:1673: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property default failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+  3) property default failing_assert (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property default failing_assert() failed. Counter-Example is:
+     [1]
+     
+     Counter example stored.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+  4) property detection disabled locally failing_raise (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection disabled locally failing_raise() failed. Counter-Example is:
+     [0]
+     
+     Counter example stored.
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1244: :proper.perform/7
+         (proper) src/proper.erl:1120: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection disabled locally failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1676: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection disabled locally failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1888: :proper.apply_skip/2
+         (proper) src/proper.erl:1728: :proper.shrink/8
+         (proper) src/proper.erl:1707: :proper.fix_shrink/6
+         (proper) src/proper.erl:1673: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection disabled locally failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+  5) property detection disabled locally failing_throw (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection disabled locally failing_throw() failed. Counter-Example is:
+     [0]
+     
+     Counter example stored.
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1244: :proper.perform/7
+         (proper) src/proper.erl:1120: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection disabled locally failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1676: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection disabled locally failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1888: :proper.apply_skip/2
+         (proper) src/proper.erl:1728: :proper.shrink/8
+         (proper) src/proper.erl:1707: :proper.fix_shrink/6
+         (proper) src/proper.erl:1673: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection disabled locally failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+  6) property detection disabled locally failing_assert (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection disabled locally failing_assert() failed. Counter-Example is:
+     [1]
+     
+     Counter example stored.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+  7) property detection enabled locally failing_raise (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection enabled locally failing_raise() failed. Counter-Example is:
+     [1]
+     
+     Counter example stored.
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1244: :proper.perform/7
+         (proper) src/proper.erl:1120: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection enabled locally failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1676: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection enabled locally failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1794: :proper.still_fails/4
+         (proper) src/proper_arith.erl:145: :proper_arith.find_first_tr/3
+         (proper) src/proper.erl:1746: :proper.shrink/8
+         (proper) src/proper.erl:1707: :proper.fix_shrink/6
+         (proper) src/proper.erl:1673: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection enabled locally failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an error:
+     ** (RuntimeError) raise-fail
+         test/verify_exception_detection_test.exs:17: anonymous fn/4 in VerifyExceptionDetectionTest.failing_raise/0
+         (proper) src/proper.erl:1888: :proper.apply_skip/2
+         (proper) src/proper.erl:1728: :proper.shrink/8
+         (proper) src/proper.erl:1707: :proper.fix_shrink/6
+         (proper) src/proper.erl:1673: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection enabled locally failing_raise"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+  8) property detection enabled locally failing_throw (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection enabled locally failing_throw() failed. Counter-Example is:
+     [0]
+     
+     Counter example stored.
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1244: :proper.perform/7
+         (proper) src/proper.erl:1120: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection enabled locally failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1543: :proper.apply_args/4
+         (proper) src/proper.erl:1676: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection enabled locally failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     PropCheck detected an exception:
+     ** (throw) "throw-fail"
+         test/verify_exception_detection_test.exs:23: anonymous fn/4 in VerifyExceptionDetectionTest.failing_throw/0
+         (proper) src/proper.erl:1888: :proper.apply_skip/2
+         (proper) src/proper.erl:1728: :proper.shrink/8
+         (proper) src/proper.erl:1707: :proper.fix_shrink/6
+         (proper) src/proper.erl:1673: :proper.shrink/4
+         (proper) src/proper.erl:1208: :proper.get_result/3
+         (proper) src/proper.erl:1123: :proper.inner_test/2
+         (proper) src/proper.erl:1111: :proper.test/2
+         (propcheck) lib/properties.ex:167: PropCheck.Properties.execute_property/4
+         test/verify_exception_detection_test.exs:36: VerifyExceptionDetectionTest."property detection enabled locally failing_throw"/1
+         (ex_unit) lib/ex_unit/runner.ex:355: ExUnit.Runner.exec_test/1
+         (stdlib) timer.erl:166: :timer.tc/1
+         (ex_unit) lib/ex_unit/runner.ex:306: anonymous fn/4 in ExUnit.Runner.spawn_test_monitor/4
+     
+     
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+  9) property detection enabled locally failing_assert (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection enabled locally failing_assert() failed. Counter-Example is:
+     [1]
+     
+     Counter example stored.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:213: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+Finished in 0.2 seconds
+9 properties, 9 failures
+
+Randomized with seed 0

@@ -1,0 +1,153 @@
+Compiling 3 files (.ex)
+
+VerifyExceptionDetectionTest
+  * property default failing_raise  * property default failing_raise (18.4ms)
+
+  1) property default failing_raise (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property default failing_raise() failed. Counter-Example is:
+     [1]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+  * property default failing_throw  * property default failing_throw (9.1ms)
+
+  2) property default failing_throw (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property default failing_throw() failed. Counter-Example is:
+     [0]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+  * property default failing_assert  * property default failing_assert (14.4ms)
+
+  3) property default failing_assert (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property default failing_assert() failed. Counter-Example is:
+     [1]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+  * property detection disabled locally failing_raise  * property detection disabled locally failing_raise (16.6ms)
+
+  4) property detection disabled locally failing_raise (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection disabled locally failing_raise() failed. Counter-Example is:
+     [1]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+  * property detection disabled locally failing_throw  * property detection disabled locally failing_throw (11.3ms)
+
+  5) property detection disabled locally failing_throw (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection disabled locally failing_throw() failed. Counter-Example is:
+     [1]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+  * property detection disabled locally failing_assert  * property detection disabled locally failing_assert (17.3ms)
+
+  6) property detection disabled locally failing_assert (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection disabled locally failing_assert() failed. Counter-Example is:
+     [1]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+  * property detection enabled locally failing_raise  * property detection enabled locally failing_raise (11.6ms)
+
+  7) property detection enabled locally failing_raise (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection enabled locally failing_raise() failed. Counter-Example is:
+     [0]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+  * property detection enabled locally failing_throw  * property detection enabled locally failing_throw (16.6ms)
+
+  8) property detection enabled locally failing_throw (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection enabled locally failing_throw() failed. Counter-Example is:
+     [0]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+  * property detection enabled locally failing_assert  * property detection enabled locally failing_assert (11.6ms)
+
+  9) property detection enabled locally failing_assert (VerifyExceptionDetectionTest)
+     test/verify_exception_detection_test.exs:36
+     Property Elixir.VerifyExceptionDetectionTest.property detection enabled locally failing_assert() failed. Counter-Example is:
+     [1]
+     
+     Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+     identified and fixed. PropCheck cannot identify changes to generators. See
+     https://github.com/alfert/propcheck/issues/30 for more details.
+     
+     code: nil
+     stacktrace:
+       (propcheck) lib/properties.ex:223: PropCheck.Properties.handle_check_results/5
+       test/verify_exception_detection_test.exs:36: (test)
+
+
+
+Finished in 0.2 seconds
+9 properties, 9 failures
+
+Randomized with seed 0

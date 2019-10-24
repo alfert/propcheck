@@ -16,4 +16,5 @@ script:
   - mix test --cover --trace --exclude will_fail:true --exclude unstable_test:true
   - ./.travis-scripts/verify_storing_counterexamples.sh
   - ./.travis-scripts/verify-verbose.sh
+  - ./.travis-scripts/verify-detect-exceptions.sh
   - mix credo --strict
