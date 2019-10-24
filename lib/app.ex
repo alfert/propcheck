@@ -26,10 +26,21 @@ defmodule PropCheck.App do
 
   defp populate_application_env do
     Application.put_env(:propcheck, :global_verbose,  global_verbose())
+    Application.put_env(:propcheck, :global_detect_exceptions,  global_detect_exceptions())
   end
 
   defp global_verbose do
       "PROPCHECK_VERBOSE"
+      |> System.get_env()
+      |> case do
+        "1" -> true
+        "0" -> false
+        _ -> nil
+      end
+  end
+
+  defp global_detect_exceptions do
+      "PROPCHECK_DETECT_EXCEPTIONS"
       |> System.get_env()
       |> case do
         "1" -> true

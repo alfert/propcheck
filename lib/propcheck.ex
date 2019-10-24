@@ -222,6 +222,12 @@ defmodule PropCheck do
     is `:undefined`. Remark: PropCheck does not support
     spec-testing.
 
+    ### PropCheck Specific Options
+
+    * `{detect_exceptions | boolean}` <br>
+      PropCheck can attempt to detect exceptions thrown or errors raised during
+    a testing function. It will output the error and the corresponding stacktrace.
+
     ## Errors
 
     The following errors may be encountered during testing. The term provided
@@ -270,10 +276,11 @@ defmodule PropCheck do
     * `{:unrecognized_option, option}`<br>
       `option` is not an option that PropEr understands.
 
-    ## Commandline Options
+    ## Options Available in the Environment
 
-    As noted above, `:verbose` can be used to enable verbose output. This can also be
-    achieved using the environment variable `PROPCHECK_VERBOSE`.
+    * `PROPCHECK_VERBOSE` can be used to enable or disable verbose output globally.
+    * `PROPCHECK_DETECT_EXCEPTIONS` can be used to enable or disable exception and error
+      detection globally.
 
     ## Acknowledgments
 
@@ -411,6 +418,7 @@ defmodule PropCheck do
 
         output_agent = PropCheck.Utils.output_agent(opts)
         verbose? = PropCheck.Utils.verbose?(opts)
+        detect_exceptions? = PropCheck.Utils.detect_exceptions?(opts)
 
         :proper.forall(
           unquote(rawtype),
@@ -429,30 +437,35 @@ defmodule PropCheck do
               e ->
                 stacktrace = System.stacktrace
 
-                output = """
-                PropCheck detected an error:
-                #{Exception.format(:error, e, stacktrace)}
-                """
+                if detect_exceptions? do
+                  output = """
+                  PropCheck detected an error:
+                  #{Exception.format(:error, e, stacktrace)}
+                  """
 
-                if output_agent != nil do
-                  PropCheck.OutputAgent.put(output_agent, output)
-                else
-                  IO.write(output)
+                  if output_agent != nil do
+                    PropCheck.OutputAgent.put(output_agent, output)
+                  else
+                    IO.write(output)
+                  end
                 end
 
                 reraise e, stacktrace
             catch
               kind, exception ->
                 stacktrace = System.stacktrace
-                output = """
-                PropCheck detected an exception:
-                #{Exception.format(kind, exception, stacktrace)}
-                """
 
-                if output_agent != nil do
-                  PropCheck.OutputAgent.put(output_agent, output)
-                else
-                  IO.write(output)
+                if detect_exceptions? do
+                  output = """
+                  PropCheck detected an exception:
+                  #{Exception.format(kind, exception, stacktrace)}
+                  """
+
+                  if output_agent != nil do
+                    PropCheck.OutputAgent.put(output_agent, output)
+                  else
+                    IO.write(output)
+                  end
                 end
 
                 throw exception

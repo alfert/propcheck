@@ -5,6 +5,12 @@ defmodule PropCheck.Utils do
   # `PropCheck.check/2` with global options. Global options
   # take precedence.
   def merge_global_opts(local_opts) do
+    local_opts
+    |> merge_global_verbose()
+    |> merge_global_detect_exceptions()
+  end
+
+  defp merge_global_verbose(local_opts) do
     case Application.get_env(:propcheck, :global_verbose) do
       true ->
         [:verbose | local_opts]
@@ -14,6 +20,16 @@ defmodule PropCheck.Utils do
 
       nil ->
         local_opts
+    end
+  end
+
+  defp merge_global_detect_exceptions(local_opts) do
+    case Application.get_env(:propcheck, :global_detect_exceptions) do
+      nil ->
+        local_opts
+
+      opt ->
+        [{:detect_exceptions, opt} | local_opts]
     end
   end
 
@@ -46,6 +62,19 @@ defmodule PropCheck.Utils do
     end
   end
 
+  # Check if exception detection should be enabled
+  def detect_exceptions?(opts) do
+    opts
+    |> Enum.drop_while(fn
+      {:detect_exceptions, _} -> false
+      _ -> true
+    end)
+    |> case do
+      [{:detect_exceptions, detect_exceptions} | _] -> detect_exceptions
+      [] -> false
+    end
+  end
+
   # Find the output agent in `opts`.
   def output_agent(opts) do
     opts
@@ -63,6 +92,7 @@ defmodule PropCheck.Utils do
   def to_proper_opts(opts) do
     Enum.reject(opts, fn
       {:output_agent, _} -> true
+      {:detect_exceptions, _} -> true
       _ -> false
     end)
   end
