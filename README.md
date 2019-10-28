@@ -60,6 +60,13 @@ Properties in PropCheck can be run in quiet or verbose mode. Usually, quiet is t
 enable verbose mode without requiring to touch the source code, the environment variable `PROPCHECK_VERBOSE`
 can be used. If this is set to 1, the `forall` macro prints verbose output.
 
+### Detecting Exceptions and Errors in Tests
+
+PropCheck can attempt to detect and output exceptions in non-verbose mode. This can be done using
+the `detect_exceptions: true` option for `property` or `forall`, or using the environment variable
+`PROPCHECK_DETECT_EXCEPTIONS`. If this environment variable is set to 1, exception detection is enabled
+globally.
+
 ## Links to other documentation
 
 The guides for PropEr are an essential set of documents to make full use of `PropCheck`

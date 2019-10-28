@@ -109,8 +109,11 @@ defmodule PropCheck.Properties do
           tags = [[failing_prop: tag_property({module, name, []})]]
           prop_name = ExUnit.Case.register_test(__ENV__, :property, name, tags)
           def unquote(prop_name)(unquote(var)) do
+            {:ok, output_agent} = PropCheck.OutputAgent.start_link()
+            opts = [{:output_agent, output_agent} | unquote(opts)]
+
             merged_opts =
-              PropCheck.Properties.merge_opts(unquote(opts), unquote(module_default_opts))
+              PropCheck.Properties.merge_opts(opts, unquote(module_default_opts))
               |> PropCheck.Utils.merge_global_opts()
               |> PropCheck.Utils.put_opts()
 
@@ -157,30 +160,33 @@ defmodule PropCheck.Properties do
   def execute_property(p, name, opts, store_counter_example?) do
     should_fail = is_tuple(p) and elem(p, 0) == :fails
     # Logger.debug "Execute property #{inspect name} "
+
+    proper_opts = PropCheck.Utils.to_proper_opts(opts)
+
     case CounterStrike.counter_example(name) do
-      :none -> PropCheck.quickcheck(p, [:long_result] ++ opts)
+      :none -> PropCheck.quickcheck(p, [:long_result] ++ proper_opts)
       :others ->
         # since the tag is set, we execute everything. You can limit
         # the amount of checks by using either --stale or --only failing_prop
-        qc(p, opts)
+        qc(p, proper_opts)
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
-        result = PropCheck.check(p, counter_example, [:long_result] ++ opts)
+        result = PropCheck.check(p, counter_example, [:long_result] ++ proper_opts)
         with true <- result do
-          qc(p, opts)
+          qc(p, proper_opts)
         else
           false -> {:rerun_failed, counter_example}
           e = {:error, _} -> e
         end
     end
-    |> handle_check_results(name, should_fail, store_counter_example?)
+    |> handle_check_results(name, opts, should_fail, store_counter_example?)
   end
 
   defp qc(p, opts), do: PropCheck.quickcheck(p, [:long_result] ++ opts)
 
   # Handles the result of executing quick check or a re-check of a counter example.
   # In this method a new found counter example is added to `CounterStrike`.
-  defp handle_check_results(results, name, should_fail, store_counter_example?) do
+  defp handle_check_results(results, name, opts, should_fail, store_counter_example?) do
     case results do
       error = {:error, _} ->
         raise ExUnit.AssertionError, [
@@ -210,7 +216,7 @@ defmodule PropCheck.Properties do
           #{inspect counter_example, pretty: true}
 
           #{counter_example_message}
-          """,
+          """ |> add_additional_output(opts),
           expr: nil]
       {:rerun_failed, counter_example} when is_list(counter_example) ->
         CounterStrike.add_counter_example(name, counter_example)
@@ -222,8 +228,22 @@ defmodule PropCheck.Properties do
           Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
           identified and fixed. PropCheck cannot identify changes to generators. See
           https://github.com/alfert/propcheck/issues/30 for more details.
-          """,
+          """ |> add_additional_output(opts),
           expr: nil]
+    end
+  end
+
+  # Add additional output to a message
+  defp add_additional_output(message, opts) do
+    {:ok, additional_output} = opts |> PropCheck.Utils.output_agent() |> PropCheck.OutputAgent.close()
+
+    if additional_output != "" do
+      """
+      #{message}
+      #{additional_output}
+      """
+    else
+      message
     end
   end
 
