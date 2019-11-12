@@ -113,7 +113,8 @@ defmodule PropCheck.Properties do
             opts = [{:output_agent, output_agent} | unquote(opts)]
 
             merged_opts =
-              PropCheck.Properties.merge_opts(opts, unquote(module_default_opts))
+              opts
+              |> PropCheck.Properties.merge_opts(unquote(module_default_opts))
               |> PropCheck.Utils.merge_global_opts()
               |> PropCheck.Utils.put_opts()
 
