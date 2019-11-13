@@ -18,6 +18,7 @@ defmodule PropCheck.Mixfile do
      description: description(),
      propcheck: [counter_examples: "_build/propcheck.ctx"],
      aliases: aliases(),
+     preferred_cli_env: [tests: :test],
      deps: deps()]
   end
 
@@ -50,7 +51,10 @@ defmodule PropCheck.Mixfile do
   defp elixirc_paths(_),     do: ["lib"]
 
   def aliases do
-    [clean: ["clean", "propcheck.clean"]]
+    [
+      clean: ["clean", "propcheck.clean"],
+      tests: test_suite()
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -71,5 +75,19 @@ defmodule PropCheck.Mixfile do
       {:proper, "~> 1.3"},
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
     ]
+  end
+
+  defp test_suite(), do: [
+    &run_external_tests/1,
+    "propcheck.clean",
+    "test --cover --trace --exclude will_fail:true --exclude unstable_test:true",
+  ]
+
+  defp run_external_tests(_args) do
+    run = &Mix.shell().cmd/1
+
+    run.("./test/verify_storing_counterexamples.sh")
+    run.("./test/verify-verbose.sh")
+    run.("./test/verify-detect-exceptions.sh")
   end
 end
