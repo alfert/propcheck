@@ -3,6 +3,8 @@ defmodule VerifyCounterExampleTest do
   # any counter examples.
   use ExUnit.Case
 
+  @moduletag manual: true
+
   @modules [
     StoreCounterExample.ModuleTag,
     StoreCounterExample.DescribeTag,

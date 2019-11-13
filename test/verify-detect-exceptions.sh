@@ -12,7 +12,7 @@ check() {
   echo -n "PROPCHECK_DETECT_EXCEPTIONS: $PROPCHECK_DETECT_EXCEPTIONS "
   mix propcheck.clean > /dev/null
   fixture=$1
-  output=$(mix test test/verify_exception_detection_test.exs --seed $seed)
+  output=$(mix test --include manual test/verify_exception_detection_test.exs --seed $seed)
   count_detected_exceptions=$(echo "$output" | grep -c "PropCheck detected")
   fixture_count_detected_exceptions=$(grep -c "PropCheck detected" $fixture)
   if [ "$count_detected_exceptions" -lt "$fixture_count_detected_exceptions" ]; then

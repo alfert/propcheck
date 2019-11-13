@@ -3,7 +3,7 @@ defmodule VerifyExceptionDetectionTest do
   use ExUnit.Case
   use PropCheck
 
-  @moduletag :will_fail # must be run manually
+  @moduletag will_fail: true, manual: true # must be run manually
 
   @tests [:failing_raise, :failing_throw, :failing_assert]
   @modes %{

@@ -18,6 +18,7 @@ defmodule PropCheck.Mixfile do
      description: description(),
      propcheck: [counter_examples: "_build/propcheck.ctx"],
      aliases: aliases(),
+     preferred_cli_env: [tests: :test, test_ext: :test],
      deps: deps()]
   end
 
@@ -50,7 +51,11 @@ defmodule PropCheck.Mixfile do
   defp elixirc_paths(_),     do: ["lib"]
 
   def aliases do
-    [clean: ["clean", "propcheck.clean"]]
+    [
+      clean: ["clean", "propcheck.clean"],
+      test_ext: &external_tests/1,
+      tests: ["test_ext", "test"],
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -71,5 +76,18 @@ defmodule PropCheck.Mixfile do
       {:proper, "~> 1.3"},
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
     ]
+  end
+
+  defp external_tests(_args) do
+    run = fn arg ->
+      r = Mix.shell().cmd(arg)
+      r > 0 && System.at_exit(fn _ -> exit({:shutdown, r}) end)
+      r
+    end
+
+    run.("./test/verify_storing_counterexamples.sh")
+    run.("./test/verify-verbose.sh")
+    run.("./test/verify-detect-exceptions.sh")
+    run.("./test/verify-verbose-in-elixir-syntax.sh")
   end
 end
