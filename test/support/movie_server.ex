@@ -59,7 +59,11 @@ defmodule PropCheck.Test.MovieServer do
     :ok
   end
 
-  def handle_call(:popcorn, _from, s), do: {:reply, :bon_appetit, s}
+  def handle_call(:popcorn, _from, s),
+    do: {:reply, Enum.random([:bon_appetit, :bon_appetit, :bon_appetit,
+                              :bon_appetit, :bon_appetit, :bon_appetit,
+                              :bon_appetit, :bon_appetit, :bon_appetit,
+                              :fuck_off]), s}
   def handle_call(:stop, _from, s), do: {:stop, :normal, :stopped, s}
   def handle_call({:new_account, name}, _from, s = %__MODULE__{next_pass: p, users: u}) do
     :ets.insert(u, {p, name, []})
