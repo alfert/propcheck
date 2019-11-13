@@ -361,15 +361,13 @@ defmodule PropCheck.StateM.DSL do
   defp is_valid(mod, initial_state, cmds) do
     # Logger.debug "is_valid: initial=#{inspect initial_state}"
     # Logger.debug "is valid: cmds=#{inspect cmds, pretty: true}"
-    {first_state, _} = hd(cmds)
     initial_state == mod.initial_state() and
-    initial_state == first_state and
     is_valid(mod, initial_state, cmds, %{})
   end
   @spec is_valid(module, state_t, [BasicTypes.type], environment) :: boolean
   defp is_valid(_mod, _state, [], _env), do: true
   defp is_valid(m, state, [call | cmds], env) do
-    {_s, {:set, var, c}} = call
+    {:set, var, c} = call
     if check_precondition(state, c) do
       replaced_call = replace_symb_vars(c, env)
       # {:call, mod, fun, args} = replaced_call
@@ -393,7 +391,7 @@ defmodule PropCheck.StateM.DSL do
         gen_result = {:var, step_counter}
         gen_state = call_next_state(state, call, gen_result)
         let cmds <- gen_cmd_list(size - 1, cmd_list, mod, gen_state, step_counter + 1) do
-          [{state, {:set, gen_result, call}} | cmds]
+          [{:set, gen_result, call} | cmds]
         end
       end
   end
@@ -436,8 +434,19 @@ defmodule PropCheck.StateM.DSL do
   """
   @spec run_commands([command]) :: t
   def run_commands(commands) when length(commands) > 0 do
+    {:set, _, {:call, mod, _, _}} = hd(commands)
+    run_commands(mod, commands)
+  end
+
+  @doc """
+  Runs the list of generated commands according to the model.
+
+  Returns the result, the history and the final state of the model.
+  """
+  @spec run_commands(atom, [command]) :: t
+  def run_commands(mod, commands) do
     # Logger.debug "Run commands: #{inspect commands, pretty: true}"
-    {initial_state, _cmd} = hd(commands)
+    initial_state = mod.initial_state()
     commands
     |> Enum.reduce(new_state(initial_state), fn
 
@@ -458,7 +467,7 @@ defmodule PropCheck.StateM.DSL do
   defp new_state(initial_state), do: %__MODULE__{state: initial_state}
 
   @spec execute_cmd(state_call, t) :: history_event
-  defp execute_cmd({_, {:set, v = {:var, _}, sym_c = {:call, _m, _f, _args}}}, prop_state) do
+  defp execute_cmd({:set, v = {:var, _}, sym_c = {:call, _m, _f, _args}}, prop_state) do
     # Logger.debug "execute_cmd: symb call: #{inspect sym_c}"
     state = prop_state.state
     # Logger.debug "execute_cmd: state = #{inspect state}"
@@ -566,7 +575,7 @@ defmodule PropCheck.StateM.DSL do
   @spec command_names(cmds :: [command]) :: [mfa]
   def command_names(cmds) do
     cmds
-    |> Enum.map(fn {_state, {:set, _var, {:call, m, f, args}}} ->
+    |> Enum.map(fn {:set, _var, {:call, m, f, args}} ->
       # "#{m}.#{f}/#{length(args)}"
       {m, f, length(args)}
     end)
