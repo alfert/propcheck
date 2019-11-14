@@ -414,6 +414,7 @@ defmodule PropCheck do
         opts =
           PropCheck.Utils.get_opts()
           |> PropCheck.Utils.merge(unquote(opts))
+          |> PropCheck.Utils.elixirfy_verbose_option()
           |> PropCheck.Utils.put_opts()
 
         output_agent = PropCheck.Utils.output_agent(opts)
@@ -909,11 +910,20 @@ defmodule PropCheck do
 
     @doc "Runs PropEr on the property `outer_test`."
     @spec quickcheck(outer_test) :: result
-    def quickcheck(outer_test), do: quickcheck(outer_test, [])
+    def quickcheck(outer_test),
+      do: quickcheck(outer_test, [:verbose] |> PropCheck.Utils.to_proper_opts())
 
     @doc "Same as `quickcheck/1`, but also accepts a list of options."
     @spec quickcheck(outer_test, user_opts) :: result
-    defdelegate quickcheck(outer_test, user_opts), to: :proper
+    def quickcheck(outer_test, user_opts) do
+      # PropEr has `:verbose` enabled by default and then internally translates
+      # it to `:on_output` option. In order to translate Erlang terms to Elixir,
+      # we need to enable our `on_output` function
+      user_opts =
+        (user_opts ++ [:verbose])
+        |> PropCheck.Utils.to_proper_opts()
+      :proper.quickcheck(outer_test, user_opts)
+    end
 
     @doc "Equivalent to `quickcheck/2`, also accepting a list of options."
     @spec counterexample(outer_test, user_opts) :: long_result
@@ -929,8 +939,15 @@ defmodule PropCheck do
     `outer_test` that it previously falsified.
     """
     @spec check(outer_test, counterexample, user_opts) :: short_result
-    def check(outer_test, cexm, user_opts \\ []), do:
+    def check(outer_test, cexm, user_opts \\ []) do
+      # PropEr has `:verbose` enabled by default and then internally translates
+      # it to `:on_output` option. In order to translate Erlang terms to Elixir,
+      # we need to enable our `on_output` function
+      user_opts =
+        (user_opts ++ [:verbose])
+        |> PropCheck.Utils.to_proper_opts()
       :proper.check(outer_test, cexm, user_opts)
+    end
 
     @doc """
     Tests all properties (i.e., all 0-arity functions whose name begins with

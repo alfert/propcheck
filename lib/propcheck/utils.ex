@@ -95,5 +95,51 @@ defmodule PropCheck.Utils do
       {:detect_exceptions, _} -> true
       _ -> false
     end)
+    |> PropCheck.Utils.elixirfy_verbose_option()
   end
+
+  def elixirfy_verbose_option(opts) do
+    Enum.map(opts, fn
+      :verbose -> [{:on_output, &PropCheck.Utils.elixirfy_output/2}, :verbose]
+      opt -> opt
+    end)
+    |> List.flatten
+  end
+
+  def elixirfy_output('Stacktrace: ~p.~n', [stacktrace]) do
+    IO.puts "Stacktrace:"
+    IO.puts Exception.format_stacktrace stacktrace
+    :ok
+  end
+  def elixirfy_output('An exception was raised:' ++ _, [kind, exception]) do
+    IO.puts "An exception was raised:"
+    IO.puts Exception.format kind, exception
+    :ok
+  end
+  def elixirfy_output('A linked process died' ++ _, [{reason, stack}]) do
+    IO.puts "A linked process died with reason: an exception was raised:"
+    IO.puts Exception.format :error, reason, stack
+    :ok
+  end
+  def elixirfy_output(fmt, data), do: do_elixirfy_output(fmt, data)
+
+  defp do_elixirfy_output(fmt, data) do
+    {fmt, data} =
+      fmt
+      |> :io_lib.scan_format(data)
+      |> Enum.map(&parse_io_spec_format/1)
+      |> :io_lib.unscan_format()
+    :io.format fmt, data
+    :ok
+  end
+
+  defp parse_io_spec_format(spec = %{control_char: ?s}) do
+    %{spec | args: [inspect(spec.args |> hd, limit: :infinity)]}
+  end
+  defp parse_io_spec_format(spec = %{control_char: c}) when c in [?w, ?p] do
+    args = [inspect(spec.args |> hd, pretty: true, limit: :infinity)]
+    %{spec | args: args, control_char: ?s}
+  end
+  defp parse_io_spec_format(char_or_spec), do: char_or_spec
+
 end
