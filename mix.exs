@@ -79,8 +79,7 @@ defmodule PropCheck.Mixfile do
 
   defp test_suite(), do: [
     &run_external_tests/1,
-    "propcheck.clean",
-    "test --cover --trace --exclude will_fail:true --exclude unstable_test:true",
+    "test --cover --trace",
   ]
 
   defp run_external_tests(_args) do

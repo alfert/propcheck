@@ -6,7 +6,7 @@
 defmodule StoreCounterExample.ModuleTag do
   use ExUnit.Case
   use PropCheck
-  @moduletag store_counter_example: false
+  @moduletag store_counter_example: false, manual: true
 
   @tag will_fail: true
   property "failing" do
@@ -19,6 +19,8 @@ end
 defmodule StoreCounterExample.DescribeTag do
   use ExUnit.Case
   use PropCheck
+
+  @moduletag manual: true
 
   describe "store counter example with describe" do
     @describetag store_counter_example: false
@@ -35,6 +37,8 @@ end
 defmodule StoreCounter.ExampleTag do
   use ExUnit.Case
   use PropCheck
+
+  @moduletag manual: true
 
   @tag store_counter_example: false
   @tag will_fail: true
