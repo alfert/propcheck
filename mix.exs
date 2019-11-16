@@ -84,7 +84,11 @@ defmodule PropCheck.Mixfile do
   ]
 
   defp run_external_tests(_args) do
-    run = &Mix.shell().cmd/1
+    run = fn arg ->
+      r = Mix.shell().cmd(arg)
+      r > 0 && System.at_exit(fn _ -> exit({:shutdown, r}) end)
+      r
+    end
 
     run.("./test/verify_storing_counterexamples.sh")
     run.("./test/verify-verbose.sh")
