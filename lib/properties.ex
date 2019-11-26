@@ -186,7 +186,8 @@ defmodule PropCheck.Properties do
   defp qc(p, opts), do: PropCheck.quickcheck(p, [:long_result] ++ opts)
 
   # Handles the result of executing quick check or a re-check of a counter example.
-  # In this method a new found counter example is added to `CounterStrike`.
+  # In this method a new found counter example is added to `CounterStrike`. Note that
+  # some macros such as exists/2 do not return counter examples when they fail.
   defp handle_check_results(results, name, opts, should_fail, store_counter_example?) do
     case results do
       error = {:error, _} ->
@@ -231,6 +232,12 @@ defmodule PropCheck.Properties do
           https://github.com/alfert/propcheck/issues/30 for more details.
           """ |> add_additional_output(opts),
           expr: nil]
+      _ ->
+        raise ExUnit.AssertionError, [
+          message: """
+          Property #{mfa_to_string name} failed. There is no counter-example available.
+          """
+        ]
     end
   end
 
