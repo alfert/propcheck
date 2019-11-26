@@ -51,7 +51,7 @@ defmodule PropCheck.Test.TargetTreeTest do
     end
   end
 
-  property "A simple tree", [numtests: 1_000] do
+  property "A simple tree", [scale_numtests(10)] do
     forall t <- tree() do
       weight = sides(t)
       debug(" #{inspect weight}")
@@ -87,7 +87,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   # Combine regular properties with user-defined neighborhood-function and
   # a search strategy inside.
 
-  property "Tree search", [search_steps: 100] do
+  property "Tree search", [scale_search_steps(0.1)] do
     forall l <- list(integer()) do
       not_exists t <- user_nf(
           # trick: wrap the list value l into the let to construct the

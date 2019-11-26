@@ -16,7 +16,7 @@ defmodule PropCheck.Test.TargetPathTest do
   def move(:up, {x, y}),    do: {x, y + 1}
   def move(:down, {x, y}),  do: {x, y - 1}
 
-  property "trivial path", [numtests: 10] do
+  property "trivial path", [scale_numtests(0.1)] do
     forall p <- path() do
       {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       debug "(#{x},#{y})."
@@ -24,15 +24,13 @@ defmodule PropCheck.Test.TargetPathTest do
     end
   end
 
-  property "simple targeted path", [search_steps: 100] do
-    numtests(10,
+  property "simple targeted path", [scale_numtests(0.1), scale_search_steps(0.1)] do
     forall_targeted p <- path() do
       {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       debug "(#{x},#{y})."
       maximize(x - y)
       true
     end
-    )
   end
 
   @doc """
@@ -41,7 +39,7 @@ defmodule PropCheck.Test.TargetPathTest do
   If this fails, then we have found at least one path that a greater distance than
   `distance_square < 100`.
   """
-  property "reach a path of distance sqrt(100)", [search_steps: 100] do
+  property "reach a path of distance sqrt(100)", [scale_search_steps(0.1)] do
     forall_targeted p <- path() do
       {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       debug "(#{x},#{y})."
@@ -56,7 +54,7 @@ defmodule PropCheck.Test.TargetPathTest do
   Similar to the `forall_targeted` variant but using `exists`: Check that at least one path
   is has a `distance_square >= 100`.
   """
-  property "exists: at least one path with distance >= sqrt(100) exists", [search_steps: 100] do
+  property "exists: at least one path with distance >= sqrt(100) exists", [scale_search_steps(0.1)] do
     exists p <- path() do
       {x, y} = Enum.reduce(p, {0, 0}, &move/2)
       debug "(#{x},#{y})."

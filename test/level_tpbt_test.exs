@@ -101,7 +101,7 @@ defmodule PropCheck.Test.LevelTest do
   # When using a proper-derived generator, we might have to search longer to find
   # a successful path. Therefore, we increase the amount of search_steps. For more complex
   # situations, e.g. for level 2, the size of the generated paths may become larger.
-  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [search_steps: 20_000] do
+  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [scale_search_steps(20)] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
@@ -178,7 +178,7 @@ defmodule PropCheck.Test.LevelTest do
   # This test is flaky. It works perfectly on my machine but fails sometimes
   # on Travis CI. Currently, I have no idea how to properly handle this.
   @tag unstable_test: true
-  property "forall_targeted PBT Level 2", [search_steps: 3_000] do
+  property "forall_targeted PBT Level 2", [scale_search_steps(3)] do
     level_data = Level.level2()
     prop_forall_targeted(level_data)
     |> fails()

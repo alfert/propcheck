@@ -13,5 +13,5 @@ before_script:
   - mix local.hex --force
   - mix do deps.get, deps.compile, compile --warnings-as-errors
 script:
-  - PROPCHECK_DEBUG=1 PROPCHECK_VERBOSE=1 mix tests --cover --trace
+  - PROPCHECK_DEBUG=1 PROPCHECK_VERBOSE=1 PROPCHECK_NUMTESTS=200 PROPCHECK_SEARCH_STEPS=1000 mix tests --cover --trace
   - mix credo --strict

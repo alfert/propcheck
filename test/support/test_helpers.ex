@@ -4,8 +4,8 @@ defmodule PropCheck.TestHelpers do
   @doc "Reads properties options from system environment."
   def config do
     [:quiet]
-    |> push("PROPCHECK_NUMTESTS", "100", :numtests, &opt_num_value/2)
-    |> push("PROPCHECK_SEARCH_STEPS", "1000", :search_steps, &opt_num_value/2)
+    |> push("PROPCHECK_NUMTESTS", "33", :numtests, &opt_num_value/2)
+    |> push("PROPCHECK_SEARCH_STEPS", "333", :search_steps, &opt_num_value/2)
     |> maybe_push("PROPCHECK_MAX_SIZE", :max_size, &opt_num_value/2)
   end
 
@@ -17,6 +17,31 @@ defmodule PropCheck.TestHelpers do
   @doc "Prints text with new line, but only when ``PROPCHECK_DEBUG` system variable is set."
   def debugln(str) do
     if debug?(), do: IO.puts(str), else: :ok
+  end
+
+  @doc """
+  Scales number of tests in respect to globally set `:numtests` number.
+  For example, if `:numtests` is globally set to 300:
+
+      iex> PropCheck.TestHelpers.scale_numtests(0.1)
+      {:numtests, 30}
+  """
+  def scale_numtests(scale_factor) do
+     numtests = Keyword.get(config(), :numtests)
+     {:numtests, (scale_factor * numtests) |> round() |> max(1)}
+  end
+
+  @doc """
+  Scales number of search steps in respect to globally set `:search_steps`
+  number.
+  For example, if `:search_steps` is globally set to 300:
+
+      iex> PropCheck.TestHelpers.scale_search_steps(0.1)
+      {:search_steps, 30}
+  """
+  def scale_search_steps(scale_factor) do
+    search_steps = Keyword.get(config(), :search_steps)
+    {:search_steps, (scale_factor * search_steps) |> round() |> max(1)}
   end
 
   defp debug? do

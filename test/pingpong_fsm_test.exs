@@ -12,8 +12,8 @@ defmodule PropCheck.Test.PingPongFSM do
   require Logger
   @moduletag capture_log: true
 
-  property "ping-pong FSM works properly" do
-    numtests(1_000, forall cmds in commands(__MODULE__) do
+  property "ping-pong FSM works properly", [scale_numtests(10)] do
+    forall cmds in commands(__MODULE__) do
       trap_exit do
         kill_all_player_processes()
         {:ok, _pid} = PingPongMaster.start_link()
@@ -34,7 +34,7 @@ defmodule PropCheck.Test.PingPongFSM do
             Result: #{inspect result, pretty: true}
             """)
       end
-    end)
+    end
   end
 
   defp log_message(log_state, {:in, msg}, proc_state) do
