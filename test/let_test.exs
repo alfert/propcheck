@@ -1,9 +1,10 @@
 defmodule PropCheck.Test.LetAndShrinks do
   use ExUnit.Case
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+  import PropCheck.TestHelpers, except: [config: 0]
 
   @tag will_fail: true
-  property "a simple forall shrinks", [:verbose] do
+  property "a simple forall shrinks" do
     forall n <- integer(100, 1000) do
       n != 180
     end
@@ -16,7 +17,7 @@ defmodule PropCheck.Test.LetAndShrinks do
   end
 
   @tag will_fail: true
-  property "a simple let shrinks", [:verbose, numtests: 1_000] do
+  property "a simple let shrinks", [numtests: 1_000] do
     pred = fn k -> k < 700 end
     forall n <- kilo_numbers() do
       pred.(n)
@@ -49,7 +50,7 @@ defmodule PropCheck.Test.LetAndShrinks do
               Env: #{inspect events.env, pretty: true}
               Result: #{inspect events.result, pretty: true}
               """)
-          |> aggregate(command_names cmds)
+          # |> aggregate(command_names cmds)
       end
     end
 
@@ -86,7 +87,7 @@ defmodule PropCheck.Test.LetAndShrinks do
               Env: #{inspect events.env, pretty: true}
               Result: #{inspect events.result, pretty: true}
               """)
-          |> aggregate(command_names cmds)
+          # |> aggregate(command_names cmds)
       end
     end
 
@@ -125,7 +126,7 @@ defmodule PropCheck.Test.LetAndShrinks do
               State: #{inspect state, pretty: true}
               Result: #{inspect result, pretty: true}
               """)
-          |> aggregate(command_names cmds)
+          # |> aggregate(command_names cmds)
       end
     end
 
@@ -162,7 +163,7 @@ defmodule PropCheck.Test.LetAndShrinks do
               Env: #{inspect events.env, pretty: true}
               Result: #{inspect events.result, pretty: true}
               """)
-          |> aggregate(command_names cmds)
+          # |> aggregate(command_names cmds)
       end
     end
 

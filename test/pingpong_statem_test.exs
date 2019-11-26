@@ -5,13 +5,14 @@ defmodule PropCheck.Test.PingPongStateM do
   """
 
   use PropCheck.StateM
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use ExUnit.Case
+  import PropCheck.TestHelpers, except: [config: 0]
   alias PropCheck.Test.PingPongMaster
   require Logger
   @moduletag capture_log: true
 
-  property "ping-pong playing works fine", [:verbose] do
+  property "ping-pong playing works fine" do
     numtests(3_000, forall cmds in commands(__MODULE__) do
       trap_exit do
         kill_all_player_processes()
@@ -28,7 +29,7 @@ defmodule PropCheck.Test.PingPongStateM do
             State: #{inspect state, pretty: true}
             Result: #{inspect result, pretty: true}
             """)
-        |> aggregate(command_names cmds)
+        # |> aggregate(command_names cmds)
       end
     end)
   end
@@ -152,7 +153,7 @@ defmodule PropCheck.Test.PingPongStateM do
     # the real machinery might be updated later
     result <= s.scores |> Map.fetch!(name)
   def postcondition(s, {:call, _, f, _}, r) do
-    IO.puts "Failing postcondition for call #{f} with result #{inspect r} in state #{inspect s}"
+    debug "Failing postcondition for call #{f} with result #{inspect r} in state #{inspect s}"
     false
   end
 

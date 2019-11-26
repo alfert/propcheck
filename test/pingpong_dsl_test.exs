@@ -5,13 +5,14 @@ defmodule PropCheck.Test.PingPongDSL do
   """
 
   use ExUnit.Case
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.DSL
+  import PropCheck.TestHelpers, except: [config: 0]
   alias PropCheck.Test.PingPongMaster
   require Logger
   @moduletag capture_log: true
 
-  property "DSL ping-pong player", [:verbose] do
+  property "DSL ping-pong player" do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         assert [] == player_processes()
@@ -25,7 +26,7 @@ defmodule PropCheck.Test.PingPongDSL do
         State: #{inspect events.state, pretty: true}
         Result: #{inspect events.result, pretty: true}
         """)
-        |> aggregate(command_names cmds)
+        # |> aggregate(command_names cmds)
       end
     end
   end

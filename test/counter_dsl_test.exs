@@ -12,9 +12,10 @@ defmodule PropCheck.Test.CounterDSL do
   These states are reflected in the commands and for determining the
   weights of the commands.
   """
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.DSL
   use ExUnit.Case
+  import PropCheck.TestHelpers, except: [config: 0]
   import ExUnit.CaptureIO
   require Logger
 
@@ -26,7 +27,7 @@ defmodule PropCheck.Test.CounterDSL do
   ### The properties
   #########################################################################
 
-  property "infinity counter works fine", [:verbose] do
+  property "infinity counter works fine" do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = Counter.start_link()
@@ -41,14 +42,14 @@ defmodule PropCheck.Test.CounterDSL do
             Env: #{inspect events.env, pretty: true}
             Result: #{inspect events.result, pretty: true}
             """)
-        |> aggregate(command_names cmds)
-        |> measure("length of commands", length(cmds))
+        # |> aggregate(command_names cmds)
+        # |> measure("length of commands", length(cmds))
       end
     end
   end
 
   @tag will_fail: true
-  property "modulo counter does not increment infinite times", [:verbose] do
+  property "modulo counter does not increment infinite times" do
     Logger.error "This property will fail in order to show the shrinking results"
     Logger.error "It is excluded from the set of test for the travis build"
     forall cmds <- commands(__MODULE__) do
@@ -65,8 +66,8 @@ defmodule PropCheck.Test.CounterDSL do
             Env: #{inspect events.env, pretty: true}
             Result: #{inspect events.result, pretty: true}
             """)
-        |> aggregate(command_names cmds)
-        |> measure("length of commands", length(cmds))
+        # |> aggregate(command_names cmds)
+        # |> measure("length of commands", length(cmds))
       end
     end
   end

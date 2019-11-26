@@ -3,8 +3,9 @@ defmodule PropCheck.Test.TargetTreeTest do
   This is the binary tree example for Targeted Properties of Fred Hebert's book "
   Property Based Testing"
   """
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use ExUnit.Case
+  import PropCheck.TestHelpers, except: [config: 0]
 
   require Logger
 
@@ -43,17 +44,17 @@ defmodule PropCheck.Test.TargetTreeTest do
     forall_targeted t <- tree() do
       weight = sides(t)
       {left, right} = weight
-      IO.write(" #{inspect weight}")
+      debug(" #{inspect weight}")
       # ensure that the left tree is larger than the right one
       maximize(left - right)
-      true # this property holds always
+      assert true # this property holds always
     end
   end
 
   property "A simple tree", [numtests: 1_000] do
     forall t <- tree() do
       weight = sides(t)
-      IO.write(" #{inspect weight}")
+      debug(" #{inspect weight}")
       true # this property holds always
     end
   end
@@ -75,7 +76,7 @@ defmodule PropCheck.Test.TargetTreeTest do
     forall_targeted t <- user_nf(tree(), next_tree()) do
       weight = sides(t)
       {left, right} = weight
-      IO.write(" #{inspect weight}")
+      debug(" #{inspect weight}")
       # ensure that the left tree is larger than the right one
       maximize(left - right)
       true # this property holds always
@@ -86,7 +87,7 @@ defmodule PropCheck.Test.TargetTreeTest do
   # Combine regular properties with user-defined neighborhood-function and
   # a search strategy inside.
 
-  property "Tree search", [:verbose, search_steps: 100]  do
+  property "Tree search", [search_steps: 100] do
     forall l <- list(integer()) do
       not_exists t <- user_nf(
           # trick: wrap the list value l into the let to construct the
@@ -95,7 +96,7 @@ defmodule PropCheck.Test.TargetTreeTest do
           next_tree()) do
         weight = sides(t)
         {left, right} = weight
-        IO.write(" #{inspect weight}")
+        debug(" #{inspect weight}")
         # ensure that the left tree is larger than the right one
         maximize(left - right)
         false # guarantees a full search for exists

@@ -4,15 +4,16 @@ defmodule PropCheck.Test.Cache.DSL do
   """
 
   use ExUnit.Case
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.DSL
+  import PropCheck.TestHelpers, except: [config: 0]
 
   alias PropCheck.Test.Cache
   # require Logger
 
   @cache_size 10
 
-  property "run the sequential cache", [:verbose] do
+  property "run the sequential cache" do
     forall cmds <- commands(__MODULE__) do
       # Logger.debug "Commands to run: #{inspect cmds}"
       Cache.start_link(@cache_size)
@@ -28,16 +29,16 @@ defmodule PropCheck.Test.Cache.DSL do
           State: #{inspect events.state, pretty: true}
           Result: #{inspect events.result, pretty: true}
           """)
-      |> aggregate(command_names cmds)
-      |> collect(events
-        |> history_of_states()
-        |> Enum.map(fn model -> model.count end)
-        |> Enum.max())
+      # |> aggregate(command_names cmds)
+      # |> collect(events
+      #   |> history_of_states()
+      #   |> Enum.map(fn model -> model.count end)
+      #   |> Enum.max())
     end
   end
 
   @tag will_fail: true
-  property "run the misconfigured sequential cache", [:verbose] do
+  property "run the misconfigured sequential cache" do
     forall cmds <- commands(__MODULE__) do
       # Logger.debug "Commands to run: #{inspect cmds}"
       # Cache size is half as big expected, so we will find some cache misses,
@@ -55,11 +56,11 @@ defmodule PropCheck.Test.Cache.DSL do
           State: #{inspect events.state, pretty: true}
           Result: #{inspect events.result, pretty: true}
           """)
-      |> aggregate(command_names cmds)
-      |> collect(events
-        |> history_of_states()
-        |> Enum.map(fn model -> model.count end)
-        |> Enum.max())
+      # |> aggregate(command_names cmds)
+      # |> collect(events
+      #   |> history_of_states()
+      #   |> Enum.map(fn model -> model.count end)
+      #   |> Enum.max())
     end
     # |> fails
   end

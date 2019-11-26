@@ -1,7 +1,8 @@
 defmodule PropCheck.TreeTest do
   use ExUnit.Case
   alias PropCheck.Test.Tree
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+  import PropCheck.TestHelpers, except: [config: 0]
 
   ################################
   ### Properties of the tree
@@ -22,12 +23,12 @@ defmodule PropCheck.TreeTest do
   end
 
   # delete2 is not faulty
-  property "delete2", [:verbose, {:max_size, 20}]  do
+  property "delete2", [max_size: 20]               do
     forall {x, t} <- {integer(), tree(integer())} do
       tsize = t |> Tree.pre_order |> Enum.count
       (not Tree.member(Tree.delete2(t, x), x))
-      |> collect(tsize)
-      |> measure("Tree Size", tsize)
+      # |> collect(tsize)
+      # |> measure("Tree Size", tsize)
     end
   end
 

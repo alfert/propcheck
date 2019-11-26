@@ -1,13 +1,14 @@
 defmodule PropCheck.Test.CounterStrikeTest do
 
   use ExUnit.Case
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+  import PropCheck.TestHelpers, except: [config: 0]
   require Logger
 
   alias PropCheck.CounterStrike
 
   setup do
-    IO.puts "This is a setup callback for #{inspect self()}"
+    debugln "This is a setup callback for #{inspect self()}"
     filename = "counterstrike_test.#{System.unique_integer([:positive, :monotonic])}.dets"
     path = Path.join(Mix.Project.build_path(), filename)
     File.rm(path)

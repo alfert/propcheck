@@ -3,9 +3,10 @@ defmodule PropCheck.Test.Movies do
   This module is the Elixir version of the StateM-Tutorial
   from Proper (see http://proper.softlab.ntua.gr/Tutorials/PropEr_testing_of_generic_servers.html).
   """
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM
   use ExUnit.Case
+  import PropCheck.TestHelpers, except: [config: 0]
   require Logger
 
   alias PropCheck.Test.MovieServer
@@ -34,7 +35,7 @@ defmodule PropCheck.Test.Movies do
             State: #{inspect state, pretty: true}
             Result: #{inspect result, pretty: true}
             """)
-        |> aggregate(command_names cmds)
+        # |> aggregate(command_names cmds)
       end
     end)
   end
