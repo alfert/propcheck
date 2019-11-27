@@ -5,8 +5,8 @@ defmodule PropCheck.Test.PingPongFSM do
   """
 
   use PropCheck.FSM
+  use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  use ExUnit.Case
   import PropCheck.TestHelpers, except: [config: 0]
   alias PropCheck.Test.PingPongMaster
   require Logger

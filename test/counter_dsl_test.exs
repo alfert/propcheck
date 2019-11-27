@@ -14,7 +14,7 @@ defmodule PropCheck.Test.CounterDSL do
   """
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.DSL
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   import PropCheck.TestHelpers, except: [config: 0]
   import ExUnit.CaptureIO
   require Logger

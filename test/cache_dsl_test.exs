@@ -3,7 +3,7 @@ defmodule PropCheck.Test.Cache.DSL do
   Testing of the cache based on the EQC api and PropEr as backend.
   """
 
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.DSL
   import PropCheck.TestHelpers, except: [config: 0]
