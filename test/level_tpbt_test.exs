@@ -66,7 +66,8 @@ defmodule PropCheck.Test.LevelTest do
 
   # This property fails, this means that in every situation a path was found
   # ==> see docs of `prop_exit/1`
-  property "Default PBT Level 0" do
+  # this can fail on rare occasions
+  property "Default PBT Level 0", [numtests: 300] do
     prop_exit(Level.level0())
     |> fails()
   end
