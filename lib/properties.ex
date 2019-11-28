@@ -164,26 +164,23 @@ defmodule PropCheck.Properties do
 
     proper_opts = PropCheck.Utils.to_proper_opts(opts)
 
-    result =
-      case CounterStrike.counter_example(name) do
-        :none -> PropCheck.quickcheck(p, [:long_result] ++ proper_opts)
-        :others ->
-          # since the tag is set, we execute everything. You can limit
-          # the amount of checks by using either --stale or --only failing_prop
+    case CounterStrike.counter_example(name) do
+      :none -> PropCheck.quickcheck(p, [:long_result] ++ proper_opts)
+      :others ->
+        # since the tag is set, we execute everything. You can limit
+        # the amount of checks by using either --stale or --only failing_prop
+        qc(p, proper_opts)
+      {:ok, counter_example} ->
+        # Logger.debug "Found counter example #{inspect counter_example}"
+        result = PropCheck.check(p, counter_example, [:long_result] ++ proper_opts)
+        with true <- result do
           qc(p, proper_opts)
-        {:ok, counter_example} ->
-          # Logger.debug "Found counter example #{inspect counter_example}"
-          result = PropCheck.check(p, counter_example, [:long_result] ++ proper_opts)
-          with true <- result do
-            qc(p, proper_opts)
-          else
-            false -> {:rerun_failed, counter_example}
-            e = {:error, _} -> e
-          end
-      end
-
-    handle_check_results(%{
-      result: result,
+        else
+          false -> {:rerun_failed, counter_example}
+          e = {:error, _} -> e
+        end
+    end
+    |> handle_check_results(%{
       name: name,
       opts: opts,
       should_fail: should_fail,
@@ -196,28 +193,28 @@ defmodule PropCheck.Properties do
   # Handles the result of executing quick check or a re-check of a counter example.
   # In this method a new found counter example is added to `CounterStrike`. Note that
   # some macros such as exists/2 do not return counter examples when they fail.
-  defp handle_check_results(%{result: true, should_fail: false}) do
+  defp handle_check_results(true, %{should_fail: false}) do
     true
   end
 
-  defp handle_check_results(args = %{result: true, should_fail: true}) do
+  defp handle_check_results(true, args = %{should_fail: true}) do
     raise ExUnit.AssertionError,
       message: "Property #{mfa_to_string(args.name)} should fail, but succeeded for all test data :-(",
       expr: nil
   end
 
-  defp handle_check_results(args = %{result: error = {:error, _}}) do
+  defp handle_check_results(error = {:error, _}, args = %{}) do
     raise ExUnit.AssertionError,
       message: "Property #{mfa_to_string(args.name)} failed with an error: #{inspect(error)}",
       expr: nil
   end
 
-  defp handle_check_results(%{result: counter_example, should_fail: true})
+  defp handle_check_results(counter_example, %{should_fail: true})
        when is_list(counter_example) do
     true
   end
 
-  defp handle_check_results(args = %{result: counter_example}) when is_list(counter_example) do
+  defp handle_check_results(counter_example, args = %{}) when is_list(counter_example) do
     counter_example_message =
       if args.store_counter_example? do
         CounterStrike.add_counter_example(args.name, counter_example)
@@ -238,7 +235,7 @@ defmodule PropCheck.Properties do
       expr: nil
   end
 
-  defp handle_check_results(args = %{result: {:rerun_failed, counter_example}}) when is_list(counter_example) do
+  defp handle_check_results({:rerun_failed, counter_example}, args = %{}) when is_list(counter_example) do
     CounterStrike.add_counter_example(args.name, counter_example)
 
     raise ExUnit.AssertionError,
@@ -255,7 +252,7 @@ defmodule PropCheck.Properties do
       expr: nil
   end
 
-  defp handle_check_results(args) do
+  defp handle_check_results(_, args) do
     raise ExUnit.AssertionError,
       message: """
       Property #{mfa_to_string(args.name)} failed. There is no counter-example available.
