@@ -1,7 +1,13 @@
 # PropCheck Changelog
 
 ## 1.2.1
-
+* `property/1 `for marking properties to be implemented in the future. 
+   Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Prevent crashing if no counter examples was returned in a failing property. 
+  Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Consistent reporting of Erlang terms in Elixir syntax. Thanks to [https://github.com/x4lldux](https://github.com/x4lldux).
+* Enhanced handling and reporting of exception. Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Include `credo` in the build. Thanks to [https://github.com/evnu](https://github.com/evnu)
 * Fix `PROPCHECK_VERBOSE` to work with `property`
 * Allow `PROPCHECK_VERBOSE=0` to make all properties quiet
 
