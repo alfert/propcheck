@@ -127,6 +127,7 @@ defmodule PropCheck.Properties do
       end
   end
 
+  @doc false
   def merge_opts(opts, module_default_opts) do
     module_default_opts = case is_function(module_default_opts) do
                             true -> module_default_opts.()
