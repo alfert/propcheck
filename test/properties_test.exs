@@ -17,4 +17,7 @@ defmodule PropertiesTest do
     assert {:max_size, 1} in opts
     assert {:numtests, 1} in opts
   end
+
+  # This will be filtered with `--exclude not_implemented`.
+  property "not yet implemented"
 end
