@@ -286,7 +286,7 @@ defmodule PropCheck.Properties do
   end
 
   @doc """
-  Defines a not implemented property.
+  Defines a not yet implemented property.
 
   This convenient macro provides a property which will always flunk. It resembles
   the `test/1` macro from ExUnit. Similarly to `ExUnit`, it also tags the test with
