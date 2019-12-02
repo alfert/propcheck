@@ -1,9 +1,9 @@
 defmodule PropCheck.Properties do
-
   @moduledoc """
-  This module defined the `property/4` macro. It is automatically available
+  This module defines the `property/4` and `property/1` macros. It is automatically available
   by `use PropCheck`.
   """
+
   alias PropCheck.CounterStrike
   require Logger
 
@@ -282,5 +282,26 @@ defmodule PropCheck.Properties do
       {_m, beam, _file} = :code.get_object_code(mod)
       {:ok, {_, [{:abstract_code, {_, ac}}]}} = :beam_lib.chunks(beam, [:abstract_code])
       ac |> Enum.map(&:erl_pp.form/1) |> List.flatten |> IO.puts
+  end
+
+  @doc """
+  Defines a not implemented property.
+
+  This convenient macro provides a property which will always flunk. It resembles
+  the `test/1` macro from ExUnit. Similarly to `ExUnit`, it also tags the test with
+  `:not_implemented`, allowing to filter it when running `mix test`.
+
+  ## Example
+
+      property "This property will be implemented in the future"
+
+  """
+  defmacro property(message) do
+    quote bind_quoted: [message: message] do
+      prop_name = ExUnit.Case.register_test(__ENV__, :property, message, [:not_implemented])
+      def unquote(prop_name)(_) do
+        flunk("Not implemented")
+      end
+    end
   end
 end
