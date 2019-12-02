@@ -180,58 +180,83 @@ defmodule PropCheck.Properties do
           e = {:error, _} -> e
         end
     end
-    |> handle_check_results(name, opts, should_fail, store_counter_example?)
+    |> handle_check_results(%{
+      name: name,
+      opts: opts,
+      should_fail: should_fail,
+      store_counter_example?: store_counter_example?
+    })
   end
 
   defp qc(p, opts), do: PropCheck.quickcheck(p, [:long_result] ++ opts)
 
   # Handles the result of executing quick check or a re-check of a counter example.
-  # In this method a new found counter example is added to `CounterStrike`.
-  defp handle_check_results(results, name, opts, should_fail, store_counter_example?) do
-    case results do
-      error = {:error, _} ->
-        raise ExUnit.AssertionError, [
-          message:
-            "Property #{mfa_to_string name} failed with an error: #{inspect(error)}",
-          expr: nil
-        ]
-      true when not should_fail -> true
-      true when should_fail ->
-        raise ExUnit.AssertionError, [
-          message:
-            "Property #{mfa_to_string name} should fail, but succeeded for all test data :-(",
-          expr: nil]
-      counter_example when is_list(counter_example) and should_fail -> true
-      counter_example when is_list(counter_example) ->
-        counter_example_message =
-          if store_counter_example? do
-            CounterStrike.add_counter_example(name, counter_example)
-            "Counter example stored."
-          else
-            "Counter example NOT stored, :store_counter_example is set to false."
-          end
+  # In this method a new found counter example is added to `CounterStrike`. Note that
+  # some macros such as exists/2 do not return counter examples when they fail.
+  defp handle_check_results(true, %{should_fail: false}) do
+    true
+  end
 
-        raise ExUnit.AssertionError, [
-          message: """
-          Property #{mfa_to_string name} failed. Counter-Example is:
-          #{inspect counter_example, pretty: true}
+  defp handle_check_results(true, args = %{should_fail: true}) do
+    raise ExUnit.AssertionError,
+      message: "Property #{mfa_to_string(args.name)} should fail, but succeeded for all test data :-(",
+      expr: nil
+  end
 
-          #{counter_example_message}
-          """ |> add_additional_output(opts),
-          expr: nil]
-      {:rerun_failed, counter_example} when is_list(counter_example) ->
-        CounterStrike.add_counter_example(name, counter_example)
-        raise ExUnit.AssertionError, [
-          message: """
-          Property #{mfa_to_string name} failed. Counter-Example is:
-          #{inspect counter_example, pretty: true}
+  defp handle_check_results(error = {:error, _}, args = %{}) do
+    raise ExUnit.AssertionError,
+      message: "Property #{mfa_to_string(args.name)} failed with an error: #{inspect(error)}",
+      expr: nil
+  end
 
-          Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
-          identified and fixed. PropCheck cannot identify changes to generators. See
-          https://github.com/alfert/propcheck/issues/30 for more details.
-          """ |> add_additional_output(opts),
-          expr: nil]
-    end
+  defp handle_check_results(counter_example, %{should_fail: true})
+       when is_list(counter_example) do
+    true
+  end
+
+  defp handle_check_results(counter_example, args = %{}) when is_list(counter_example) do
+    counter_example_message =
+      if args.store_counter_example? do
+        CounterStrike.add_counter_example(args.name, counter_example)
+        "Counter example stored."
+      else
+        "Counter example NOT stored, :store_counter_example is set to false."
+      end
+
+    raise ExUnit.AssertionError,
+      message:
+        """
+        Property #{mfa_to_string(args.name)} failed. Counter-Example is:
+        #{inspect(counter_example, pretty: true)}
+
+        #{counter_example_message}
+        """
+        |> add_additional_output(args.opts),
+      expr: nil
+  end
+
+  defp handle_check_results({:rerun_failed, counter_example}, args = %{}) when is_list(counter_example) do
+    CounterStrike.add_counter_example(args.name, counter_example)
+
+    raise ExUnit.AssertionError,
+      message:
+        """
+        Property #{mfa_to_string(args.name)} failed. Counter-Example is:
+        #{inspect(counter_example, pretty: true)}
+
+        Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
+        identified and fixed. PropCheck cannot identify changes to generators. See
+        https://github.com/alfert/propcheck/issues/30 for more details.
+        """
+        |> add_additional_output(args.opts),
+      expr: nil
+  end
+
+  defp handle_check_results(_, args) do
+    raise ExUnit.AssertionError,
+      message: """
+      Property #{mfa_to_string(args.name)} failed. There is no counter-example available.
+      """
   end
 
   # Add additional output to a message
