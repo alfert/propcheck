@@ -6,7 +6,7 @@
 # run tests in order
 seed=0
 
-elixir_syntax_output=$(mix test --seed 0 test/verify_verbose_elixir_syntax_test.exs)
+elixir_syntax_output=$(PROPCHECK_VERBOSE=1 mix test --include manual --include will_fail test/verify_verbose_elixir_syntax_test.exs --seed $seed)
 
 # linked process crashes
 expected1='A linked process died with reason: an exception was raised:'

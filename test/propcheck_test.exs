@@ -1,5 +1,7 @@
 defmodule PropcheckTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+  import PropCheck.TestHelpers, except: [config: 0]
 
   import ExUnit.CaptureIO
   require Logger
@@ -20,8 +22,6 @@ defmodule PropcheckTest do
   end
 
   test "let/2 generates larger lists of bindings" do
-    use PropCheck
-
     let_gen = let [
       m <- nat(),
       n <- nat(),
@@ -41,7 +41,6 @@ defmodule PropcheckTest do
   end
 
   test "equals/2 outputs on error" do
-    use PropCheck
     assert capture_io(fn ->
       quickcheck(
         forall x <- :not_ok do
@@ -52,8 +51,6 @@ defmodule PropcheckTest do
   end
 
   test "sample_shrink/2" do
-    use PropCheck
-
     assert capture_io(fn ->
       assert :ok == sample_shrink(1)
     end) == "1\n"
@@ -64,8 +61,6 @@ defmodule PropcheckTest do
   end
 
   describe "forall" do
-    use PropCheck
-
     test "can use assertion in forall" do
       assert capture_io(fn ->
         quickcheck(

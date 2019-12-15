@@ -1,6 +1,7 @@
 defmodule PropCheck.Test.LevelTest do
-  use PropCheck
-  use ExUnit.Case
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+  use ExUnit.Case, async: true
+  import PropCheck.TestHelpers, except: [config: 0]
 
   require Logger
 
@@ -65,7 +66,8 @@ defmodule PropCheck.Test.LevelTest do
 
   # This property fails, this means that in every situation a path was found
   # ==> see docs of `prop_exit/1`
-  property "Default PBT Level 0" do
+  # this can fail on rare occasions
+  property "Default PBT Level 0", [numtests: 300] do
     prop_exit(Level.level0())
     |> fails()
   end
@@ -100,7 +102,7 @@ defmodule PropCheck.Test.LevelTest do
   # When using a proper-derived generator, we might have to search longer to find
   # a successful path. Therefore, we increase the amount of search_steps. For more complex
   # situations, e.g. for level 2, the size of the generated paths may become larger.
-  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [:verbose, search_steps: 20_000] do
+  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [scale_search_steps(20)] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
@@ -168,7 +170,7 @@ defmodule PropCheck.Test.LevelTest do
   # random search was not successful.
   # The logic is negative, therefore we expect that
   # the property fails.
-  property "forall_targeted PBT Level 1", [:verbose] do
+  property "forall_targeted PBT Level 1" do
     level_data = Level.level1()
     prop_forall_targeted(level_data)
     |> fails()
@@ -177,13 +179,13 @@ defmodule PropCheck.Test.LevelTest do
   # This test is flaky. It works perfectly on my machine but fails sometimes
   # on Travis CI. Currently, I have no idea how to properly handle this.
   @tag unstable_test: true
-  property "forall_targeted PBT Level 2", [:verbose, search_steps: 3_000] do
+  property "forall_targeted PBT Level 2", [scale_search_steps(3)] do
     level_data = Level.level2()
     prop_forall_targeted(level_data)
     |> fails()
   end
 
-  property "Exists Target PBT Level 1", [:verbose] do
+  property "Exists Target PBT Level 1" do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level

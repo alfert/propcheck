@@ -5,14 +5,15 @@ defmodule PropCheck.Test.PingPongFSM do
   """
 
   use PropCheck.FSM
-  use PropCheck
-  use ExUnit.Case
+  use ExUnit.Case, async: true
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+  import PropCheck.TestHelpers, except: [config: 0]
   alias PropCheck.Test.PingPongMaster
   require Logger
   @moduletag capture_log: true
 
-  property "ping-pong FSM works properly", [:quiet] do
-    numtests(1_000, forall cmds in commands(__MODULE__) do
+  property "ping-pong FSM works properly", [scale_numtests(10)] do
+    forall cmds in commands(__MODULE__) do
       trap_exit do
         kill_all_player_processes()
         {:ok, _pid} = PingPongMaster.start_link()
@@ -25,7 +26,7 @@ defmodule PropCheck.Test.PingPongFSM do
         # Logger.info "Property finished. result is: #{inspect r}"
         # IO.puts "Property finished. result is: #{inspect r}"
         (result == :ok)
-        |> aggregate(command_names cmds)
+        # |> aggregate(command_names cmds)
         |> when_fail(
             IO.puts """
             History: #{inspect history, pretty: true}
@@ -33,7 +34,7 @@ defmodule PropCheck.Test.PingPongFSM do
             Result: #{inspect result, pretty: true}
             """)
       end
-    end)
+    end
   end
 
   defp log_message(log_state, {:in, msg}, proc_state) do

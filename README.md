@@ -130,6 +130,13 @@ Please use the GitHub issue tracker for
 * bug reports and for
 * submitting pull requests
 
+Before submitting a pull request, please use Credo to ensure code consistency
+and run `mix tests` to check PropCheck itself. `mix tests` is a Mix alias that
+runs regular tests (via `mix test`) and some external tests (via another Mix
+alias `mix test_ext`) which test PropCheck's side effects, like storing
+counterexamples or proper output format, that can't be easily tested using
+regular tests.
+
 ## License
 
 PropCheck is provided under the GPL 3 License due to its intimate use of PropEr

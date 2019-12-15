@@ -2,6 +2,9 @@ defmodule VerifyCounterExampleTest do
   # The tests here verify that CheckCounterExamplesTest did indeed not store
   # any counter examples.
   use ExUnit.Case
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+
+  @moduletag manual: true
 
   @modules [
     StoreCounterExample.ModuleTag,

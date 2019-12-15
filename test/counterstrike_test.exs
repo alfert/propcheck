@@ -1,13 +1,14 @@
 defmodule PropCheck.Test.CounterStrikeTest do
 
-  use ExUnit.Case
-  use PropCheck
+  use ExUnit.Case, async: true
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+  import PropCheck.TestHelpers, except: [config: 0]
   require Logger
 
   alias PropCheck.CounterStrike
 
   setup do
-    IO.puts "This is a setup callback for #{inspect self()}"
+    debugln "This is a setup callback for #{inspect self()}"
     filename = "counterstrike_test.#{System.unique_integer([:positive, :monotonic])}.dets"
     path = Path.join(Mix.Project.build_path(), filename)
     File.rm(path)
@@ -49,25 +50,30 @@ defmodule PropCheck.Test.CounterStrikeTest do
     end
   end
 
+  #
+  # helper for "PropEr error is not stored" test, can't be inside the tests
+  # because it triggers strange error in ExUnit when `async` is true and
+  # `--trace` options is enabled. Bug is already fixed in Elixir master
+  defmodule Helper do
+    use ExUnit.Case
+    use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+    import PropCheck.TestHelpers, except: [config: 0]
+
+    @tag will_fail: true # must be run manually
+    property "cant_generate" do
+      # Check that no counterexample is stored if PropEr reported an error
+      gen = such_that b <- false, when: b
+      forall b <- gen do
+        b
+      end
+    end
+  end
+
   test "PropEr error is not stored" do
     # Check that an invalid counterexample is not stored. PropEr returns
     # {:error, _} on internal errors such as inability to generate a
     # value instance. Such errors cannot be used as counterexamples in
     # subsequent runs.
-
-    defmodule Helper do
-      use ExUnit.Case
-      use PropCheck
-
-      @tag will_fail: true # must be run manually
-      property "cant_generate" do
-        # Check that no counterexample is stored if PropEr reported an error
-        gen = such_that b <- false, when: b
-        forall b <- gen do
-          b
-        end
-      end
-    end
 
     assert_raise ExUnit.AssertionError, ~r/cant_generate/, fn ->
       apply(Helper, :"property cant_generate", [[]])

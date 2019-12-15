@@ -3,9 +3,10 @@ defmodule PropCheck.Test.MoviesDSL do
   This module is the Elixir version of the StateM-Tutorial
   from Proper (see http://proper.softlab.ntua.gr/Tutorials/PropEr_testing_of_generic_servers.html).
   """
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.DSL
   use ExUnit.Case
+  import PropCheck.TestHelpers, except: [config: 0]
   require Logger
 
   alias PropCheck.Test.MovieServer
@@ -16,7 +17,7 @@ defmodule PropCheck.Test.MoviesDSL do
   ### The properties
   #########################################################################
 
-  property "server works fine", [:verbose] do
+  property "server works fine" do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = MovieServer.start_link()
@@ -31,7 +32,7 @@ defmodule PropCheck.Test.MoviesDSL do
             Env: #{inspect events.env, pretty: true}
             Result: #{inspect events.result, pretty: true}
             """)
-        |> aggregate(command_names cmds)
+        # |> aggregate(command_names cmds)
       end
     end
   end

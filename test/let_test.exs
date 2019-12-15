@@ -1,9 +1,10 @@
 defmodule PropCheck.Test.LetAndShrinks do
-  use ExUnit.Case
-  use PropCheck
+  use ExUnit.Case, async: true
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
+  import PropCheck.TestHelpers, except: [config: 0]
 
   @tag will_fail: true
-  property "a simple forall shrinks", [:verbose] do
+  property "a simple forall shrinks" do
     forall n <- integer(100, 1000) do
       n != 180
     end
@@ -16,7 +17,7 @@ defmodule PropCheck.Test.LetAndShrinks do
   end
 
   @tag will_fail: true
-  property "a simple let shrinks", [:verbose, numtests: 1_000] do
+  property "a simple let shrinks", [scale_numtests(10)] do
     pred = fn k -> k < 700 end
     forall n <- kilo_numbers() do
       pred.(n)
@@ -38,7 +39,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     end
 
     @tag will_fail: true
-    property "a simple integer shrinks in SM DSL", [numtests: 1000] do
+    property "a simple integer shrinks in SM DSL", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
           events = run_commands(cmds)
           (events.result == :ok)
@@ -49,7 +50,7 @@ defmodule PropCheck.Test.LetAndShrinks do
               Env: #{inspect events.env, pretty: true}
               Result: #{inspect events.result, pretty: true}
               """)
-          |> aggregate(command_names cmds)
+          # |> aggregate(command_names cmds)
       end
     end
 
@@ -75,7 +76,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     end
 
     @tag will_fail: true
-    property "a simple let will shrink in SM DSL", [numtests: 1000] do
+    property "a simple let will shrink in SM DSL", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
           events = run_commands(cmds)
           (events.result == :ok)
@@ -86,7 +87,7 @@ defmodule PropCheck.Test.LetAndShrinks do
               Env: #{inspect events.env, pretty: true}
               Result: #{inspect events.result, pretty: true}
               """)
-          |> aggregate(command_names cmds)
+          # |> aggregate(command_names cmds)
       end
     end
 
@@ -115,7 +116,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     def precondition(_state, _call), do: true
 
     @tag will_fail: true
-    property "let shrinks in PropEr's native SM", [numtests: 1000] do
+    property "let shrinks in PropEr's native SM", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
           {history, state, result} = run_commands(__MODULE__, cmds)
           (result == :ok)
@@ -125,7 +126,7 @@ defmodule PropCheck.Test.LetAndShrinks do
               State: #{inspect state, pretty: true}
               Result: #{inspect result, pretty: true}
               """)
-          |> aggregate(command_names cmds)
+          # |> aggregate(command_names cmds)
       end
     end
 
@@ -151,7 +152,7 @@ defmodule PropCheck.Test.LetAndShrinks do
     end
 
     @tag will_fail: true
-    property "a let with a list shrinks in SM DSL", [numtests: 1000] do
+    property "a let with a list shrinks in SM DSL", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
           events = run_commands(cmds)
           (events.result == :ok)
@@ -162,7 +163,7 @@ defmodule PropCheck.Test.LetAndShrinks do
               Env: #{inspect events.env, pretty: true}
               Result: #{inspect events.result, pretty: true}
               """)
-          |> aggregate(command_names cmds)
+          # |> aggregate(command_names cmds)
       end
     end
 

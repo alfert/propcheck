@@ -4,13 +4,14 @@ defmodule PropCheck.Test.MasterStateM do
   are called from the test script `ping_pong_test.exs`.
   """
 
-  use PropCheck
+  use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM
   use ExUnit.Case
+  import PropCheck.TestHelpers, except: [config: 0]
   alias PropCheck.Test.PingPongMaster
   @moduletag capture_log: true
 
-  property "master works fine", [:verbose, max_size: 100] do
+  property "master works fine", [max_size: 100] do
     forall cmds <- more_commands(100, commands(__MODULE__)) do
       trap_exit do
         kill_all_player_processes()
@@ -26,8 +27,8 @@ defmodule PropCheck.Test.MasterStateM do
             State: #{inspect state, pretty: true}
             Result: #{inspect result, pretty: true}
             """)
-        |> aggregate(command_names cmds)
-        |> collect(length cmds)
+        # |> aggregate(command_names cmds)
+        # |> collect(length cmds)
       end
     end
   end

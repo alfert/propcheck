@@ -1,6 +1,6 @@
 defmodule PropertiesDefaultOptsFunctionTest do
   alias PropCheck.Test
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use PropCheck, default_opts: &DefaultOpts.config/0
 
   property "default_opts function returns options", [max_size: 1] do

@@ -1,5 +1,5 @@
 defmodule PropertiesTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use PropCheck, default_opts: [numtests: 1]
 
   setup do
