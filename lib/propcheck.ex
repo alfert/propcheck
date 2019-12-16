@@ -718,22 +718,29 @@ defmodule PropCheck do
     This produces a specialization of a generator, encoded as
     a binding of form `x <- type` (as in the let macro).
 
-    The specialization of members of `type` that satisfy the
-    constraint `condition` - that is,
-    those members for which the function `fn(x) -> condition end` returns
-    `true`. If the constraint is very strict - that is, only a small
-    percentage of instances of `type` pass the test - it will take a lot of
-    tries for the instance generation subsystem to randomly produce a valid
-    instance. This will result in slower testing, and testing may even be
-    stopped short, in case the `:constraint_tries` limit is reached (see the
-    "Options" section).
+    The specialization of members of `type` that satisfy the constraint
+    `condition` - that is, those members for which the function
+    `fn(x) -> condition end` returns `true`.
+    If the constraint is very strict - that is, only a small percentage of
+    instances of `type` pass the test - it will take a lot of tries for the
+    instance generation subsystem to randomly produce a valid instance. This
+    will result in slower testing, and testing may even be stopped short, in
+    case the `:constraint_tries` limit is reached (see the "Options" section).
 
-    If this is the case, it would be more appropriate to generate valid instances
-    of the specialized type using the `let` macro. Also make sure that even
-    small instances can satisfy the constraint, since PropEr will only try
-    small instances at the start of testing. If this is not possible, you can
-    instruct PropEr to start at a larger size, by supplying a suitable value
+    It probably will be more appropriate to generate valid instances of the
+    specialized type using the `let` macro.
+    Also make sure that even small instances can satisfy the constraint, since
+    PropEr will **only** increase the size of generated instances when it can
+    find an instance passing the constraint test. If this is not possible, you
+    can instruct PropEr to start at a larger size, by supplying a suitable value
     for the `:start_size` option (see the "Options" section).
+
+    In the second example below, `:start_size` set to 2 is required, because
+    otherwise PropCheck would first try to generate lists of size 1 (or less),
+    but such a list will never satisfy the _length_ constraint, and after
+    `:constraint_tries` limit has been reached, PropCheck would give up.
+
+    ## Examples
 
         iex> use PropCheck
         iex> even = such_that n <- nat(), when: rem(n, 2) == 0
@@ -743,6 +750,13 @@ defmodule PropCheck do
         ...>   end)
         true
 
+        iex> use PropCheck
+        iex> twofer_list = such_that l <- list(nat()), when: length(l) > 1
+        iex> quickcheck(
+        ...>   forall [_ | t] <- twofer_list do
+        ...>     Enum.any?(t)
+        ...>   end, [start_size: 2])
+        true
     """
     defmacro such_that(binding, condition)
     defmacro such_that({:<-, _, [var, rawtype]}, condition)  do
