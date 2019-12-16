@@ -392,4 +392,23 @@ defmodule PropCheck.StateM do
   """
   defdelegate zip(l1, l2), to: :proper_statem
 
+  @doc """
+  Print pretty report of the failed command run.
+
+  Accepts options:
+  * `return_values` - whether to print return values after each command run
+    (default `true`),
+  * `last_state` - whether section with the last state should be present
+    (default `true`),
+  * `pre_cmd_state` - whether to print state prior to executed command
+    (default `false`),
+  * `post_cmd_state` - whether to print state post executed command
+    (default `true`),
+  * `cmd_args` - whether to print command arguments as literals
+    (default `true`),
+  * `inspect_opts` - options passed to `inspect/2`
+
+  """
+  defdelegate print_report(run_result, cmds, opts \\ []),
+    to: PropCheck.StateM.Reporter
 end
