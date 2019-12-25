@@ -4,6 +4,15 @@ defmodule PropCheck.Tracer do
   the QuickChecks Pulse ideas.
   """
 
+  defmodule TraceDecorator do
+    @moduledoc """
+    Defines the decorator callback.
+    """
+    use Decorator.Define, [trace: 0]
+
+    def trace(body, context), do: PropCheck.Tracer.Instrument.instrument(body, context)
+  end
+
   defmodule Instrument do
     @moduledoc """
     This module provides the replacements for message handling and process spawning,
@@ -20,34 +29,12 @@ defmodule PropCheck.Tracer do
 
     defmacro __using__(_opts) do
       quote do
-        import Kernel, except: [send: 2, spawn: 1] # , def: 2 ]
+        import Kernel, except: [send: 2, spawn: 1]
+        use PropCheck.Tracer.TraceDecorator
         defdelegate send(m, d), to: PropCheck.Tracer.Instrument
         defdelegate spawn(f), to: PropCheck.Tracer.Instrument
-        defmacro def(call, expr) do
-          IO.outs "Defining #{inspect call}"
-          instr_expr = PropCheck.Tracer.Instrument.instrument(expr)
-          quote do
-            Kernel.def(call, instr_expr)
-          end
-        end
-        # @before_compile unquote(__MODULE__)
+        @decorate_all trace()
       end
-    end
-
-    def __before_compile__(env) do
-      IO.puts "before compile for #{inspect env}"
-      #IO.puts "We are in module #{inspect env.module}"
-    end
-
-    def instrument(expr) do
-      instr_expr = Macro.prewalk(expr, fn
-        {:receive, _info, [patterns]} -> # identify do: patterns Und after: clause, diese müssen bei
-          # gen_receive als Argument übernommen werden.
-          IO.puts "instrument receive"
-          gen_receive(patterns)
-        any -> any
-      end)
-      instr_expr
     end
 
     @doc """
@@ -84,6 +71,26 @@ defmodule PropCheck.Tracer do
       pid
     end
 
+    @doc """
+    Instruments the body of a function to handle the `receive do ... end` expression
+    for Tracer
+    """
+    def instrument(expr, context) do
+      IO.puts "instrument function #{context.name}"
+      instr_expr = Macro.postwalk(expr, fn
+        {:receive, _info, [patterns]} -> # identify do: patterns Und after: clause, diese müssen bei
+          # gen_receive als Argument übernommen werden.
+          IO.puts "instrument receive with pattern #{Macro.to_string patterns}"
+          IO.puts "instrument receive with pattern #{inspect patterns}"
+          IO.puts "Body expression is: #{Macro.to_string expr}"
+          gen_receive(patterns)
+        any -> any
+      end)
+      IO.puts "New body is: #{Macro.to_string(instr_expr)}"
+      IO.puts "New body is: #{inspect instr_expr, pretty: true}"
+      instr_expr
+    end
+
     # Helper function for waiting till the scheduler sends a `:go` message
     def receiving(receiver_fun) do
       sched = scheduler()
@@ -96,18 +103,14 @@ defmodule PropCheck.Tracer do
     end
 
     def gen_receive(receive_patterns) do
+      call_fail = quote do failed.() end
+      after_ast = {:after, [{:->, [], [[0], call_fail] }] }
+      receive_expr = {:receive, [], [receive_patterns ++ [after_ast]]}
       quote do
         PropCheck.Tracer.Instrument.receiving(fn failed ->
-          receive do
-            :patterns
-          after 0 -> failed.()
-          end
+          unquote(receive_expr)
         end)
       end
-      |> Macro.prewalk(fn
-        [:patterns] -> receive_patterns
-        any -> any
-      end)
     end
 
   end
@@ -129,6 +132,7 @@ defmodule PropCheck.Tracer do
     end
     def handle_info({:block, pid}, state) do
       IO.puts "Scheduler blocks #{inspect pid}"
+      IO.puts "Scheduler sends :go"
       Kernel.send(pid, {__MODULE__, :go})
       {:noreply, state}
     end
