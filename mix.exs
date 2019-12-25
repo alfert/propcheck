@@ -71,6 +71,7 @@ defmodule PropCheck.Mixfile do
   defp deps do
     [
       {:proper, "~> 1.3"},
+      {:decorator, "~> 1.3"},
       {:coverex, "~> 1.4", only: :test},
       {:poison, "~> 3.0", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
