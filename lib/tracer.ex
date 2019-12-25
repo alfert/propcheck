@@ -20,7 +20,7 @@ defmodule PropCheck.Tracer do
 
     defmacro __using__(_opts) do
       quote do
-        import Kernel, except: [send: 2, spawn: 1, def: 2 ]
+        import Kernel, except: [send: 2, spawn: 1] # , def: 2 ]
         defdelegate send(m, d), to: PropCheck.Tracer.Instrument
         defdelegate spawn(f), to: PropCheck.Tracer.Instrument
         defmacro def(call, expr) do
@@ -30,7 +30,7 @@ defmodule PropCheck.Tracer do
             Kernel.def(call, instr_expr)
           end
         end
-        @before_compile unquote(__MODULE__)
+        # @before_compile unquote(__MODULE__)
       end
     end
 
