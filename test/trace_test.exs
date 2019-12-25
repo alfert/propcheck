@@ -20,16 +20,15 @@ defmodule PropCheck.TracingTest do
     def get_hello do
       receive do
         :hello -> IO.puts "Received hello"
-          :hello
+          :get_hello
       end
-
     end
   end
 
-  test "" do
+  test "Receive the hello sequence" do
     GenServer.start_link(PropCheck.Tracer.Scheduler, :nothing, name: PropCheck.Tracer.Scheduler)
     TracedModule.put_hello()
-    assert :hello == TracedModule.get_hello()
+    assert :get_hello == TracedModule.get_hello()
   end
 
 end
