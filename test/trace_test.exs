@@ -47,8 +47,9 @@ defmodule PropCheck.TracingTest do
 
   property "head of queue and list are the same" do
     forall {s, d, l, m} <- mapped_queue() do
-      {_m1, {_k, msg}} = Scheduler.get_msg(m, {s, d})
+      {m1, {_k, msg}} = Scheduler.get_msg(m, {s, d})
       assert msg == hd(l)
+      assert Map.has_key?(m1, {s, d}) == (length(l) > 1)
     end
   end
 
