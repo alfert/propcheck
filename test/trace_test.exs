@@ -6,6 +6,7 @@ defmodule PropCheck.TracingTest do
 
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   import PropCheck.TestHelpers, except: [config: 0]
+  alias PropCheck.Tracer.Scheduler
 
   defmodule TracedModule do
     use PropCheck.Tracer.Instrument
@@ -26,9 +27,29 @@ defmodule PropCheck.TracingTest do
   end
 
   test "Receive the hello sequence" do
-    GenServer.start_link(PropCheck.Tracer.Scheduler, :nothing, name: PropCheck.Tracer.Scheduler)
+    Scheduler.start_link()
     TracedModule.put_hello()
     assert :get_hello == TracedModule.get_hello()
+  end
+
+  def mapped_queue do
+    let l <- non_empty(list(nat())) do
+      map = Enum.reduce(l, %{}, fn e, m -> Scheduler.add_msg(m, :source, :dest, e) end)
+      {:source, :dest, l, map}
+    end
+  end
+
+  property "same amounf of entries in the queue and list" do
+    forall {s, d, l, m} <- mapped_queue() do
+      assert l == (Map.get(m, {s, d}, :queue.new) |> :queue.to_list )
+    end
+  end
+
+  property "head of queue and list are the same" do
+    forall {s, d, l, m} <- mapped_queue() do
+      {_m1, {_k, msg}} = Scheduler.get_msg(m, {s, d})
+      assert msg == hd(l)
+    end
   end
 
 end

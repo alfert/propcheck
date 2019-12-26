@@ -84,7 +84,7 @@ defmodule PropCheck.Tracer do
           IO.puts "instrument receive with pattern #{inspect patterns}"
           IO.puts "Body expression is: #{Macro.to_string expr}"
           gen_receive(patterns)
-        {:receive, _info, [patterns, after_pattern]}
+        {:receive, _info, [patterns, after_pattern]} ->
           IO.puts "instrument a receive with an after pattern - this is ignored!"
           gen_receive(patterns)
         any -> any
@@ -124,9 +124,48 @@ defmodule PropCheck.Tracer do
     """
     use GenServer
 
-    def init(init_arg) do
-      {:ok, init_arg}
+    @type key :: {pid, pid}
+    @type msg_q :: :queue.queue(any)
+    @type t :: %{required(key) => msg_q}
+    @doc """
+    Starts the Scheduler gen server.
+    """
+    def start_link do
+      GenServer.start_link(__MODULE__, :nothing, name: PropCheck.Tracer.Scheduler)
     end
+
+    def init(init_arg) do
+      {:ok, %{}}
+    end
+
+    def add_msg(map, source, dest, msg) do
+      Map.update(map, {source, dest}, :queue.from_list([msg]), fn q -> :queue.in(msg, q) end)
+    end
+
+    @doc """
+    Returns the next message in the queue for the given sender/receiver pair.
+    If it is the last message, then queue is removed from the map.
+    """
+    @spec get_msg(t, key) :: {t, {key, any}}
+    def get_msg(map, key) do
+      {msg, m} = Map.get_and_update!(map, key, fn q ->
+        case :queue.out(q) do
+          {{:value, msg}, q2} ->
+            if :queue.is_empty(q2) do
+              :pop
+            else
+              {msg, q2}
+            end
+        end
+      end)
+      if :queue.is_queue(msg) do
+        {m, {key, :queue.head(msg)}}
+      else
+        {m, {key, msg}}
+      end
+    end
+
+
 
     def handle_info(m = {:send, _source, dest, msg}, state) do
       IO.puts "Scheduler sends: #{inspect m}"
