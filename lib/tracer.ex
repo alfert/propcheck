@@ -84,6 +84,9 @@ defmodule PropCheck.Tracer do
           IO.puts "instrument receive with pattern #{inspect patterns}"
           IO.puts "Body expression is: #{Macro.to_string expr}"
           gen_receive(patterns)
+        {:receive, _info, [patterns, after_pattern]}
+          IO.puts "instrument a receive with an after pattern - this is ignored!"
+          gen_receive(patterns)
         any -> any
       end)
       IO.puts "New body is: #{Macro.to_string(instr_expr)}"
