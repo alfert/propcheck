@@ -6,7 +6,7 @@ defmodule PropCheck.Test.MoviesDSL do
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.DSL
   use ExUnit.Case
-  import PropCheck.TestHelpers, except: [config: 0]
+  # import PropCheck.TestHelpers, except: [config: 0]
   require Logger
 
   alias PropCheck.Test.MovieServer
@@ -21,7 +21,7 @@ defmodule PropCheck.Test.MoviesDSL do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = MovieServer.start_link()
-        events = run_commands(cmds)
+        events = run_commands(__MODULE__, cmds)
         MovieServer.stop
 
         (events.result == :ok)
@@ -42,7 +42,7 @@ defmodule PropCheck.Test.MoviesDSL do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = MovieServer.start_link(will_fail: true)
-        events = run_commands(cmds)
+        events = run_commands(__MODULE__, cmds)
         MovieServer.stop
 
         (events.result == :ok)

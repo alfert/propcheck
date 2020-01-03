@@ -17,7 +17,7 @@ defmodule PropCheck.Test.PingPongDSL do
       trap_exit do
         assert [] == player_processes()
         PingPongMaster.start_link()
-        events = run_commands(cmds)
+        events = run_commands(__MODULE__, cmds)
         :ok = PingPongMaster.stop()
 
         (events.result == :ok)
