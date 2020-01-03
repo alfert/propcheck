@@ -68,7 +68,7 @@ defmodule PropCheck.Test.MovieServer do
     Enum.random([:bon_appetit, :bon_appetit, :bon_appetit,
       :bon_appetit, :bon_appetit, :bon_appetit,
       :bon_appetit, :bon_appetit, :bon_appetit,
-      :fuck_off])
+      :popcorn_is_out])
 
   def handle_call(:popcorn, _from, s),
     do: {:reply, popcorn_answer(s), s}
