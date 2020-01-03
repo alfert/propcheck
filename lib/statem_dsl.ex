@@ -427,10 +427,16 @@ defmodule PropCheck.StateM.DSL do
     end
   end
 
+  @deprecated "Use run_commands/2 instead!"
   @doc """
   Runs the list of generated commands according to the model.
 
   Returns the result, the history and the final state of the model.
+
+  Due to an internal refactoring and to achieve a common API with the `PropCheck.StateM`
+  module, we changed the API for `run_commands`. This implementation infers the
+  callback module from the first generated command. Usually, this will be the case,
+  but we cannot rely on that.
   """
   @spec run_commands([command]) :: t
   def run_commands(commands) when length(commands) > 0 do
