@@ -17,7 +17,7 @@ defmodule PropCheck.Test.Cache.DSL do
     forall cmds <- commands(__MODULE__) do
       # Logger.debug "Commands to run: #{inspect cmds}"
       Cache.start_link(@cache_size)
-      events = run_commands(cmds)
+      events = run_commands(__MODULE__, cmds)
       Cache.stop()
       # Logger.debug "Events are: #{inspect events}"
 
@@ -44,7 +44,7 @@ defmodule PropCheck.Test.Cache.DSL do
       # Cache size is half as big expected, so we will find some cache misses,
       # where the model expects that the value is properly cached.
       Cache.start_link(div(@cache_size, 2))
-      events = run_commands(cmds)
+      events = run_commands(__MODULE__, cmds)
       Cache.stop()
       # Logger.debug "Events are: #{inspect events}"
 
@@ -88,7 +88,7 @@ defmodule PropCheck.Test.Cache.DSL do
     assert is_list(cmds)
 
     first = hd(cmds)
-    assert {%__MODULE__{}, {:set, {:var, 1}, {:call, __MODULE__, _, _}}} = first
+    assert {:set, {:var, 1}, {:call, __MODULE__, _, _}} = first
   end
 
   ###########################

@@ -31,7 +31,7 @@ defmodule PropCheck.Test.CounterDSL do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = Counter.start_link()
-        events = run_commands(cmds)
+        events = run_commands(__MODULE__, cmds)
         Counter.stop()
 
         (events.result == :ok)
@@ -55,7 +55,7 @@ defmodule PropCheck.Test.CounterDSL do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = Counter.start_link(5)
-        events = run_commands(cmds)
+        events = run_commands(__MODULE__, cmds)
         Counter.stop()
 
         (events.result == :ok)
