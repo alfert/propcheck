@@ -36,6 +36,27 @@ defmodule PropCheck.Test.MoviesDSL do
       end
     end
   end
+
+  @tag will_fail: true
+  property "server has illegal states" do
+    forall cmds <- commands(__MODULE__) do
+      trap_exit do
+        {:ok, _pid} = MovieServer.start_link(will_fail: true)
+        events = run_commands(cmds)
+        MovieServer.stop
+
+        (events.result == :ok)
+        |> when_fail(
+            IO.puts """
+            History: #{inspect events.history, pretty: true}
+            State: #{inspect events.state, pretty: true}
+            Env: #{inspect events.env, pretty: true}
+            Result: #{inspect events.result, pretty: true}
+            """)
+        # |> aggregate(command_names cmds)
+      end
+    end
+  end
   #########################################################################
   ### Model state
   #########################################################################
