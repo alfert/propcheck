@@ -88,7 +88,7 @@ defmodule PropCheck.Test.Cache.DSL do
     assert is_list(cmds)
 
     first = hd(cmds)
-    assert {%__MODULE__{}, {:set, {:var, 1}, {:call, __MODULE__, _, _}}} = first
+    assert {:set, {:var, 1}, {:call, __MODULE__, _, _}} = first
   end
 
   ###########################
