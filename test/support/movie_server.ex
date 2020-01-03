@@ -12,10 +12,14 @@ defmodule PropCheck.Test.MovieServer do
 
   defstruct users: nil,
     movies: nil,
-    next_pass: 0
+    next_pass: 0,
+    popcorn_failure: false
 
-  def start_link, do:
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  def start_link, do: start_link(will_fail: false)
+  def start_link(args = [will_fail: true]), do:
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
+  def start_link(args = [will_fail: false]), do:
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
 
   def stop do
     ref = Process.monitor(__MODULE__)
@@ -46,11 +50,11 @@ defmodule PropCheck.Test.MovieServer do
 
   ##########################################################
 
-  def init([]) do
+  def init([will_fail: will_fail]) when is_boolean(will_fail) do
     tid = :ets.new(:movies, [])
     :ets.insert(tid, @movies)
     {:ok, %__MODULE__{users: :ets.new(:users, []),
-      movies: tid, next_pass: 1}}
+      movies: tid, next_pass: 1, popcorn_failure: will_fail}}
   end
 
   def terminate(_reason, %__MODULE__{movies: m, users: u}) do
@@ -59,11 +63,15 @@ defmodule PropCheck.Test.MovieServer do
     :ok
   end
 
+  defp popcorn_answer(%__MODULE__{popcorn_failure: false}), do: :bon_appetit
+  defp popcorn_answer(%__MODULE__{popcorn_failure: true}), do:
+    Enum.random([:bon_appetit, :bon_appetit, :bon_appetit,
+      :bon_appetit, :bon_appetit, :bon_appetit,
+      :bon_appetit, :bon_appetit, :bon_appetit,
+      :fuck_off])
+
   def handle_call(:popcorn, _from, s),
-    do: {:reply, Enum.random([:bon_appetit, :bon_appetit, :bon_appetit,
-                              :bon_appetit, :bon_appetit, :bon_appetit,
-                              :bon_appetit, :bon_appetit, :bon_appetit,
-                              :fuck_off]), s}
+    do: {:reply, popcorn_answer(s), s}
   def handle_call(:stop, _from, s), do: {:stop, :normal, :stopped, s}
   def handle_call({:new_account, name}, _from, s = %__MODULE__{next_pass: p, users: u}) do
     :ets.insert(u, {p, name, []})
