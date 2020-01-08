@@ -19,7 +19,8 @@ defmodule PropCheck.Mixfile do
      propcheck: [counter_examples: "_build/propcheck.ctx"],
      aliases: aliases(),
      preferred_cli_env: [tests: :test, test_ext: :test],
-     deps: deps()]
+     deps: deps(),
+     dialyzer: dialyzer()]
   end
 
   # Hex Package description
@@ -69,12 +70,28 @@ defmodule PropCheck.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:dialyxir, "~> 0.5.1", only: [:dev, :test]},
-      {:coverex, "~> 1.4.15", only: :test},
-      {:ex_doc, "~>0.16", only: :dev},
-      {:earmark, ">= 0.2.1", only: :dev},
       {:proper, "~> 1.3"},
-      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
+      {:coverex, "~> 1.4", only: :test},
+      {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.7", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.21", only: :dev}
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_add_deps: :apps_direct,
+      plt_add_apps: ~w(
+        ex_unit
+        iex
+        mix
+      )a,
+      flags: ~w(
+        error_handling
+        race_conditions
+        unmatched_returns
+        underspecs
+      )a
     ]
   end
 
