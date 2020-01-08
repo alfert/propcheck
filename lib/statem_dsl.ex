@@ -172,6 +172,7 @@ defmodule PropCheck.StateM.DSL do
   """
 
   use PropCheck
+  alias PropCheck.BasicTypes
   require Logger
 
   @typedoc """
