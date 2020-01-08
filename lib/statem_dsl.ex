@@ -491,7 +491,7 @@ defmodule PropCheck.StateM.DSL do
         end
       rescue exc ->
         stacktrace = Exception.format_stacktrace(System.stacktrace())
-        Logger.error("Got exception: #{inspect(exc)}\nstacktrace: #{stacktrace}")
+        _ = Logger.error("Got exception: #{inspect(exc)}\nstacktrace: #{stacktrace}")
         {:exception, {exc, stacktrace}}
       catch
         value -> {:exception, value}
@@ -530,7 +530,7 @@ defmodule PropCheck.StateM.DSL do
   defp replace_symb_vars(v = {:var, n}, env) when is_integer(n) do
     case Map.get(env, v) do
       nil ->
-        Logger.error "replace_symb_vars: unknown #{inspect v} in #{inspect env}"
+        _ = Logger.error "replace_symb_vars: unknown #{inspect v} in #{inspect env}"
         v
       value -> value
     end

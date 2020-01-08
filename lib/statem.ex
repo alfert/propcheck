@@ -291,7 +291,7 @@ defmodule PropCheck.StateM do
     require PropCheck.BasicTypes
     require Logger
 
-    Logger.debug(fn -> "cmd_type = #{inspect cmd_type}" end)
+    _ = Logger.debug(fn -> "cmd_type = #{inspect cmd_type}" end)
     PropCheck.sized(size, PropCheck.BasicTypes.resize(size * n, cmd_type))
   end
 

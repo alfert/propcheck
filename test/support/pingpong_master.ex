@@ -57,10 +57,11 @@ defmodule PropCheck.Test.PingPongMaster do
     #Logger.debug "Player #{inspect name} is waiting round #{counter}"
     receive do
       :ping_pong        -> # Logger.debug "Player #{inspect name} got a request for a ping-pong game"
-          ping(name)
-      {:tennis, from}   -> send(from, :maybe_later)
-      {:football, from} -> send(from, :no_way)
-      msg -> Logger.error "Player #{inspect name} got invalid message #{inspect msg}"
+        ping(name)
+        {:tennis, from}   -> send(from, :maybe_later)
+        {:football, from} -> send(from, :no_way)
+      msg ->
+        _ = Logger.error "Player #{inspect name} got invalid message #{inspect msg}"
         exit(:kill)
     end
     # Logger.debug "Player #{inspect name} is recursive"
@@ -136,14 +137,17 @@ defmodule PropCheck.Test.PingPongMaster do
           true = Process.register(pid, name)
           {:reply, :ok, scores |> Map.put(name, 0)}
       {:ok, _} ->
-          Logger.debug(fn -> "add_player: player #{name} already exists!" end)
+          _ = Logger.debug(fn -> "add_player: player #{name} already exists!" end)
           {:reply, :ok, scores}
     end
   end
   def handle_call({:remove_player, name}, _from, scores) do
     case Process.whereis(name) do
-      nil -> Logger.debug(fn -> "Process #{name} is unknown / not running" end)
-      pid -> kill_process(pid)
+      nil ->
+        _ = Logger.debug(fn -> "Process #{name} is unknown / not running" end)
+        :ok
+      pid ->
+        kill_process(pid)
     end
     # Process.whereis(name) |> Process.exit(:kill)
     {:reply, {:removed, name}, scores |> Map.delete(name)}
