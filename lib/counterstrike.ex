@@ -80,7 +80,7 @@ defmodule PropCheck.CounterStrike do
   # Loads the counter examples from DETS file and stores them
   # into the map. Afterwards the DETS is emptied to prepare for
   # storing new counter examples.
-  @spec load_existing_counter_examples(%{mfa => any}, :dets.tid) :: %{mfa => any}
+  @spec load_existing_counter_examples(%{mfa => any}, :dets.tab_name()) :: %{mfa => any}
   defp load_existing_counter_examples(ce, dets) do
     # Logger.debug "Loading existing examples from #{inspect dets}"
     new_ce = :dets.foldl(fn {mfa, example}, ces ->
