@@ -345,6 +345,7 @@ defmodule PropCheck do
     @type sample :: [any]
     @type title :: charlist | atom | String.t
     @type stats_printer :: ((sample) -> :ok) | ((sample, output_fun) -> :ok)
+    @type type :: :proper_types.type()
 
     @doc """
     A property that should hold for all values generated.
