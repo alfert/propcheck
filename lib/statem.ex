@@ -167,11 +167,11 @@ defmodule PropCheck.StateM do
     end
   end
 
-  @type symb_var :: :proper_statem.symb_var
+  @type symb_var :: :proper_statem.symbolic_var()
   @type symbolic_state :: any
   @type dynamic_state :: any
-  @type symb_call :: :proper_statem.symb_call
-  @type command :: :proper_statem.command
+  @type symb_call :: :proper_statem.symbolic_call()
+  @type command :: {:set, symb_var, symb_call} | {:init, symbolic_state}
   @type parallel_testcase :: {command_list, [command_list]}
   @type command_list :: [command]
   @type history :: [{command, term}]
