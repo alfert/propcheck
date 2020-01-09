@@ -174,9 +174,8 @@ defmodule PropCheck.Properties do
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
         result = PropCheck.check(p, counter_example, [:long_result] ++ proper_opts)
-        with true <- result do
-          qc(p, proper_opts)
-        else
+        case result do
+          true -> qc(p, proper_opts)
           false -> {:rerun_failed, counter_example}
           e = {:error, _} -> e
         end
