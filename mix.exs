@@ -72,6 +72,7 @@ defmodule PropCheck.Mixfile do
     [
       {:proper, "~> 1.3"},
       {:coverex, "~> 1.4", only: :test},
+      {:poison, "~> 3.0", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0.0-rc.7", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.21", only: :dev}
