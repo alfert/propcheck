@@ -1119,5 +1119,6 @@ defmodule PropCheck do
 
     # Helper functions
 
+    @spec syntax_error(String.t()) :: no_return()
     defp syntax_error(err), do: raise(ArgumentError, "Usage: " <> err)
 end
