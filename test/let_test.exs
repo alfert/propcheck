@@ -27,13 +27,14 @@ defmodule PropCheck.Test.LetAndShrinks do
   defmodule DSLShrinkTest do # shrinks properly
     use ExUnit.Case
     use PropCheck
-    use PropCheck.StateM.DSL
+    use PropCheck.StateM.ModelDSL
 
     def initial_state, do: %{}
 
+    def command_gen(_), do: {:equal, [integer(1, 1000)]}
+
     defcommand :equal do
       def impl(_number), do: :ok
-      def args(_state), do: [integer(1, 1000)]
       def post(_state, [arg], :ok), do: arg != 800
       def next(model, [_arg], _ret), do: model
     end
@@ -41,14 +42,14 @@ defmodule PropCheck.Test.LetAndShrinks do
     @tag will_fail: true
     property "a simple integer shrinks in SM DSL", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
-          events = run_commands(cmds)
-          (events.result == :ok)
+          r = run_commands(__MODULE__, cmds)
+          {history, state, result} = r
+          (result == :ok)
           |> when_fail(
               IO.puts """
-              History: #{inspect events.history, pretty: true}
-              State: #{inspect events.state, pretty: true}
-              Env: #{inspect events.env, pretty: true}
-              Result: #{inspect events.result, pretty: true}
+              History: #{inspect history, pretty: true}
+              State: #{inspect state, pretty: true}
+              Result: #{inspect result, pretty: true}
               """)
           # |> aggregate(command_names cmds)
       end
@@ -59,18 +60,20 @@ defmodule PropCheck.Test.LetAndShrinks do
   defmodule DSLLetTest do # shrinks properly
     use ExUnit.Case
     use PropCheck
-    use PropCheck.StateM.DSL
+    use PropCheck.StateM.ModelDSL
 
     def initial_state, do: %{}
 
+    def command_gen(_) do
+      arg_generator = let num <- integer(1, 1000) do
+        num
+      end
+
+      {:equal, [arg_generator]}
+    end
+
     defcommand :equal do
       def impl(_number), do: :ok
-      def args(_state) do
-        arg_generator = let num <- integer(1, 1000) do
-          num
-        end
-        [arg_generator]
-      end
       def post(_state, [arg], :ok), do: arg != 800
       def next(model, [_arg], _ret), do: model
     end
@@ -78,15 +81,15 @@ defmodule PropCheck.Test.LetAndShrinks do
     @tag will_fail: true
     property "a simple let will shrink in SM DSL", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
-          events = run_commands(cmds)
-          (events.result == :ok)
-          |> when_fail(
-              IO.puts """
-              History: #{inspect events.history, pretty: true}
-              State: #{inspect events.state, pretty: true}
-              Env: #{inspect events.env, pretty: true}
-              Result: #{inspect events.result, pretty: true}
-              """)
+        r = run_commands(__MODULE__, cmds)
+        {history, state, result} = r
+        (result == :ok)
+        |> when_fail(
+          IO.puts """
+          History: #{inspect history, pretty: true}
+          State: #{inspect state, pretty: true}
+          Result: #{inspect result, pretty: true}
+          """)
           # |> aggregate(command_names cmds)
       end
     end
@@ -135,9 +138,17 @@ defmodule PropCheck.Test.LetAndShrinks do
   defmodule DSLLetShrinkTest do # does shrink properly
     use ExUnit.Case
     use PropCheck
-    use PropCheck.StateM.DSL
+    use PropCheck.StateM.ModelDSL
 
     def initial_state, do: %{}
+
+    def command_gen(_) do
+      arg_generator = let [num <- integer(1, 1000)] do
+        [num]
+      end
+
+      {:equal, arg_generator}
+    end
 
     defcommand :equal do
       def impl(_number), do: :ok
@@ -154,16 +165,16 @@ defmodule PropCheck.Test.LetAndShrinks do
     @tag will_fail: true
     property "a let with a list shrinks in SM DSL", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
-          events = run_commands(cmds)
-          (events.result == :ok)
-          |> when_fail(
-              IO.puts """
-              History: #{inspect events.history, pretty: true}
-              State: #{inspect events.state, pretty: true}
-              Env: #{inspect events.env, pretty: true}
-              Result: #{inspect events.result, pretty: true}
-              """)
-          # |> aggregate(command_names cmds)
+        r = run_commands(__MODULE__, cmds)
+        {history, state, result} = r
+        (result == :ok)
+        |> when_fail(
+          IO.puts """
+          History: #{inspect history, pretty: true}
+          State: #{inspect state, pretty: true}
+          Result: #{inspect result, pretty: true}
+          """)
+        # |> aggregate(command_names cmds)
       end
     end
 

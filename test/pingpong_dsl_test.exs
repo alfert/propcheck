@@ -6,7 +6,7 @@ defmodule PropCheck.Test.PingPongDSL do
 
   use ExUnit.Case
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  use PropCheck.StateM.DSL
+  use PropCheck.StateM.ModelDSL
   import PropCheck.TestHelpers, except: [config: 0]
   alias PropCheck.Test.PingPongMaster
   require Logger
@@ -17,14 +17,15 @@ defmodule PropCheck.Test.PingPongDSL do
       trap_exit do
         assert [] == player_processes()
         PingPongMaster.start_link()
-        events = run_commands(__MODULE__, cmds)
+        r = run_commands(__MODULE__, cmds)
+        {history, state, result} = r
         :ok = PingPongMaster.stop()
 
-        (events.result == :ok)
+        (result == :ok)
         |> when_fail(IO.puts """
-        History: #{inspect events.history, pretty: true}
-        State: #{inspect events.state, pretty: true}
-        Result: #{inspect events.result, pretty: true}
+        History: #{inspect history, pretty: true}
+        State: #{inspect state, pretty: true}
+        Result: #{inspect result, pretty: true}
         """)
         # |> aggregate(command_names cmds)
       end
@@ -50,12 +51,17 @@ defmodule PropCheck.Test.PingPongDSL do
   @doc "initial model state of the state machine"
   def initial_state, do: %__MODULE__{}
 
-  def weight(%__MODULE__{players: []}), do: %{add_player: 1}
-  def weight(_), do:
-    %{
-      add_player: 1, remove_player: 1, get_score: 1,
-      play_ping_pong: 1, play_tennis: 1, play_football: 1
-    }
+    def command_gen(%__MODULE__{players: []}), do: {:add_player, [any_name()]}
+    def command_gen(state) do
+      oneof([
+        {:add_player, [any_name()]},
+        {:remove_player, [known_name(state)]},
+        {:get_score, [known_name(state)]},
+        {:play_ping_pong, [known_name(state)]},
+        {:play_tennis, [known_name(state)]},
+        {:play_football, [known_name(state)]},
+      ])
+    end
 
   #####################################################
   ##
@@ -72,7 +78,6 @@ defmodule PropCheck.Test.PingPongDSL do
 
   defcommand :add_player do
     def impl(name), do: PingPongMaster.add_player(name)
-    def args(_state), do: fixed_list([any_name()])
     def post(_state, [_name], result), do: result == :ok
     def next(state = %__MODULE__{players: ps, scores: scores}, [name], _result) do
       if Enum.member?(ps, name) do
@@ -88,7 +93,6 @@ defmodule PropCheck.Test.PingPongDSL do
 
   defcommand :remove_player do
     def impl(name), do: PingPongMaster.remove_player(name)
-    def args(state), do: fixed_list([known_name(state)])
     def post(_state, [name], {:removed, n}), do: n == name
     def next(state = %__MODULE__{players: ps, scores: scores}, [name], _res) do
       state
@@ -100,7 +104,6 @@ defmodule PropCheck.Test.PingPongDSL do
 
   defcommand :play_ping_pong do
     def impl(name), do: PingPongMaster.play_ping_pong(name)
-    def args(state), do: fixed_list([known_name(state)])
     def pre(%__MODULE__{players: ps}, [name]), do: Enum.member?(ps, name)
     def post(_state, [_name], result), do: result == :ok
     def next(state =  %__MODULE__{scores: scores}, [name], _res) do
@@ -115,21 +118,18 @@ defmodule PropCheck.Test.PingPongDSL do
 
   defcommand :play_tennis do
     def impl(name), do: PingPongMaster.play_tennis(name)
-    def args(state), do: fixed_list([known_name(state)])
     def pre(%__MODULE__{players: ps}, [name]), do: Enum.member?(ps, name)
     def post(_state, [_name], result), do: result == :maybe_later
   end
 
   defcommand :play_football do
     def impl(name), do: PingPongMaster.play_football(name)
-    def args(state), do: fixed_list([known_name(state)])
     def pre(%__MODULE__{players: ps}, [name]), do: Enum.member?(ps, name)
     def post(_state, [_name], result), do: result == :no_way
   end
 
   defcommand :get_score do
     def impl(name), do: PingPongMaster.get_score(name)
-    def args(state), do: fixed_list([known_name(state)])
     def pre(%__MODULE__{players: ps}, [name]), do: Enum.member?(ps, name)
     def post(%__MODULE__{scores: scores}, [name], result) do
       # playing ping pong is asynchronous, therefore the counter in scores

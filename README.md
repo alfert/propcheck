@@ -30,9 +30,9 @@ when running `mix test`. You find relevant information here:
 * details about how to specify the property conditions are documented in
   `PropCheck`,
 * the basic data generators are found in `PropCheck.BasicTypes`,
-* for property testing of state-based systems take a loot at `PropCheck.StateM.DSL`
-  for the new DSL (since PropCheck 1.1.0-rc1), which is a layer on top of
-  `PropCheck.StateM`.
+* for property testing of state-based systems take a loot at
+  `PropCheck.StateM.ModelDSL` for the new DSL (since PropCheck 1.1.0-rc1), 
+  which is a layer on top of `PropCheck.StateM`.
 * The new targeted property based testing approach (TBPT) employing an automated
   search strategy towards more interesting test data is described in
   `PropCheck.TargetedPBT`.

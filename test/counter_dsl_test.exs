@@ -13,7 +13,7 @@ defmodule PropCheck.Test.CounterDSL do
   weights of the commands.
   """
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  use PropCheck.StateM.DSL
+  use PropCheck.StateM.ModelDSL
   use ExUnit.Case, async: true
   import PropCheck.TestHelpers, except: [config: 0]
   import ExUnit.CaptureIO
@@ -31,16 +31,16 @@ defmodule PropCheck.Test.CounterDSL do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = Counter.start_link()
-        events = run_commands(__MODULE__, cmds)
+        r = run_commands(__MODULE__, cmds)
+        {history, state, result} = r
         Counter.stop()
 
-        (events.result == :ok)
+        (result == :ok)
         |> when_fail(
             IO.puts """
-            History: #{inspect events.history, pretty: true}
-            State: #{inspect events.state, pretty: true}
-            Env: #{inspect events.env, pretty: true}
-            Result: #{inspect events.result, pretty: true}
+            History: #{inspect history, pretty: true}
+            State: #{inspect state, pretty: true}
+            Result: #{inspect result, pretty: true}
             """)
         # |> aggregate(command_names cmds)
         # |> measure("length of commands", length(cmds))
@@ -55,16 +55,16 @@ defmodule PropCheck.Test.CounterDSL do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = Counter.start_link(5)
-        events = run_commands(__MODULE__, cmds)
+        r = run_commands(__MODULE__, cmds)
+        {history, state, result} = r
         Counter.stop()
 
-        (events.result == :ok)
+        (result == :ok)
         |> when_fail(
             IO.puts """
-            History: #{inspect events.history, pretty: true}
-            State: #{inspect events.state, pretty: true}
-            Env: #{inspect events.env, pretty: true}
-            Result: #{inspect events.result, pretty: true}
+            History: #{inspect history, pretty: true}
+            State: #{inspect state, pretty: true}
+            Result: #{inspect result, pretty: true}
             """)
         # |> aggregate(command_names cmds)
         # |> measure("length of commands", length(cmds))
@@ -93,12 +93,18 @@ defmodule PropCheck.Test.CounterDSL do
 
   def initial_state, do: :init
 
-  def weight(:init), do: %{inc: 1, clear: 1}
-  def weight(_), do: %{get: 1, inc: 2, clear: 1}
+  def command_gen(:init), do: oneof([
+      {:inc, []},
+      {:clear, []}
+    ])
+  def command_gen(_), do: frequency([
+      {1, {:get, []}},
+      {2, {:inc, []}},
+      {1, {:clear, []}},
+    ])
 
   defcommand :inc do
     def impl, do: Counter.inc()
-    def args(_), do: []
     def next(:init, [], _res), do: :zero
     def next(:zero, [], _res), do: :one
     def next(:one, [], _res), do: :one
@@ -109,7 +115,6 @@ defmodule PropCheck.Test.CounterDSL do
 
   defcommand :get do
     def impl, do: Counter.get()
-    def args(_), do: []
     def post(_state, [], res), do: res >= 0
     def pre(:init, _, _), do: false
     def pre(_, _, _), do: true
@@ -117,9 +122,7 @@ defmodule PropCheck.Test.CounterDSL do
 
   defcommand :clear do
     def impl, do: Counter.clear()
-    def args(_), do: []
     def next(_state, [], _res), do: :zero
     def post(_state, [], res), do: res == :ok
   end
-
 end
