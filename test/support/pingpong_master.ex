@@ -15,7 +15,7 @@ defmodule PropCheck.Test.PingPongMaster do
   """
 
   use GenServer
-  require Logger
+  import PropCheck.Logging
 
   # -------------------------------------------------------------------
   # Master's API
@@ -38,9 +38,9 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   def ping(from_name) do
-    #Logger.debug "Ping Pong Game for #{inspect from_name}"
+    #log_debug "Ping Pong Game for #{inspect from_name}"
     r = GenServer.call(__MODULE__, {:ping, from_name})
-    #Logger.debug "Ping Pong result: #{inspect r}"
+    #log_debug "Ping Pong result: #{inspect r}"
     r
   end
 
@@ -54,17 +54,17 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Process loop for the ping pong player process"
   def ping_pong_player(name, counter \\ 1) do
-    #Logger.debug "Player #{inspect name} is waiting round #{counter}"
+    #log_debug "Player #{inspect name} is waiting round #{counter}"
     receive do
-      :ping_pong        -> # Logger.debug "Player #{inspect name} got a request for a ping-pong game"
+      :ping_pong        -> # log_debug "Player #{inspect name} got a request for a ping-pong game"
         ping(name)
         {:tennis, from}   -> send(from, :maybe_later)
         {:football, from} -> send(from, :no_way)
       msg ->
-        _ = Logger.error "Player #{inspect name} got invalid message #{inspect msg}"
+        log_error "Player #{inspect name} got invalid message #{inspect msg}"
         exit(:kill)
     end
-    # Logger.debug "Player #{inspect name} is recursive"
+    # log_debug "Player #{inspect name} is recursive"
     ping_pong_player(name, counter + 1)
   end
 
@@ -137,14 +137,14 @@ defmodule PropCheck.Test.PingPongMaster do
           true = Process.register(pid, name)
           {:reply, :ok, scores |> Map.put(name, 0)}
       {:ok, _} ->
-          _ = Logger.debug(fn -> "add_player: player #{name} already exists!" end)
+          log_debug(fn -> "add_player: player #{name} already exists!" end)
           {:reply, :ok, scores}
     end
   end
   def handle_call({:remove_player, name}, _from, scores) do
     case Process.whereis(name) do
       nil ->
-        _ = Logger.debug(fn -> "Process #{name} is unknown / not running" end)
+        log_debug(fn -> "Process #{name} is unknown / not running" end)
         :ok
       pid ->
         kill_process(pid)
@@ -153,7 +153,7 @@ defmodule PropCheck.Test.PingPongMaster do
     {:reply, {:removed, name}, scores |> Map.delete(name)}
   end
   def handle_call({:ping, from_name}, _from, scores) do
-    # Logger.debug "Master: Ping Pong Game for #{inspect from_name}"
+    # log_debug "Master: Ping Pong Game for #{inspect from_name}"
     if scores |> Map.has_key?(from_name) do
       {:reply, :pong, scores |> Map.update!(from_name, &(&1 + 1))}
     else
@@ -166,7 +166,7 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Terminates all clients"
   def terminate(_reason, scores) do
-    # Logger.info "Terminate Master with scores #{inspect scores}"
+    # log_info "Terminate Master with scores #{inspect scores}"
     scores
       |> Map.keys
       |> Enum.each(&kill_process(&1))

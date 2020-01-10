@@ -173,7 +173,7 @@ defmodule PropCheck.StateM.DSL do
 
   use PropCheck
   alias PropCheck.BasicTypes
-  require Logger
+  import PropCheck.Logging, only: [log_error: 1]
 
   @typedoc """
   The name of a command must be an atom.
@@ -491,7 +491,7 @@ defmodule PropCheck.StateM.DSL do
         end
       rescue exc ->
         stacktrace = Exception.format_stacktrace(System.stacktrace())
-        _ = Logger.error("Got exception: #{inspect(exc)}\nstacktrace: #{stacktrace}")
+        log_error "Got exception: #{inspect(exc)}\nstacktrace: #{stacktrace}"
         {:exception, {exc, stacktrace}}
       catch
         value -> {:exception, value}
@@ -530,7 +530,7 @@ defmodule PropCheck.StateM.DSL do
   defp replace_symb_vars(v = {:var, n}, env) when is_integer(n) do
     case Map.get(env, v) do
       nil ->
-        _ = Logger.error "replace_symb_vars: unknown #{inspect v} in #{inspect env}"
+        log_error "replace_symb_vars: unknown #{inspect v} in #{inspect env}"
         v
       value -> value
     end
