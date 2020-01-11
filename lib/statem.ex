@@ -174,6 +174,8 @@ defmodule PropCheck.StateM do
   @type command :: :proper_statem.command
   @type parallel_testcase :: {command_list, [command_list]}
   @type command_list :: [command]
+  @type history :: [{command, term}]
+  @type result :: :proper_statem.statem_result
 
   @doc """
   Specifies the symbolic initial state of the state machine.
@@ -409,6 +411,7 @@ defmodule PropCheck.StateM do
   * `inspect_opts` - options passed to `inspect/2`
 
   """
+  @spec print_report({history, dynamic_state, result}, command_list, keyword) :: :ok
   defdelegate print_report(run_result, cmds, opts \\ []),
     to: PropCheck.StateM.Reporter
 end
