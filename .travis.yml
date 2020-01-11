@@ -15,3 +15,4 @@ before_script:
 script:
   - PROPCHECK_DEBUG=1 PROPCHECK_VERBOSE=1 PROPCHECK_NUMTESTS=200 PROPCHECK_SEARCH_STEPS=1000 mix tests --cover --trace
   - mix credo --strict
+  - env MIX_ENV=test mix dialyzer

@@ -205,12 +205,16 @@ defmodule PropCheck.StateM.Reporter do
   defp indent(str, _level, true),
     do: do_indent("# ", str)
 
-  defp indent(str, level, cmt) when is_binary(cmt) and level > length(cmt) do
-    (String.duplicate(" ", level - length(cmt)) <> cmt)
-    |> do_indent(str)
+  defp indent(str, level, cmt) when is_binary(cmt) do
+    length = String.length(cmt)
+
+    if level > length do
+      (String.duplicate(" ", level - length) <> cmt)
+      |> do_indent(str)
+    else
+      do_indent(cmt, str)
+    end
   end
-  defp indent(str, _level, cmt) when is_binary(cmt),
-    do: do_indent(cmt, str)
 
   defp do_indent(indent, str) do
     str

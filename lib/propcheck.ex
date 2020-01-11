@@ -345,6 +345,7 @@ defmodule PropCheck do
     @type sample :: [any]
     @type title :: charlist | atom | String.t
     @type stats_printer :: ((sample) -> :ok) | ((sample, output_fun) -> :ok)
+    @type type :: :proper_types.type()
 
     @doc """
     A property that should hold for all values generated.
@@ -1118,5 +1119,6 @@ defmodule PropCheck do
 
     # Helper functions
 
+    @spec syntax_error(String.t()) :: no_return()
     defp syntax_error(err), do: raise(ArgumentError, "Usage: " <> err)
 end

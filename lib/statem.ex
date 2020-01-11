@@ -167,11 +167,11 @@ defmodule PropCheck.StateM do
     end
   end
 
-  @type symb_var :: :proper_statem.symb_var
+  @type symb_var :: :proper_statem.symbolic_var()
   @type symbolic_state :: any
   @type dynamic_state :: any
-  @type symb_call :: :proper_statem.symb_call
-  @type command :: :proper_statem.command
+  @type symb_call :: :proper_statem.symbolic_call()
+  @type command :: {:set, symb_var, symb_call} | {:init, symbolic_state}
   @type parallel_testcase :: {command_list, [command_list]}
   @type command_list :: [command]
   @type history :: [{command, term}]
@@ -287,11 +287,11 @@ defmodule PropCheck.StateM do
 
   """
   def more_commands(n, cmd_type) do
+    import PropCheck.Logger, only: [log_debug: 1]
     require PropCheck
     require PropCheck.BasicTypes
-    require Logger
 
-    Logger.debug(fn -> "cmd_type = #{inspect cmd_type}" end)
+    log_debug(fn -> "cmd_type = #{inspect cmd_type}" end)
     PropCheck.sized(size, PropCheck.BasicTypes.resize(size * n, cmd_type))
   end
 
