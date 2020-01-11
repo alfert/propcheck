@@ -59,8 +59,10 @@ defmodule PropCheck.Test.PingPongMaster do
       :ping_pong ->
         # log_debug "Player #{inspect name} got a request for a ping-pong game"
         ping(name)
-        {:tennis, from}   -> send(from, :maybe_later)
-        {:football, from} -> send(from, :no_way)
+      {:tennis, from} ->
+        send(from, :maybe_later)
+      {:football, from} ->
+        send(from, :no_way)
       msg ->
         log_error "Player #{inspect name} got invalid message #{inspect msg}"
         exit(:kill)
