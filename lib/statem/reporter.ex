@@ -1,6 +1,19 @@
 defmodule PropCheck.StateM.Reporter do
   @moduledoc false
 
+  alias PropCheck.StateM
+
+  @type option :: {:return_values, boolean}
+                | {:last_state, boolean}
+                | {:pre_cmd_state, boolean}
+                | {:post_cmd_state, boolean}
+                | {:cmd_args, boolean}
+                | {:inspect_opts, keyword}
+
+  @type options :: [option]
+
+  @spec print_report({StateM.history, StateM.dynamic_state, StateM.result},
+    StateM.command_list, options) :: :ok
   def print_report({history, state, result}, commands, opts \\ []),
     do: pretty_report(result, history, state, commands, opts)
 
