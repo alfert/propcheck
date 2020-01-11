@@ -56,7 +56,8 @@ defmodule PropCheck.Test.PingPongMaster do
   def ping_pong_player(name, counter \\ 1) do
     #log_debug "Player #{inspect name} is waiting round #{counter}"
     receive do
-      :ping_pong        -> # log_debug "Player #{inspect name} got a request for a ping-pong game"
+      :ping_pong ->
+        # log_debug "Player #{inspect name} got a request for a ping-pong game"
         ping(name)
         {:tennis, from}   -> send(from, :maybe_later)
         {:football, from} -> send(from, :no_way)
