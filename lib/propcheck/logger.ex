@@ -1,4 +1,4 @@
-defmodule PropCheck.Logging do
+defmodule PropCheck.Logger do
   require Logger
 
   @moduledoc false

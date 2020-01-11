@@ -287,7 +287,7 @@ defmodule PropCheck.StateM do
 
   """
   def more_commands(n, cmd_type) do
-    import PropCheck.Logging, only: [log_debug: 1]
+    import PropCheck.Logger, only: [log_debug: 1]
     require PropCheck
     require PropCheck.BasicTypes
 

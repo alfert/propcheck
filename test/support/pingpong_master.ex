@@ -15,7 +15,7 @@ defmodule PropCheck.Test.PingPongMaster do
   """
 
   use GenServer
-  import PropCheck.Logging
+  import PropCheck.Logger
 
   # -------------------------------------------------------------------
   # Master's API

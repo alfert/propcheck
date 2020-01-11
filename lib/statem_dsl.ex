@@ -173,7 +173,7 @@ defmodule PropCheck.StateM.DSL do
 
   use PropCheck
   alias PropCheck.BasicTypes
-  import PropCheck.Logging, only: [log_error: 1]
+  import PropCheck.Logger, only: [log_error: 1]
 
   @typedoc """
   The name of a command must be an atom.
