@@ -32,16 +32,11 @@ defmodule PropCheck.Test.CounterDSL do
       trap_exit do
         {:ok, _pid} = Counter.start_link()
         r = run_commands(__MODULE__, cmds)
-        {history, state, result} = r
+        {_history, _state, result} = r
         Counter.stop()
 
         (result == :ok)
-        |> when_fail(
-            IO.puts """
-            History: #{inspect history, pretty: true}
-            State: #{inspect state, pretty: true}
-            Result: #{inspect result, pretty: true}
-            """)
+        |> when_fail(print_report(r, cmds))
         # |> aggregate(command_names cmds)
         # |> measure("length of commands", length(cmds))
       end
@@ -56,16 +51,11 @@ defmodule PropCheck.Test.CounterDSL do
       trap_exit do
         {:ok, _pid} = Counter.start_link(5)
         r = run_commands(__MODULE__, cmds)
-        {history, state, result} = r
+        {_history, _state, result} = r
         Counter.stop()
 
         (result == :ok)
-        |> when_fail(
-            IO.puts """
-            History: #{inspect history, pretty: true}
-            State: #{inspect state, pretty: true}
-            Result: #{inspect result, pretty: true}
-            """)
+        |> when_fail(print_report(r, cmds))
         # |> aggregate(command_names cmds)
         # |> measure("length of commands", length(cmds))
       end

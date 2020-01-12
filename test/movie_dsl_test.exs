@@ -22,16 +22,11 @@ defmodule PropCheck.Test.MoviesDSL do
       trap_exit do
         {:ok, _pid} = MovieServer.start_link()
         r = run_commands(__MODULE__, cmds)
-        {history, state, result} = r
+        {_history, _state, result} = r
         MovieServer.stop
 
         (result == :ok)
-        |> when_fail(
-            IO.puts """
-            History: #{inspect history, pretty: true}
-            State: #{inspect state, pretty: true}
-            Result: #{inspect result, pretty: true}
-            """)
+        |> when_fail(print_report(r, cmds))
         # |> aggregate(command_names cmds)
       end
     end
@@ -43,16 +38,11 @@ defmodule PropCheck.Test.MoviesDSL do
       trap_exit do
         {:ok, _pid} = MovieServer.start_link(will_fail: true)
         r = run_commands(__MODULE__, cmds)
+        {_history, _state, result} = r
         MovieServer.stop
-        {history, state, result} = r
 
         (result == :ok)
-        |> when_fail(
-            IO.puts """
-            History: #{inspect history, pretty: true}
-            State: #{inspect state, pretty: true}
-            Result: #{inspect result, pretty: true}
-            """)
+        |> when_fail(print_report(r, cmds))
         # |> aggregate(command_names cmds)
       end
     end

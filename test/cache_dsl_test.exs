@@ -18,18 +18,13 @@ defmodule PropCheck.Test.Cache.DSL do
       # Logger.debug "Commands to run: #{inspect cmds}"
       Cache.start_link(@cache_size)
       r = run_commands(__MODULE__, cmds)
-      {history, state, result} = r
+      {_history, _state, result} = r
       Cache.stop()
       # Logger.debug "Events are: #{inspect events}"
 
       (result == :ok)
       # |> collect(length cmds)
-      |> when_fail(
-          IO.puts """
-          History: #{inspect history, pretty: true}
-          State: #{inspect state, pretty: true}
-          Result: #{inspect result, pretty: true}
-          """)
+      |> when_fail(print_report(r, cmds))
       # |> aggregate(command_names cmds)
       # |> collect(
       #   history
@@ -47,18 +42,13 @@ defmodule PropCheck.Test.Cache.DSL do
       # where the model expects that the value is properly cached.
       Cache.start_link(div(@cache_size, 2))
       r = run_commands(__MODULE__, cmds)
+      {_history, _state, result} = r
       Cache.stop()
-      {history, state, result} = r
       # Logger.debug "Events are: #{inspect events}"
 
       (result == :ok)
+      |> when_fail(print_report(r, cmds))
       # |> collect(length cmds)
-      |> when_fail(
-          IO.puts """
-          History: #{inspect history, pretty: true}
-          State: #{inspect state, pretty: true}
-          Result: #{inspect result, pretty: true}
-          """)
       # |> aggregate(command_names cmds)
       # |> collect(
       #   history

@@ -18,15 +18,11 @@ defmodule PropCheck.Test.PingPongDSL do
         assert [] == player_processes()
         PingPongMaster.start_link()
         r = run_commands(__MODULE__, cmds)
-        {history, state, result} = r
+        {_history, _state, result} = r
         :ok = PingPongMaster.stop()
 
         (result == :ok)
-        |> when_fail(IO.puts """
-        History: #{inspect history, pretty: true}
-        State: #{inspect state, pretty: true}
-        Result: #{inspect result, pretty: true}
-        """)
+        |> when_fail(print_report(r, cmds))
         # |> aggregate(command_names cmds)
       end
     end
