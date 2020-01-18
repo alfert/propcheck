@@ -9,6 +9,9 @@ defmodule PropCheck.TracingTest do
   alias PropCheck.Tracer.Scheduler
 
   defmodule TracedModule do
+    @moduledoc """
+    A module which is pepared for tracing.
+    """
     use PropCheck.Tracer.Instrument
 
     def hi, do: :hello

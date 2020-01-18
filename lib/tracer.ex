@@ -9,8 +9,8 @@ defmodule PropCheck.Tracer do
     Defines the decorator callback.
     """
     use Decorator.Define, [trace: 0]
-
-    def trace(body, context), do: PropCheck.Tracer.Instrument.instrument(body, context)
+    alias PropCheck.Tracer.Instrument
+    def trace(body, context), do: Instrument.instrument(body, context)
   end
 
   defmodule Instrument do
@@ -18,6 +18,8 @@ defmodule PropCheck.Tracer do
     This module provides the replacements for message handling and process spawning,
     interacting with the central scheduler.
     """
+    alias PropCheck.Tracer.Instrument
+
     defp scheduler, do: PropCheck.Tracer.Scheduler
 
     IO.puts("Instrument: all loaded applications: #{inspect Application.loaded_applications()}")
@@ -84,7 +86,7 @@ defmodule PropCheck.Tracer do
           IO.puts "instrument receive with pattern #{inspect patterns}"
           IO.puts "Body expression is: #{Macro.to_string expr}"
           gen_receive(patterns)
-        {:receive, _info, [patterns, after_pattern]} ->
+        {:receive, _info, [patterns, _after_pattern]} ->
           IO.puts "instrument a receive with an after pattern - this is ignored!"
           gen_receive(patterns)
         any -> any
@@ -107,10 +109,10 @@ defmodule PropCheck.Tracer do
 
     def gen_receive(receive_patterns) do
       call_fail = quote do failed.() end
-      after_ast = {:after, [{:->, [], [[0], call_fail] }] }
+      after_ast = {:after, [{:->, [], [[0], call_fail]}] }
       receive_expr = {:receive, [], [receive_patterns ++ [after_ast]]}
       quote do
-        PropCheck.Tracer.Instrument.receiving(fn failed ->
+        Instrument.receiving(fn failed ->
           unquote(receive_expr)
         end)
       end
@@ -134,7 +136,7 @@ defmodule PropCheck.Tracer do
       GenServer.start_link(__MODULE__, :nothing, name: PropCheck.Tracer.Scheduler)
     end
 
-    def init(init_arg) do
+    def init(_init_arg) do
       {:ok, %{}}
     end
 
@@ -148,16 +150,7 @@ defmodule PropCheck.Tracer do
     """
     @spec get_msg(t, key) :: {t, {key, any}}
     def get_msg(map, key) do
-      {msg, m} = Map.get_and_update!(map, key, fn q ->
-        case :queue.out(q) do
-          {{:value, msg}, q2} ->
-            if :queue.is_empty(q2) do
-              :pop
-            else
-              {msg, q2}
-            end
-        end
-      end)
+      {msg, m} = Map.get_and_update!(map, key, &update_queue(&1))
       if :queue.is_queue(msg) do
         {m, {key, :queue.head(msg)}}
       else
@@ -165,7 +158,17 @@ defmodule PropCheck.Tracer do
       end
     end
 
-
+    @spec update_queue(:queue.queue) :: :pop | {any, :queue.queue}
+    defp update_queue(q) do
+      case :queue.out(q) do
+        {{:value, msg}, q2} ->
+          if :queue.is_empty(q2) do
+            :pop
+          else
+            {msg, q2}
+          end
+      end
+    end
 
     def handle_info(m = {:send, _source, dest, msg}, state) do
       IO.puts "Scheduler sends: #{inspect m}"
