@@ -27,7 +27,36 @@ defmodule PropCheck.TracingTest do
           :get_hello
       end
     end
+
+    def faulty_pmap(enum, mapper) do
+      me = self()
+      enum
+      |> Enum.map(fn v -> spawn(fn -> send(me, mapper.(v)) end) end)
+      |> Enum.map(fn _pid ->
+        receive do
+          val -> val
+        end
+      end)
+    end
+
+    def pmap(enum, mapper) do
+      me = self()
+      enum
+      |>  Enum.map(fn v -> spawn(fn -> send(me, {me, mapper.(v)}) end) end)
+      |> Enum.map(fn pid ->
+        receive do
+          {^pid, val} -> val
+        end
+      end)
+    end
   end
+
+  def startup_the_scheduler(_context) do
+    start_supervised!(Scheduler)
+    :ok
+  end
+
+  setup :startup_the_scheduler
 
   test "Receive the hello sequence" do
     Scheduler.start_link()
@@ -56,4 +85,20 @@ defmodule PropCheck.TracingTest do
     end
   end
 
+  property "the faulty pmap should eventually fail" do # , [:verbose] do
+    # mapper = fn x -> x + 1 end
+    # forall {fun, items} <- {mapper, list(nat())} do
+    forall {fun, items} <- {function1(nat()), list(nat())} do
+      seq = Enum.map(items, fun)
+      par = TracedModule.faulty_pmap(items, fun)
+      (assert seq == par)
+      |> when_fail(
+        IO.puts """
+        Sequence and parallel do not match!
+        seq = #{inspect seq}
+        par = #{inspect par}
+        """
+      )
+    end
+  end
 end
