@@ -132,14 +132,22 @@ defmodule PropCheck.Tracer do
     @doc """
     Starts the Scheduler gen server.
     """
-    def start_link do
+    def start_link(_opts \\ :no_opts) do
       GenServer.start_link(__MODULE__, :nothing, name: PropCheck.Tracer.Scheduler)
     end
 
+    @doc """
+    Creates the initial empty map of process pairs with their queue of messages.
+    """
+    @doc false
     def init(_init_arg) do
       {:ok, %{}}
     end
 
+    @doc """
+    Adds a message to the queue for sender/receiver pair.
+    """
+    @doc false
     def add_msg(map, source, dest, msg) do
       Map.update(map, {source, dest}, :queue.from_list([msg]), fn q -> :queue.in(msg, q) end)
     end
@@ -158,6 +166,8 @@ defmodule PropCheck.Tracer do
       end
     end
 
+    # returns the first element of queue and the remaining queue or, if it is
+    # the last element of a queue, simply `:pop`. To be used by `Map.get_and_update/3`.
     @spec update_queue(:queue.queue) :: :pop | {any, :queue.queue}
     defp update_queue(q) do
       case :queue.out(q) do
@@ -177,6 +187,12 @@ defmodule PropCheck.Tracer do
     end
     def handle_info({:block, pid}, state) do
       IO.puts "Scheduler blocks #{inspect pid}"
+      IO.puts "Scheduler sends :go"
+      Kernel.send(pid, {__MODULE__, :go})
+      {:noreply, state}
+    end
+    def handle_info({:spawned, pid}, state) do
+      IO.puts "Scheduler intercepts spawing process #{inspect pid}"
       IO.puts "Scheduler sends :go"
       Kernel.send(pid, {__MODULE__, :go})
       {:noreply, state}
