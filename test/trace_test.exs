@@ -34,7 +34,7 @@ defmodule PropCheck.TracingTest do
       |> Enum.map(fn v -> spawn(fn -> send(me, mapper.(v)) end) end)
       |> Enum.map(fn _pid ->
         receive do
-          val -> val
+          val -> IO.inspect(val)
         end
       end)
     end
@@ -56,7 +56,15 @@ defmodule PropCheck.TracingTest do
     :ok
   end
 
+  def clear_mailbox(context) do
+    receive do
+      some -> clear_mailbox(context)
+    after 0 -> :ok
+    end
+  end
+
   setup :startup_the_scheduler
+  setup :clear_mailbox
 
   test "Receive the hello sequence" do
     Scheduler.start_link()
@@ -70,6 +78,7 @@ defmodule PropCheck.TracingTest do
       {:source, :dest, l, map}
     end
   end
+
 
   property "same amounf of entries in the queue and list" do
     forall {s, d, l, m} <- mapped_queue() do
@@ -86,9 +95,10 @@ defmodule PropCheck.TracingTest do
   end
 
   property "the faulty pmap should eventually fail" do # , [:verbose] do
-    # mapper = fn x -> x + 1 end
-    # forall {fun, items} <- {mapper, list(nat())} do
-    forall {fun, items} <- {function1(nat()), list(nat())} do
+    mapper = fn x -> x + 1 end
+    forall {fun, items} <- {mapper, list(nat())} do
+    # forall {fun, items} <- {function1(nat()), list(nat())} do
+      IO.puts "items has #{length(items)} elements"
       seq = Enum.map(items, fun)
       par = TracedModule.faulty_pmap(items, fun)
       (assert seq == par)
