@@ -66,7 +66,9 @@ defmodule PropCheck.Tracer do
       sched = scheduler()
       pid = Kernel.spawn(fn ->
         receive do
-          {^sched, :go} -> fun.()
+          {^sched, :start} ->
+            IO.puts "#{inspect self} received :start"
+            fun.()
         end
       end)
       Kernel.send(scheduler(), {:spawned, pid})
@@ -102,17 +104,43 @@ defmodule PropCheck.Tracer do
       receiver_fun.(fn ->
         Kernel.send(sched, {:block, self()})
         receive do
-          {^sched, :go} -> receiving(receiver_fun)
+          {^sched, :go} ->
+            IO.puts "#{inspect self} received :go"
+            receiving(receiver_fun)
         end
       end)
     end
 
+    @doc """
+    Generates the replace for a `receive`. The parameter `receive_patterns`
+    are the message patters to be received. It uses function `receiving/1` as looping
+    construct. The overall strategy is that source code of the form
+
+        receive do
+          msg -> handle(msg)
+        end
+
+    is transformed into this
+
+        receiver = fn failed ->
+          receive do
+            msg -> handle(msg)
+          after 0 -> receiving(failed)
+          end
+        end
+        receiving(receiver)
+
+    Function `receiving/1` sends blocking message to the schedule and only proceeds
+    after a `:go` message. In that case, a regular message should be there and can be
+    handled. Otherwise we block again.
+    """
     def gen_receive(receive_patterns) do
       call_fail = quote do failed.() end
       after_ast = {:after, [{:->, [], [[0], call_fail]}] }
       receive_expr = {:receive, [], [receive_patterns ++ [after_ast]]}
       quote do
         Instrument.receiving(fn failed ->
+          IO.puts "Check my inbox for real messages #{inspect self()}"
           unquote(receive_expr)
         end)
       end
@@ -187,14 +215,16 @@ defmodule PropCheck.Tracer do
     end
     def handle_info({:block, pid}, state) do
       IO.puts "Scheduler blocks #{inspect pid}"
-      IO.puts "Scheduler sends :go"
-      Kernel.send(pid, {__MODULE__, :go})
+      msg = {__MODULE__, :go}
+      IO.puts "Scheduler sends msg = #{inspect msg}"
+      Kernel.send(pid, msg)
       {:noreply, state}
     end
     def handle_info({:spawned, pid}, state) do
       IO.puts "Scheduler intercepts spawing process #{inspect pid}"
-      IO.puts "Scheduler sends :go"
-      Kernel.send(pid, {__MODULE__, :go})
+      msg = {__MODULE__, :start}
+      IO.puts "Scheduler sends msg = #{inspect msg}"
+      Kernel.send(pid, msg)
       {:noreply, state}
     end
   end
