@@ -484,7 +484,7 @@ defmodule PropCheck.StateM.DSL do
   @spec new_state(state_t) :: %__MODULE__{}
   defp new_state(initial_state), do: %__MODULE__{state: initial_state}
 
-  @spec execute_cmd(state_call, t) :: history_event
+  @spec execute_cmd(command, t) :: history_event
   defp execute_cmd({:set, v = {:var, _}, sym_c = {:call, _m, _f, _args}}, prop_state) do
     # Logger.debug "execute_cmd: symb call: #{inspect sym_c}"
     state = prop_state.state
