@@ -174,7 +174,7 @@ defmodule PropCheck.StateM do
   @type command :: {:set, symb_var, symb_call} | {:init, symbolic_state}
   @type parallel_testcase :: {command_list, [command_list]}
   @type command_list :: [command]
-  @type history :: [{command, term}]
+  @type history :: [{dynamic_state, term}]
   @type result :: :proper_statem.statem_result
 
   @doc """
