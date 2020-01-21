@@ -110,16 +110,16 @@ defmodule PropCheck.FSM do
   @type mod_name :: atom
   @type state_name :: atom | tuple
   @type state_data :: any
-  @type symb_call :: PropCheck.StateM.symb_call
-  @type symb_var :: PropCheck.StateM.symb_var
+  @type symbolic_call :: PropCheck.StateM.symbolic_call
+  @type symbolic_var :: PropCheck.StateM.symbolic_var
   @type fsm_state()    :: {state_name, state_data}
-  @type transition()   :: {state_name, symb_call}
+  @type transition()   :: {state_name, symbolic_call}
   @type history()      :: [{fsm_state, cmd_result}]
 
   @type result :: :proper_statem.statem_result
   @type fsm_result :: result
   @type cmd_result :: any
-  @type command  :: {:set, symb_var, symb_call} | {:init, fsm_state()}
+  @type command  :: {:set, symbolic_var, symbolic_call} | {:init, fsm_state()}
   @type command_list:: [command]
 
   @doc """
@@ -149,7 +149,7 @@ defmodule PropCheck.FSM do
   will be raised.
   """
   @callback precondition(from :: state_name, target:: state_name,
-    state_data :: state_data, call :: symb_call) :: boolean
+    state_data :: state_data, call :: symbolic_call) :: boolean
 
   @doc """
   Similar to `c:PropCheck.StateM.postcondition/3`. Specifies the
@@ -157,7 +157,7 @@ defmodule PropCheck.FSM do
   of `call`.
   """
   @callback postcondition(from :: state_name, target:: state_name,
-    state_data :: state_data, call :: symb_call, result :: result) :: boolean
+    state_data :: state_data, call :: symbolic_call, result :: result) :: boolean
 
   @doc """
   Similar to `c:PropCheck.StateM.next_state/3`. Specifies how the
@@ -166,7 +166,7 @@ defmodule PropCheck.FSM do
   symbolic or dynamic.
   """
   @callback next_state_data(from :: state_name, target:: state_name,
-    state_data :: state_data, result :: result, call :: symb_call) :: state_data
+    state_data :: state_data, result :: result, call :: symbolic_call) :: state_data
 
   @doc """
   This is an optional callback. When it is not defined (or not exported),
@@ -175,7 +175,7 @@ defmodule PropCheck.FSM do
   triggered by symbolic call `call`. In this case, each transition is chosen
   with probability proportional to the weight assigned.
   """
-  @callback weight(from::state_name, target::state_name, call::symb_call) :: integer
+  @callback weight(from::state_name, target::state_name, call::symbolic_call) :: integer
   @optional_callbacks weight: 3
 
   @doc """

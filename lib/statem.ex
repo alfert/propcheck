@@ -24,7 +24,7 @@ defmodule PropCheck.StateM do
     repeatable test cases, which is essential for correct shrinking.
 
   Since the actual results of symbolic calls are not known at generation time,
-  we use symbolic variables of type `t:symb_var/0` to refer to them.
+  we use symbolic variables of type `t:symbolic_var/0` to refer to them.
   A command of type `t:command/0` is a symbolic term, used to bind a symbolic
   variable to the result of a symbolic call. For example:
 
@@ -167,14 +167,61 @@ defmodule PropCheck.StateM do
     end
   end
 
-  @type symb_var :: :proper_statem.symbolic_var()
+  @typedoc """
+  Each result of a symbolic call is stored in a symbolic variable. Their values
+  are opaque and can only used as whole.
+  """
+  @type symbolic_var :: :proper_statem.symbolic_var()
+
+  @typedoc """
+  A symbolic state can be anything and appears only during phase 1.
+  """
   @type symbolic_state :: any
+
+  @typedoc """
+  A dynamic state can be anything and appears only during phase 2.
+  """
   @type dynamic_state :: any
-  @type symb_call :: :proper_statem.symbolic_call()
-  @type command :: {:set, symb_var, symb_call} | {:init, symbolic_state}
-  @type parallel_testcase :: {command_list, [command_list]}
+
+  @typedoc """
+  A symbolic call is the typical mfa-tuple plus the tag `:call`.
+  """
+  @type symbolic_call :: :proper_statem.symbolic_call()
+
+  @typedoc """
+  A value of type `command` denotes the execution of a symbolic command and
+  storing its result in a symbolic variable.
+  """
+  @type command :: {:set, symbolic_var, symbolic_call} | {:init, symbolic_state}
+
+  @typedoc """
+  A sequence of commands.
+  """
   @type command_list :: [command]
+
+  @typedoc """
+  A parallel testcase consists of a sequential and a parallel component. The
+  sequential component is a command sequence that is run first to put the system
+  in a random state. The parallel component is a list containing 2 command
+  sequences to be executed in parallel, each of them in a separate newly-spawned
+  process.
+  """
+  @type parallel_testcase :: {command_list, [command_list]}
+
+  @typedoc """
+  The history of concurrent execution of commands in phase 2.
+  """
+  @type parallel_history :: [{command, term}]
+
+  @typedoc """
+  History of command execution in phase 2. It contains current dynamic state and
+  the result of the call.
+  """
   @type history :: [{dynamic_state, term}]
+
+  @typedoc """
+  The outcome of the command sequence execution.
+  """
   @type result :: :proper_statem.statem_result
 
   @doc """
@@ -218,7 +265,7 @@ defmodule PropCheck.StateM do
   usually attempt to perform a call with the system being in a state
   different from the state it was when initially running the test.
   """
-  @callback precondition(s :: symbolic_state, call :: symb_call) :: boolean
+  @callback precondition(s :: symbolic_state, call :: symbolic_call) :: boolean
 
   @doc """
   Specifies the postcondition that should hold about the result `res` of
@@ -229,7 +276,7 @@ defmodule PropCheck.StateM do
   runtime, this is why the state is dynamic.
   """
   @callback postcondition(s :: dynamic_state,
-    call:: symb_call, res :: term) :: boolean
+    call:: symbolic_call, res :: term) :: boolean
 
   @doc """
   Specifies the next state of the abstract state machine, given the
@@ -239,7 +286,7 @@ defmodule PropCheck.StateM do
   result `Res` can be either symbolic or dynamic.
   """
   @callback next_state(s :: symbolic_state | dynamic_state,
-    res :: term, call :: symb_call) ::
+    res :: term, call :: symbolic_call) ::
     symbolic_state | dynamic_state
 
   @doc """
