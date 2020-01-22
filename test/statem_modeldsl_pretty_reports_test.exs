@@ -548,6 +548,40 @@ defmodule PropCheck.Test.PrettyReportsDSL do
     end
   end
 
+  describe "initial state passed to `run_commands`," do
+    defp run_cmds(args = [cmd_seq | _]) do
+      strip_ansi_sequences capture_io(fn ->
+        PropCheck.StateM
+        |> apply(:run_commands, [__MODULE__ | args])
+        |> print_report(cmd_seq)
+      end)
+    end
+
+    test "doesn't change a ok printout" do
+      assert run_cmds([ok_seq()]) == run_cmds([ok_seq(), initial_state()])
+    end
+
+    test "doesn't change a command crash printout" do
+      assert run_cmds([command_crash_seq()]) == run_cmds([command_crash_seq(), initial_state()])
+    end
+
+    test "doesn't change a precond fail printout" do
+      assert run_cmds([precond_fail_seq()]) == run_cmds([precond_fail_seq(), initial_state()])
+    end
+
+    test "doesn't change a precond crash printout" do
+      assert run_cmds([precond_crash_seq()]) == run_cmds([precond_crash_seq(), initial_state()])
+    end
+
+    test "doesn't change a postcond fail printout" do
+      assert run_cmds([postcond_fail_seq()]) == run_cmds([postcond_fail_seq(), initial_state()])
+    end
+
+    test "doesn't change a postcond crash printout" do
+      assert run_cmds([postcond_crash_seq()]) == run_cmds([postcond_crash_seq(), initial_state()])
+    end
+  end
+
   describe "printout options," do
     defp run(opts) do
       cmds = postcond_fail_seq()
@@ -662,6 +696,15 @@ defmodule PropCheck.Test.PrettyReportsDSL do
   #
   # Helpers
   #
+
+  defp ok_seq, do: [
+    {:set, {:var, 1}, {:call, __MODULE__, :noop, [0]}},
+    {:set, {:var, 1}, {:call, __MODULE__, :noop, [1]}},
+    {:set, {:var, 1}, {:call, __MODULE__, :noop, [2]}},
+    {:set, {:var, 1}, {:call, __MODULE__, :noop, [3]}},
+    {:set, {:var, 1}, {:call, __MODULE__, :noop, [4]}},
+    {:set, {:var, 1}, {:call, __MODULE__, :noop, [5]}},
+  ]
 
   defp command_crash_seq, do: [
     {:set, {:var, 1}, {:call, __MODULE__, :noop, [0]}},
