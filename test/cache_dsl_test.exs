@@ -5,7 +5,7 @@ defmodule PropCheck.Test.Cache.DSL do
 
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  use PropCheck.StateM.DSL
+  use PropCheck.StateM.ModelDSL
   import PropCheck.TestHelpers, except: [config: 0]
 
   alias PropCheck.Test.Cache
@@ -17,20 +17,17 @@ defmodule PropCheck.Test.Cache.DSL do
     forall cmds <- commands(__MODULE__) do
       # Logger.debug "Commands to run: #{inspect cmds}"
       Cache.start_link(@cache_size)
-      events = run_commands(__MODULE__, cmds)
+      r = run_commands(__MODULE__, cmds)
+      {_history, _state, result} = r
       Cache.stop()
       # Logger.debug "Events are: #{inspect events}"
 
-      (events.result == :ok)
+      (result == :ok)
       # |> collect(length cmds)
-      |> when_fail(
-          IO.puts """
-          History: #{inspect events.history, pretty: true}
-          State: #{inspect events.state, pretty: true}
-          Result: #{inspect events.result, pretty: true}
-          """)
+      |> when_fail(print_report(r, cmds))
       # |> aggregate(command_names cmds)
-      # |> collect(events
+      # |> collect(
+      #   history
       #   |> history_of_states()
       #   |> Enum.map(fn model -> model.count end)
       #   |> Enum.max())
@@ -44,20 +41,17 @@ defmodule PropCheck.Test.Cache.DSL do
       # Cache size is half as big expected, so we will find some cache misses,
       # where the model expects that the value is properly cached.
       Cache.start_link(div(@cache_size, 2))
-      events = run_commands(__MODULE__, cmds)
+      r = run_commands(__MODULE__, cmds)
+      {_history, _state, result} = r
       Cache.stop()
       # Logger.debug "Events are: #{inspect events}"
 
-      (events.result == :ok)
+      (result == :ok)
+      |> when_fail(print_report(r, cmds))
       # |> collect(length cmds)
-      |> when_fail(
-          IO.puts """
-          History: #{inspect events.history, pretty: true}
-          State: #{inspect events.state, pretty: true}
-          Result: #{inspect events.result, pretty: true}
-          """)
       # |> aggregate(command_names cmds)
-      # |> collect(events
+      # |> collect(
+      #   history
       #   |> history_of_states()
       #   |> Enum.map(fn model -> model.count end)
       #   |> Enum.max())
@@ -72,9 +66,9 @@ defmodule PropCheck.Test.Cache.DSL do
   defstruct [max: @cache_size, entries: [], count: 0]
 
   # extract the list of state from the history
-  def history_of_states(events) do
-    events.history
-    |> Enum.map(fn {state, _call, _result} -> state end)
+  def history_of_states(history) do
+    history
+    |> Enum.map(fn {state, _result} -> state end)
   end
 
   ###########################
@@ -116,13 +110,18 @@ defmodule PropCheck.Test.Cache.DSL do
 
   ##################
   # The command weight distribution
-  def weight(_state), do: %{find: 1, cache: 3, flush: 1}
+  def command_gen(_state) do
+    frequency([
+      {1, {:find, [key()]}},
+      {3, {:cache, [key(), val()]}},
+      {1, {:flush, []}}
+    ])
+  end
 
   ###### Command: find
 
   defcommand :find do
     def impl(key), do: Cache.find(key)
-    def args(_state), do: [key()]
     def post(%__MODULE__{entries: l}, [key], res) do
       ret_val = case List.keyfind(l, key, 0, false) do
           false       -> res == {:error, :not_found}
@@ -138,8 +137,6 @@ defmodule PropCheck.Test.Cache.DSL do
   defcommand :cache do
     # implement cache
     def impl(key, val), do: Cache.cache(key, val)
-    # generator for args of cache
-    def args(_state), do: [key(), val()]
     # what is the next state?
     def next(s = %__MODULE__{entries: l, count: n, max: m}, [k, v], _res) do
       case List.keyfind(l, k, 0, false) do

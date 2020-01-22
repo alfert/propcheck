@@ -4,7 +4,7 @@ defmodule PropCheck.Test.MoviesDSL do
   from Proper (see http://proper.softlab.ntua.gr/Tutorials/PropEr_testing_of_generic_servers.html).
   """
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  use PropCheck.StateM.DSL
+  use PropCheck.StateM.ModelDSL
   use ExUnit.Case
   # import PropCheck.TestHelpers, except: [config: 0]
   require Logger
@@ -21,17 +21,12 @@ defmodule PropCheck.Test.MoviesDSL do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = MovieServer.start_link()
-        events = run_commands(__MODULE__, cmds)
+        r = run_commands(__MODULE__, cmds)
+        {_history, _state, result} = r
         MovieServer.stop
 
-        (events.result == :ok)
-        |> when_fail(
-            IO.puts """
-            History: #{inspect events.history, pretty: true}
-            State: #{inspect events.state, pretty: true}
-            Env: #{inspect events.env, pretty: true}
-            Result: #{inspect events.result, pretty: true}
-            """)
+        (result == :ok)
+        |> when_fail(print_report(r, cmds))
         # |> aggregate(command_names cmds)
       end
     end
@@ -42,17 +37,12 @@ defmodule PropCheck.Test.MoviesDSL do
     forall cmds <- commands(__MODULE__) do
       trap_exit do
         {:ok, _pid} = MovieServer.start_link(will_fail: true)
-        events = run_commands(__MODULE__, cmds)
+        r = run_commands(__MODULE__, cmds)
+        {_history, _state, result} = r
         MovieServer.stop
 
-        (events.result == :ok)
-        |> when_fail(
-            IO.puts """
-            History: #{inspect events.history, pretty: true}
-            State: #{inspect events.state, pretty: true}
-            Env: #{inspect events.env, pretty: true}
-            Result: #{inspect events.result, pretty: true}
-            """)
+        (result == :ok)
+        |> when_fail(print_report(r, cmds))
         # |> aggregate(command_names cmds)
       end
     end
@@ -79,21 +69,30 @@ defmodule PropCheck.Test.MoviesDSL do
   end
 
   #########################################################################
-  ### Weights of the commands
+  ### Commands generator
   #########################################################################
-  def weight(%__MODULE__{users: []}), do:
-    %{create_account: 1, ask_for_popcorn: 1}
-  def weight(s) do
-    std_commands = %{
-      create_account: 1, ask_for_popcorn: 1,
-      delete_account: 1, rent_dvd: 1
-    }
-    if some_movies_rented?(s) do
-       std_commands
-       |> Map.put(:return_dvd, 1)
+  def command_gen(%__MODULE__{users: []}) do
+    frequency([
+      {1, {:create_account, [name()]}},
+      {1, {:ask_for_popcorn, []}},
+    ])
+  end
+  def command_gen(s) do
+    std_commands = [
+      {1, {:create_account, [name()]}},
+      {1, {:ask_for_popcorn, []}},
+      {1, {:delete_account, [password(s)]}},
+      {1, {:rent_dvd, [password(s), movie()]}},
+    ]
+
+    calls = if some_movies_rented?(s) do
+      args = let {pass, movie} <- oneof(user_movie_pairs(s)), do: [pass, movie]
+      [{5, {:return_dvd, args}} | std_commands]
     else
       std_commands
     end
+
+    frequency(calls)
   end
 
   #########################################################################
@@ -142,7 +141,6 @@ defmodule PropCheck.Test.MoviesDSL do
       # Logger.info "Create account #{inspect name}"
       MovieServer.create_account(name)
     end
-    def args(_state), do: fixed_list([name()])
     def next(s = %__MODULE__{users: users}, _name, password) do
       # Logger.info "created account for password #{inspect password}"
       %__MODULE__{s | users: [password | users]}
@@ -153,7 +151,6 @@ defmodule PropCheck.Test.MoviesDSL do
   end
 
   defcommand :delete_account do
-    def args(state), do: fixed_list([password(state)])
     def impl(passwd) do
       # Logger.info "Delete account #{inspect passwd}"
       MovieServer.delete_account(passwd)
@@ -205,13 +202,7 @@ defmodule PropCheck.Test.MoviesDSL do
 
   defcommand :return_dvd do
     def impl(passwd, movie), do: MovieServer.return_dvd(passwd, movie)
-    def args(state) do
-      # Logger.debug "return_dvd args: state.rented #{inspect state.rented}"
-      pm = let {p, m} <- oneof(user_movie_pairs(state)) do
-        [p, m]
-      end
-      fixed_list(pm)
-    end
+
     @doc "Don't return movies, which are not rented"
     def pre(state, [passwd, movie]), do: movie_rented?(state, passwd, movie)
     def next(s = %__MODULE__{rented: rented}, [passwd, movie], _res) do

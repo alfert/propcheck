@@ -1,6 +1,9 @@
 defmodule PropCheck.StateM.DSL do
 
   @moduledoc """
+  _DEPRECATED_ : This module is deprecated, please use
+  `PropCheck.Statem.ModelDSL` instead.
+
   This module provides a shallow DSL (domain specific language) in Elixir
   for property based testing of stateful systems.
 
@@ -254,6 +257,9 @@ defmodule PropCheck.StateM.DSL do
   @callback initial_state() :: symbolic_state
 
   @doc """
+  _DEPRECATED_ : This module is deprecated, please use
+  `PropCheck.Statem.ModelDSL` instead.
+
   The optional weights for the command generation. It takes the current
   model state and returns a map of command/weight pairs. Commands,
   which are not allowed in a specific state, should be omitted, since
@@ -280,7 +286,11 @@ defmodule PropCheck.StateM.DSL do
   end
 
   @known_suffixes [:pre, :post, :args, :next]
+  @deprecated "This module is deprecated, use `PropCheck.StateM.ModelDSL` instead!"
   @doc """
+  _DEPRECATED_ : This module is deprecated, please use
+  `PropCheck.Statem.ModelDSL` instead.
+
   Defines a new command of the model.
 
   Inside the command, local functions define
@@ -333,6 +343,7 @@ defmodule PropCheck.StateM.DSL do
     ast
   end
 
+  @deprecated "This module is deprecated, use `PropCheck.StateM.ModelDSL` instead!"
   @doc """
   Generates the command list for the given module
   """
@@ -473,7 +484,7 @@ defmodule PropCheck.StateM.DSL do
   @spec new_state(state_t) :: %__MODULE__{}
   defp new_state(initial_state), do: %__MODULE__{state: initial_state}
 
-  @spec execute_cmd(state_call, t) :: history_event
+  @spec execute_cmd(command, t) :: history_event
   defp execute_cmd({:set, v = {:var, _}, sym_c = {:call, _m, _f, _args}}, prop_state) do
     # Logger.debug "execute_cmd: symb call: #{inspect sym_c}"
     state = prop_state.state
