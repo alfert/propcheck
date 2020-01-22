@@ -75,7 +75,7 @@ defmodule PropCheck.Test.Cache.DSL do
   # Testing the command generators and such
 
   test "commands produces something" do
-    cmd_gen = commands(__MODULE__)
+    cmd_gen = commands(__MODULE__) |> non_empty()
     size = 10
     {:ok, cmds} = produce(cmd_gen, size)
 
