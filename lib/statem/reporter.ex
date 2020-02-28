@@ -61,6 +61,8 @@ defmodule PropCheck.StateM.Reporter do
   end
 
   @header String.duplicate("=", 80)
+  defp print_pretty_report(title, cmds_to_print, history, state, [{:init, _} | commands], opts),
+    do: print_pretty_report(title, cmds_to_print, history, state, commands, opts)
   defp print_pretty_report(title, cmds_to_print, history, state, commands, opts) do
     main = main_section(cmds_to_print, history, state, commands, opts)
     IO.puts """

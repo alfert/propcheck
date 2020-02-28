@@ -14,7 +14,7 @@ defmodule PropCheck.Test.Cache.DSL do
   @cache_size 10
 
   property "run the sequential cache" do
-    forall cmds <- commands(__MODULE__) do
+    forall cmds <- commands(__MODULE__, initial_state()) do
       # Logger.debug "Commands to run: #{inspect cmds}"
       Cache.start_link(@cache_size)
       r = run_commands(__MODULE__, cmds)
