@@ -226,23 +226,26 @@ defmodule PropCheck.StateM.ModelDSL do
       Module.get_attribute(env.module, :commands)
       |> Enum.map(&String.to_atom/1)
 
-    other_commands = quote do
+    [
+      def_preconds(commands),
+      def_postconds(commands),
+      def_next_states(commands),
+      def_commands(),
+    ]
+  end
+
+  def def_commands() do
+    quote do
       def __all_commands__, do: @commands
 
       @impl :proper_statem
       def command(state) do
+        import PropCheck, only: [let: 2]
         let {cmd, args} <- command_gen(state) do
           {:call, __MODULE__, cmd, args}
         end
       end
     end
-
-    [
-      other_commands,
-      def_preconds(commands),
-      def_postconds(commands),
-      def_next_states(commands)
-    ]
   end
 
   def def_preconds(commands) do
