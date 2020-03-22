@@ -22,6 +22,7 @@ defmodule PropCheck.Test.Cache do
     case :ets.match(@cache_name, {:_, {key, :"$1"}}) do
         [[val]] -> {:ok, val}
         [] -> {:error, :not_found}
+        any -> {:error, :many_values}
     end
   end
 
@@ -35,13 +36,21 @@ defmodule PropCheck.Test.Cache do
         [[n]] ->
             # Logger.debug "Cache: override as pos #{n}"
             :ets.insert(@cache_name, {n, {key, val}}) # overwrite dupe
-        [] -> insert(key, val)
+        [] ->
+            # provoke a potenial concurrency bug
+            :erlang.yield()
+            insert(key, val)
+        any ->
+            Logger.error "Invalid result during :etc.match for key #{inspect key}: #{inspect any}"
+            :invalid_match_result
     end
     # Logger.debug "Updated Cache is: #{inspect dump()}"
   end
 
   defp insert(key, val) do
-    [{:count, current, max}] = :ets.lookup(@cache_name, :count)
+    count = :ets.lookup(@cache_name, :count)
+    # Logger.debug "count is #{inspect count}"
+    [{:count, current, max}] = count
     # Logger.debug "Current: #{current}, Max: #{inspect max}"
     if current < max do
       # Logger.debug "Cache: Incrementally add at pos #{current + 1}"
@@ -49,7 +58,7 @@ defmodule PropCheck.Test.Cache do
                          {:count, current + 1, max}])
     else
       # table is full, override from the beginning
-      #  Logger.debug "Cache is full, override position 1"
+       Logger.debug "Cache is full, override position 1"
       :ets.insert(@cache_name, [{1, {key, val}}, {:count, 1, max}])
     end
   end
@@ -60,6 +69,8 @@ defmodule PropCheck.Test.Cache do
   def flush do
     [{:count, _, max}] = :ets.lookup(@cache_name, :count)
     :ets.delete_all_objects(@cache_name)
+    # this provokes a potential concurrency bug.
+    # :erlang.yield()
     :ets.insert(@cache_name, {:count, 0, max})
   end
 
