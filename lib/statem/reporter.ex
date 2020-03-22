@@ -19,6 +19,11 @@ defmodule PropCheck.StateM.Reporter do
   def print_report({history, state, result}, commands, opts \\ []),
     do: pretty_report(result, history, state, commands, opts)
 
+  defp pretty_report(result, seq_history, par_history, cmds, opts) when is_tuple(cmds) do
+    title = "Concurrency Failure, we don't show the state :-/"
+    history = [{:sequential, seq_history}, {:parallel, par_history}]
+    print_pretty_report(title, :parallel, history, :no_state, cmds, opts)
+  end
   defp pretty_report(:ok, history, state, commands, opts),
     do: print_pretty_report(
           "All commands were successful and all postconditions were true.",
@@ -111,6 +116,29 @@ defmodule PropCheck.StateM.Reporter do
     Commands:
     #{cmds}
     #{last_state}
+    """
+  end
+  defp main_section(:parallel, history, _state, cmds, opts) do
+    {seq_cmds, [p1_cmds, p2_cmds]} = cmds
+    {:ok, seq} = Keyword.fetch(history, :sequential)
+    [p1, p2] = case Keyword.fetch(history, :parallel) do
+      {:ok, val} -> val
+      :error -> [ [], [] ]
+    end
+    seq_commands = zip_cmds_history(seq_cmds, seq)
+    |> print_command_lines(false, opts)
+    |> Enum.join("\n")
+    par_commands_1 = "#{inspect p1, :pretty}"
+    par_commands_2 = "#{inspect p2, :pretty}"
+    """
+    Sequential commands:
+    #{seq_commands}
+
+    Process 1:
+    #{par_commands_1}
+
+    Process 2:
+    #{par_commands_2}
     """
   end
 
