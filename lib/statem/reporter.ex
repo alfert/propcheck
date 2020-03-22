@@ -161,9 +161,17 @@ defmodule PropCheck.StateM.Reporter do
     |> to_string
   end
 
+  @doc false
+  def pretty_print_counter_example_cmd({:init, _}), do: ""
+  def pretty_print_counter_example_cmd(cmd) do
+    pretty_cmd_name(cmd, [syntax_colors: []]) <> "\n"
+  end
+
+  @cmd_indent_level 3
+  @comment_indent_level 10
   defp print_command(cmd, failing?, opts)
   defp print_command(cmd, false, opts),
-    do: indent(pretty_cmd_name(cmd, opts), 3, false) <> "\n"
+    do: indent(pretty_cmd_name(cmd, opts), @cmd_indent_level, false) <> "\n"
   defp print_command(cmd, true, opts) do
     cmt =
       [:red, "#! ", :reset]
@@ -171,7 +179,7 @@ defmodule PropCheck.StateM.Reporter do
     cmd_str =
       [:red, pretty_cmd_name(cmd, opts), :reset]
       |> IO.ANSI.format() |> to_string
-    indent(cmd_str, 3, cmt) <> "\n"
+    indent(cmd_str, @cmd_indent_level, cmt) <> "\n"
   end
 
   defp print_return_value({return_val, _, _}, opts) do
@@ -190,9 +198,7 @@ defmodule PropCheck.StateM.Reporter do
 
   defp comment(title, val, opts) do
     str = inspectx(val, opts)
-      # |> String.replace("\n", "\n#{indent}")
-    # indent <> title <> str <> "\n"
-    indent("#{title} #{str}", 10, true) <> "\n"
+    indent("#{title} #{str}", @comment_indent_level, true) <> "\n"
   end
 
   defp indent(str, level, commented?)
@@ -228,20 +234,24 @@ defmodule PropCheck.StateM.Reporter do
   def pretty_cmds_name(cmds, opts) do
     Enum.map(cmds, &pretty_cmd_name(&1, opts))
   end
+
   def pretty_cmd_name({:set, {:var, n}, {:call, mod, fun, args}}, opts) do
     args =
       args
       |> Enum.with_index()
       |> Enum.map(fn
-        {{:var, m}, _} -> "var#{m}"
+        {{:var, m}, _} -> symb_var(m)
         {arg, i} -> case Keyword.get(opts, :cmd_args, true) do
                true -> inspectx(arg, opts)
                false -> "arg#{n}_#{i+1}"
              end
       end)
       |> Enum.join(", ")
-    "var#{n} = #{inspect mod}.#{fun}(#{args})"
+    "#{symb_var(n)} = #{inspect mod}.#{fun}(#{args})"
   end
+
+  defp symb_var(x) when is_integer(x), do: "var#{x}"
+  defp symb_var(x) when is_atom(x), do: "var_#{x}"
 
   def inspectx({:exception, :error, exception, stacktrace}, _opts) do
     Exception.format :error, exception, stacktrace

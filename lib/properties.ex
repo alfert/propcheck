@@ -227,7 +227,7 @@ defmodule PropCheck.Properties do
       message:
         """
         Property #{mfa_to_string(args.name)} failed. Counter-Example is:
-        #{inspect(counter_example, pretty: true)}
+        #{counter_example_inspect(counter_example)}
 
         #{counter_example_message}
         """
@@ -242,7 +242,7 @@ defmodule PropCheck.Properties do
       message:
         """
         Property #{mfa_to_string(args.name)} failed. Counter-Example is:
-        #{inspect(counter_example, pretty: true)}
+        #{counter_example_inspect(counter_example)}
 
         Consider running `MIX_ENV=test mix propcheck.clean` if a bug in a generator was
         identified and fixed. PropCheck cannot identify changes to generators. See
@@ -258,6 +258,29 @@ defmodule PropCheck.Properties do
       Property #{mfa_to_string(args.name)} failed. There is no counter-example available.
       """
   end
+
+  defp counter_example_inspect(counter_example) do
+    alias PropCheck.StateM.Reporter
+    case is_statem_commands?(counter_example) do
+      false ->
+        inspect(counter_example, pretty: true)
+      true ->
+        counter_example
+        |> hd
+        |> Enum.map(&Reporter.pretty_print_counter_example_cmd/1)
+    end
+  end
+
+  defp is_statem_commands?([counter_example]) when is_list(counter_example) do
+    counter_example
+    |> Enum.all?(fn term ->
+      match?({:init, _}, term) or
+      match?({:set, {:var, _}, {:call, mod, fun, args}}
+        when is_atom(mod) and is_atom(fun) and is_list(args),
+        term)
+    end)
+  end
+  defp is_statem_commands?(_), do: false
 
   # Add additional output to a message
   defp add_additional_output(message, opts) do
@@ -279,9 +302,9 @@ defmodule PropCheck.Properties do
 
   @doc false
   def print_mod_as_erlang(mod) when is_atom(mod) do
-      {_m, beam, _file} = :code.get_object_code(mod)
-      {:ok, {_, [{:abstract_code, {_, ac}}]}} = :beam_lib.chunks(beam, [:abstract_code])
-      ac |> Enum.map(&:erl_pp.form/1) |> List.flatten |> IO.puts
+    {_m, beam, _file} = :code.get_object_code(mod)
+    {:ok, {_, [{:abstract_code, {_, ac}}]}} = :beam_lib.chunks(beam, [:abstract_code])
+    ac |> Enum.map(&:erl_pp.form/1) |> List.flatten |> IO.puts
   end
 
   @doc """
@@ -293,7 +316,7 @@ defmodule PropCheck.Properties do
 
   ## Example
 
-      property "This property will be implemented in the future"
+  property "This property will be implemented in the future"
 
   """
   defmacro property(message) do

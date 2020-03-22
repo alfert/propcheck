@@ -281,7 +281,7 @@ defmodule PropCheck.StateM.ModelDSL do
     ]
   end
 
-  def def_commands() do
+  def def_commands do
     quote do
       def __all_commands__, do: @commands
 
