@@ -6,7 +6,6 @@ defmodule PropCheck.Test.Cache.DSL do
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.ModelDSL
-  import PropCheck.TestHelpers, except: [config: 0]
 
   alias PropCheck.Test.Cache
   # require Logger
@@ -17,7 +16,8 @@ defmodule PropCheck.Test.Cache.DSL do
     forall cmds <- commands(__MODULE__, initial_state()) do
       # Logger.debug "Commands to run: #{inspect cmds}"
       Cache.start_link(@cache_size)
-      r = run_commands(__MODULE__, cmds)
+      env = [just_a_var: 123, root_key: 0]
+      r = run_commands(__MODULE__, cmds, env)
       {_history, _state, result} = r
       Cache.stop()
       # Logger.debug "Events are: #{inspect events}"
@@ -98,9 +98,11 @@ defmodule PropCheck.Test.Cache.DSL do
   to 'fuzz' the system.
   """
   def key, do: oneof([
-    integer(1, @cache_size),
-    integer()
-    ])
+        integer(1, @cache_size),
+        integer(),
+        {:var, :just_a_var},
+        {:var, :root_key}
+      ])
   @doc "our values are integers"
   def val, do: integer()
 
