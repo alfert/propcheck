@@ -18,7 +18,7 @@ defmodule PropCheck.Test.Cache.DSL do
       # Logger.debug "Commands to run: #{inspect cmds}"
       Cache.start_link(@cache_size)
       r = run_parallel_commands(__MODULE__, cmds)
-      {history, state, result} = r
+      {_history, _state, result} = r
       # Logger.debug "History is #{inspect history}"
       # Logger.debug "State is #{inspect state}"
       Cache.stop()
