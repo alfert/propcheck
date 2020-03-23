@@ -118,27 +118,33 @@ defmodule PropCheck.StateM.Reporter do
     #{last_state}
     """
   end
-  defp main_section(:parallel, history, _state, cmds, opts) do
-    {seq_cmds, [p1_cmds, p2_cmds]} = cmds
+  defp main_section(:parallel, history, _state, states, opts) do
+    {seq_states, [p1_states, p2_states]} = states
     {:ok, seq} = Keyword.fetch(history, :sequential)
     [p1, p2] = case Keyword.fetch(history, :parallel) do
       {:ok, val} -> val
       :error -> [ [], [] ]
     end
-    seq_commands = zip_cmds_history(seq_cmds, seq)
-    |> print_command_lines(false, opts)
-    |> Enum.join("\n")
-    par_commands_1 = "#{inspect p1, :pretty}"
-    par_commands_2 = "#{inspect p2, :pretty}"
+    # seq_commands = zip_cmds_history(seq, seq_states)
+    # |> print_command_lines(false, opts)
+    # |> Enum.join("\n")
+    # p2_cmds = zip_cmds_history(p2, p2_states) |> print_command_lines(false, opts)|> Enum.join("\n")
+    seq_commands = "#{inspect seq, pretty: true}"
+    seq_state_0 = "#{inspect seq_states, pretty: true}"
+    par_commands_1 = "#{inspect p1, pretty: true}"
+    par_commands_2 = "#{inspect p2, pretty: true}"
+    par_states_2 = "#{inspect p2_states, pretty: true}"
     """
     Sequential commands:
     #{seq_commands}
+    #{seq_state_0}
 
     Process 1:
     #{par_commands_1}
 
     Process 2:
     #{par_commands_2}
+    #{par_states_2}
     """
   end
 
