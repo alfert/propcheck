@@ -367,7 +367,7 @@ defmodule PropCheck.StateM do
 
   * `history` contains the execution history of all commands that were
     executed without raising an exception. It contains tuples of the form
-    `{t:dynamic_state, t:term}`, specifying the state prior to
+    `{t:dynamic_state/0, t:term/0}`, specifying the state prior to
     command execution and the actual result of the command.
   * `dynamicState` contains the state of the abstract state machine at
     the moment when execution stopped. In case execution has stopped due to a
@@ -444,6 +444,9 @@ defmodule PropCheck.StateM do
   @doc """
   Print pretty report of the failed command run.
 
+  Note that it by default aliases every commands module, so only the last part
+  of the namespace will be used.
+
   Accepts options:
   * `return_values` - whether to print return values after each command run
     (default `true`),
@@ -456,7 +459,10 @@ defmodule PropCheck.StateM do
   * `cmd_args` - whether to print command arguments as literals
     (default `true`),
   * `inspect_opts` - options passed to `inspect/2`
-
+  * `alias` - set a list of modules and aliases, to be used to pretty print
+  commands. Accepts a `t:module/0`,  a tuple of type
+  `{module(), alias :: module()}` or a list of them (default is to alias every
+  command's module - if you want to disable default aliasing set it to `[]`).
   """
   @spec print_report({history, dynamic_state, result}, command_list, keyword) :: :ok
   defdelegate print_report(run_result, cmds, opts \\ []),
