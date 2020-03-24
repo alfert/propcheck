@@ -11,23 +11,23 @@ defmodule PropCheck.Test.PrettyReportsDSL do
     # Command crashed.
     #
     # Commands:
-    #    var1 = PropCheck.Test.PrettyReportsDSL.noop(0)
+    #    var1 = PrettyReportsDSL.noop(0)
     #         # -> :ok
     #         # Post state: [0]
     #
-    #    var2 = PropCheck.Test.PrettyReportsDSL.noop(1)
+    #    var2 = PrettyReportsDSL.noop(1)
     #         # -> :ok
     #         # Post state: [1, 0]
     #
-    #    var3 = PropCheck.Test.PrettyReportsDSL.noop(2)
+    #    var3 = PrettyReportsDSL.noop(2)
     #         # -> :ok
     #         # Post state: [2, 1, 0]
     #
-    #    var4 = PropCheck.Test.PrettyReportsDSL.noop(3)
+    #    var4 = PrettyReportsDSL.noop(3)
     #         # -> :ok
     #         # Post state: [3, 2, 1, 0]
     #
-    # #! var5 = PropCheck.Test.PrettyReportsDSL.crash_command()
+    # #! var5 = PrettyReportsDSL.crash_command()
     #         # -> ** (RuntimeError) Crash
     #         #     test/statem_pretty_reports_test.exs:99: PropCheck.Test.PrettyReportsDSL.crash_command/0
     #         #     (proper) src/proper_statem.erl:581: :proper_statem.safe_apply/3
@@ -139,22 +139,22 @@ defmodule PropCheck.Test.PrettyReportsDSL do
     #
     #
     # Commands:
-    #    var1 = PropCheck.Test.PrettyReportsDSL.noop(0)
+    #    var1 = PrettyReportsDSL.noop(0)
     #         # -> :ok
     #         # Post state: [0]
     #
-    #    var2 = PropCheck.Test.PrettyReportsDSL.noop(1)
+    #    var2 = PrettyReportsDSL.noop(1)
     #         # -> :ok
     #         # Post state: [1, 0]
     #
-    #    var3 = PropCheck.Test.PrettyReportsDSL.noop(2)
+    #    var3 = PrettyReportsDSL.noop(2)
     #         # -> :ok
     #         # Post state: [2, 1, 0]
     #
-    #    var4 = PropCheck.Test.PrettyReportsDSL.noop(3)
+    #    var4 = PrettyReportsDSL.noop(3)
     #         # -> :ok
     #
-    # #! var5 = PropCheck.Test.PrettyReportsDSL.crash_precond()
+    # #! var5 = PrettyReportsDSL.crash_precond()
     #
     #
     # Last state:
@@ -237,22 +237,22 @@ defmodule PropCheck.Test.PrettyReportsDSL do
     # Precondition failed.
     #
     # Commands:
-    #    var1 = PropCheck.Test.PrettyReportsDSL.noop(0)
+    #    var1 = PrettyReportsDSL.noop(0)
     #         # -> :ok
     #         # Post state: [0]
     #
-    #    var2 = PropCheck.Test.PrettyReportsDSL.noop(1)
+    #    var2 = PrettyReportsDSL.noop(1)
     #         # -> :ok
     #         # Post state: [1, 0]
     #
-    #    var3 = PropCheck.Test.PrettyReportsDSL.noop(2)
+    #    var3 = PrettyReportsDSL.noop(2)
     #         # -> :ok
     #         # Post state: [2, 1, 0]
     #
-    #    var4 = PropCheck.Test.PrettyReportsDSL.noop(3)
+    #    var4 = PrettyReportsDSL.noop(3)
     #         # -> :ok
     #
-    # #! var5 = PropCheck.Test.PrettyReportsDSL.fail_precond()
+    # #! var5 = PrettyReportsDSL.fail_precond()
     #
     #
     # Last state:
@@ -351,23 +351,23 @@ defmodule PropCheck.Test.PrettyReportsDSL do
     #
     #
     # Commands:
-    #    var1 = PropCheck.Test.PrettyReportsDSL.noop(0)
+    #    var1 = PrettyReportsDSL.noop(0)
     #         # -> :ok
     #         # Post state: [0]
     #
-    #    var2 = PropCheck.Test.PrettyReportsDSL.noop(1)
+    #    var2 = PrettyReportsDSL.noop(1)
     #         # -> :ok
     #         # Post state: [1, 0]
     #
-    #    var3 = PropCheck.Test.PrettyReportsDSL.noop(2)
+    #    var3 = PrettyReportsDSL.noop(2)
     #         # -> :ok
     #         # Post state: [2, 1, 0]
     #
-    #    var4 = PropCheck.Test.PrettyReportsDSL.noop(3)
+    #    var4 = PrettyReportsDSL.noop(3)
     #         # -> :ok
     #         # Post state: [3, 2, 1, 0]
     #
-    # #! var5 = PropCheck.Test.PrettyReportsDSL.crash_postcond()
+    # #! var5 = PrettyReportsDSL.crash_postcond()
     #         # -> :ok
     #
     #
@@ -451,23 +451,23 @@ defmodule PropCheck.Test.PrettyReportsDSL do
     # Postcondition failed.
     #
     # Commands:
-    #    var1 = PropCheck.Test.PrettyReportsDSL.noop(0)
+    #    var1 = PrettyReportsDSL.noop(0)
     #         # -> :ok
     #         # Post state: [0]
     #
-    #    var2 = PropCheck.Test.PrettyReportsDSL.noop(1)
+    #    var2 = PrettyReportsDSL.noop(1)
     #         # -> :ok
     #         # Post state: [1, 0]
     #
-    #    var3 = PropCheck.Test.PrettyReportsDSL.noop(2)
+    #    var3 = PrettyReportsDSL.noop(2)
     #         # -> :ok
     #         # Post state: [2, 1, 0]
     #
-    #    var4 = PropCheck.Test.PrettyReportsDSL.noop(3)
+    #    var4 = PrettyReportsDSL.noop(3)
     #         # -> :ok
     #         # Post state: [3, 2, 1, 0]
     #
-    # #! var5 = PropCheck.Test.PrettyReportsDSL.fail_postcond()
+    # #! var5 = PrettyReportsDSL.fail_postcond()
     #         # -> :ok
     #
     #
@@ -624,16 +624,42 @@ defmodule PropCheck.Test.PrettyReportsDSL do
 
     test "command arguments as literals is enabled by default" do
       c = run []
+      assert c.log =~ "var1 = PrettyReportsDSL.noop(0)"
+      assert c.log =~ "var2 = PrettyReportsDSL.noop(1)"
+      assert c.log =~ "var3 = PrettyReportsDSL.noop(2)"
+    end
+
+    test "command arguments as literals can be suppressed" do
+      c = run [cmd_args: false]
+      assert c.log =~ "var1 = PrettyReportsDSL.noop(arg1_1)"
+      assert c.log =~ "var2 = PrettyReportsDSL.noop(arg2_1)"
+      assert c.log =~ "var3 = PrettyReportsDSL.noop(arg3_1)"
+    end
+
+    test "module aliasing can be disabled" do
+      c = run [alias: []]
       assert c.log =~ "var1 = PropCheck.Test.PrettyReportsDSL.noop(0)"
       assert c.log =~ "var2 = PropCheck.Test.PrettyReportsDSL.noop(1)"
       assert c.log =~ "var3 = PropCheck.Test.PrettyReportsDSL.noop(2)"
     end
 
-    test "command arguments as literals can be suppressed" do
-      c = run [cmd_args: false]
-      assert c.log =~ "var1 = PropCheck.Test.PrettyReportsDSL.noop(arg1_1)"
-      assert c.log =~ "var2 = PropCheck.Test.PrettyReportsDSL.noop(arg2_1)"
-      assert c.log =~ "var3 = PropCheck.Test.PrettyReportsDSL.noop(arg3_1)"
+    test "module aliasing accepts a list and a single element" do
+      c = run [alias: PropCheck.Test.PrettyReportsDSL]
+      assert c.log =~ "var1 = PrettyReportsDSL.noop(0)"
+      assert c.log =~ "var2 = PrettyReportsDSL.noop(1)"
+      assert c.log =~ "var3 = PrettyReportsDSL.noop(2)"
+
+      c = run [alias: [PropCheck.Test.PrettyReportsDSL]]
+      assert c.log =~ "var1 = PrettyReportsDSL.noop(0)"
+      assert c.log =~ "var2 = PrettyReportsDSL.noop(1)"
+      assert c.log =~ "var3 = PrettyReportsDSL.noop(2)"
+    end
+
+    test "module aliasing works in 'alias as' mode" do
+      c = run [alias: [{PropCheck.Test.PrettyReportsDSL, X}]]
+      assert c.log =~ "var1 = X.noop(0)"
+      assert c.log =~ "var2 = X.noop(1)"
+      assert c.log =~ "var3 = X.noop(2)"
     end
   end
 

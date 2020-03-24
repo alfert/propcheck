@@ -3,12 +3,14 @@ defmodule PropCheck.StateM.Reporter do
 
   alias PropCheck.StateM
 
+  @type mod_alias :: module() | {module(), as :: module()}
   @type option :: {:return_values, boolean}
                 | {:last_state, boolean}
                 | {:pre_cmd_state, boolean}
                 | {:post_cmd_state, boolean}
                 | {:cmd_args, boolean}
                 | {:inspect_opts, keyword}
+                | {:alias, mod_alias | [mod_alias]}
 
   @type options :: [option]
 
@@ -236,6 +238,8 @@ defmodule PropCheck.StateM.Reporter do
   end
 
   def pretty_cmd_name({:set, {:var, n}, {:call, mod, fun, args}}, opts) do
+    aliases = Keyword.get(opts, :alias, [mod])
+    mod = alias_module(mod, aliases)
     args =
       args
       |> Enum.with_index()
@@ -252,6 +256,35 @@ defmodule PropCheck.StateM.Reporter do
 
   defp symb_var(x) when is_integer(x), do: "var#{x}"
   defp symb_var(x) when is_atom(x), do: "var_#{x}"
+
+  defp alias_module(module, module) when is_atom(module),
+    do: alias_module(module, [module])
+  defp alias_module(module, {module, alias}) when is_atom(module) and is_atom(alias),
+    do: alias_module(module, [{module, alias}])
+  defp alias_module(module, aliases) when is_list(aliases) do
+    mod_split = Module.split(module)
+    aliased = for a <- aliases do
+      {alias_split, alias_as} = case a do
+                                  {m, a} when is_atom(m) and is_atom(a) ->
+                                    {Module.split(m), Module.split(a)}
+                                  m when is_atom(m) ->
+                                    m = Module.split(m)
+                                    {m, [List.last(m)]}
+                                end
+
+      case :lists.prefix(alias_split, mod_split) do
+        false -> module
+        true ->
+          mod_tail = Enum.drop(mod_split, length(alias_split))
+          (alias_as ++ mod_tail)
+          |> Module.concat
+      end
+    end
+
+    [module | aliased]
+    |> Enum.sort_by(& &1 |> to_string |> byte_size, &<=/2)
+    |> hd
+  end
 
   def inspectx({:exception, :error, exception, stacktrace}, _opts) do
     Exception.format :error, exception, stacktrace

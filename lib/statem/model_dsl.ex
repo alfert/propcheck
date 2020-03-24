@@ -526,6 +526,9 @@ defmodule PropCheck.StateM.ModelDSL do
   @doc """
   Print pretty report of the failed command run.
 
+  Note that it by default aliases every commands module, so only the last part
+  of the namespace will be used.
+
   Accepts options:
   * `return_values` - whether to print return values after each command run
   (default `true`),
@@ -538,6 +541,10 @@ defmodule PropCheck.StateM.ModelDSL do
   * `cmd_args` - whether to print command arguments as literals
   (default `true`),
   * `inspect_opts` - options passed to `inspect/2`
+  * `alias` - set a list of modules and aliases, to be used to pretty print
+  commands. Accepts a `t:module/0`,  a tuple of type
+  `{module(), alias :: module()}` or a list of them (default is to alias every
+  command's module - if you want to disable default aliasing set it to `[]`).
   """
   defdelegate print_report(run_result, cmds, opts \\ []),
     to: PropCheck.StateM.Reporter
