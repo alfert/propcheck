@@ -5,6 +5,10 @@ elixir:
   - 1.7
   - 1.8
   - 1.9
+jobs:
+  include:
+    - elixir: '1.10'
+      otp_release: '21.0'
 cache:
     - deps
     - ~/.mix
