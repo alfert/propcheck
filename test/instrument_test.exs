@@ -7,6 +7,15 @@ defmodule PropCheck.Test.InstrumentTester do
 
   alias PropCheck.Instrument
 
+  defmodule Identity do
+    @moduledoc """
+    Implements the Instrumentation as the identity function
+    """
+    @behaviour Instrument
+    @impl true
+    def handle_function_call(call), do: IO.inspect(call)
+  end
+
   test "Read the forms of the beam" do
     assert {:ok, forms} = Instrument.get_forms_of_module(PropCheck.Support.InstrumentExample)
     IO.inspect(forms, [pretty: true, limit: :infinity])
@@ -18,7 +27,7 @@ defmodule PropCheck.Test.InstrumentTester do
 
   test "Initial instrumentation is the identity" do
     {:ok, forms} = Instrument.get_forms_of_module(PropCheck.Support.InstrumentExample)
-    instrumented_forms = Instrument.instrument_form(forms)
+    instrumented_forms = Instrument.instrument_form(Identity, forms)
   end
 
 end
