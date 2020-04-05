@@ -10,19 +10,14 @@ defmodule PropCheck.Instrument do
   """
   @callback handle_function_call(call :: any) :: any
 
-
   @doc """
   Takes the object code of the module, instruments it and update the module
   in the code server with instrumented byte code.
   """
   def instrument_module(mod) when is_atom(mod) do
-
-    # TODO: hwo to convert a beam ast to an Elixir ast?
-    # with :beam_lib we can extract the Erlang AST from the obj_code binary
-    # but how to proceed then?
-    # ast = instrument_functions(mod, obj_code)
-    # {^mod, new_obj_code} = Code.compile_quoted(ast, file)
-    # {:module, _new_mod} = :code.load_binary(mod, filename, new_obj_code)
+    # 1. Get the forms of the mod
+    # 2. instruments the forms of the mod
+    # 3. Compile them with :compile.forms
     :not_implemented
   end
 
@@ -38,15 +33,17 @@ defmodule PropCheck.Instrument do
     end
   end
 
-  def map(enum, mod, fun) when is_function(fun, 2) do
+  # Helper function for passing the module through the mapping process
+  defp map(enum, mod, fun) when is_function(fun, 2) do
     Enum.map(enum, &(fun.(mod, &1)))
   end
-  def map_expr(enum, mod), do: map(enum, mod, &instrument_expr/2)
+  # Helper function for mapping expressions
+  defp map_expr(enum, mod), do: map(enum, mod, &instrument_expr/2)
 
   @doc "Instruments the form of a module"
   def instrument_form(mod, {:abstract_code, {:raw_abstract_v1, clauses}}) when is_list(clauses) do
     instr_clauses = map(clauses, mod, &instrument_mod_clause/2)
-    {:abstract_form,
+    {:abstract_code,
       {:raw_abstract_v1,
         instr_clauses}}
   end
@@ -73,7 +70,7 @@ defmodule PropCheck.Instrument do
     {:bin, line, map(bin_elements, mod, &instrument_bin_element/2)}
   end
   def instrument_expr(mod, {:block, line, exprs}) do
-    {:block, line, map(exprs, mod, &instrument_expr/2)}
+    {:block, line, map_expr(exprs, mod)}
   end
   def instrument_expr(mod, {:case, line, expr, clauses}) do
     instr_expr = instrument_expr(mod, expr)
@@ -133,7 +130,10 @@ defmodule PropCheck.Instrument do
   def instrument_clause(mod, {:clause, line, p, body}) do
     {:clause, line, instrument_pattern(mod, p), map_expr(body, mod)}
   end
-  def instrument_clause(mod, {:clause, line, ps, [guards], body}) when is_list(ps) do
+  def instrument_clause(mod, {:clause, line, ps, body}) when is_list(ps) do
+    {:clause, line, map_expr(ps, mod), map_expr(body, mod)}
+  end
+  def instrument_clause(mod, {:clause, line, ps, [guards], body}) when is_list(ps) and is_list(guards) do
     {:clause, line, map_expr(ps, mod), [map_expr(guards, mod)], map_expr(body, mod)}
   end
   def instrument_clause(mod, {:clause, line, ps, guards, body}) when is_list(ps) do
@@ -154,7 +154,26 @@ defmodule PropCheck.Instrument do
     {assoc, line, instrument_expr(mod, key), instrument_expr(mod, value)}
   end
 
-  def instrument_function_call(mod, c), do: mod.handle_function_call(c)
+  @doc """
+  Instruments a function call and gives control the handler module `mod`.
+  For now, we only instrumenting a call, if it is any of the interesting functions,
+  i.e those might be a source of concurrency problems due to a shared mutable
+  state or otherwise tinkering with scheduling.
+  """
+  def instrument_function_call(mod, {:call, line, {:remote, line2, m, f}, as}) do
+    module = instrument_expr(mod, m)
+    fun = instrument_expr(mod, f)
+    args = map_expr(as, mod)
+    case instrumentable_function(m, f) do
+      true -> mod.handle_function_call({:call, line, {:remote, line2, module, fun}, args})
+      _ -> {:call, line, {:remote, line2, module, fun}, args}
+    end
+  end
+  def instrument_function_call(mod, {:call, line, f, as}) do
+    fun = instrument_expr(mod, f)
+    args = map_expr(as, mod)
+    {:call, line, fun, args}
+  end
 
   @doc "The receive might be handled differently, therefore it has its own function"
   def instrument_receive(mod, {:receive, line, cs}) do
@@ -165,32 +184,137 @@ defmodule PropCheck.Instrument do
       instrument_expr(mod, e), map_expr(b, mod)}
   end
 
+  # Generate the matcher for interestng functions by a macro
+  # This list is taken from the opensource version of Pulse
+  # (https://github.com/prowessproject/pulse-time/blob/master/src/pulse_time_scheduler.erl)
+  for {m, f} <- [
+    {:erlang, :spawn},
+    {:erlang, :spawn_link},
+    {:erlang, :link},
+    {:erlang, :process_flag},
+    # {:erlang, yield},
+    {:erlang, :now},
+    {:erlang, :is_process_alive},
+    {:erlang, :demonitor},
+    {:erlang, :monitor},
+    {:erlang, :exit},
+    {:erlang, :is_process_alive},
+
+    {:os, :timestamp},
+
+    {:timer, :sleep},
+    {:timer, :apply_after},
+    {:timer, :sleep},
+
+    {:io, :format},
+
+    {:file, :write_file},
+
+    {:supervisor, :start_link},
+    {:supervisor, :start_child},
+    {:supervisor, :which_children},
+
+    {:gen_event, :start_link},
+    {:gen_event, :send},
+    {:gen_event, :add_handler},
+    {:gen_event, :notify},
+
+    {:gen_fsm, :start_link},
+    {:gen_fsm, :send_event},
+    {:gen_fsm, :send_all_state_event},
+    {:gen_fsm, :sync_send_all_state_event},
+
+    {:gen_server, :start_link},
+    {:gen_server, :start},
+    {:gen_server, :call},
+    {:gen_server, :cast},
+    {:gen_server, :server},
+    {:gen_server, :loop}
+
+  ] do
+    quote do
+      def instrumentable_function({:atom, _, unquote(m)}, {:atom, _, unquote(f)}), do: true
+      def instrumentable_function(unquote(m), unquote(f)), do: true
+    end
+  end
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :lookup}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :lookup_element}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :update_element}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :insert}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :insert_new}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :delete_object}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :delete}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :delete_all_objects}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :select_delete}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :match_delete}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :match_object}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :member}), do: true
+  def instrumentable_function({:atom, _, :ets}, {:atom, _, :new}), do: true
+
+  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :start_link}), do: true
+  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :start}), do: true
+  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :call}), do: true
+  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :cast}), do: true
+  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :server}), do: true
+  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :loop}), do: true
+
+  def instrumentable_function({:atom, _, :supervisor}, {:atom, _, :start_link}), do: true
+  def instrumentable_function({:atom, _, :supervisor}, {:atom, _, :start_child}), do: true
+  def instrumentable_function({:atom, _, :supervisor}, {:atom, _, :which_children}), do: true
+
+  def intrumentable_function({:atom, _, :timer}, {:atom, _, :sleep}), do: true
+  def intrumentable_function({:atom, _, :timer}, {:atom, _, :apply_after}), do: true
+  def intrumentable_function({:atom, _, :timer}, {:atom, _, :exit_after}), do: true
+
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :spawn}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :spawn_link}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :link}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :process_flag}), do: true
+  # def instrumentable_function({:atom, _, :erlang}, {:atom, _, yield}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :now}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :is_process_alive}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :demonitor}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :monitor}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :exit}), do: true
+  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :is_process_alive}), do: true
+
+  def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :start_link}), do: true
+  def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :send}), do: true
+  def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :add_handler}), do: true
+  def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :notify}), do: true
+
+  def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :start_link}), do: true
+  def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :send_event}), do: true
+  def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :send_all_state_event}), do: true
+  def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :sync_send_all_state_event}), do: true
+
+  def instrumentable_function(_mod, _fun), do: false
 
   @doc """
   Instruments the body of a function to handle the `receive do ... end` expression
   for Tracer
   """
-  def instrument_elixir_expr(expr, context, instrumenter \\ __MODULE__) do
-    IO.puts "instrument function #{context.name}"
-    instr_expr = Macro.postwalk(expr, fn
-      {:receive, _info, [patterns]} ->
-        # identify do: patterns Und after: clause, diese müssen bei
-        # gen_receive als Argument übernommen werden.
-        IO.puts "instrument receive with pattern #{Macro.to_string patterns}"
-        IO.puts "instrument receive with pattern #{inspect patterns}"
-        IO.puts "Body expression is: #{Macro.to_string expr}"
-        gen_receive(patterns)
-      {:receive, _info, [patterns, _after_pattern]} ->
-        IO.puts "instrument a receive with an after pattern - this is ignored!"
-        gen_receive(patterns)
-      any -> any
-    end)
-    IO.puts "New body is: #{Macro.to_string(instr_expr)}"
-    IO.puts "New body is: #{inspect instr_expr, pretty: true}"
-    instr_expr
-  end
+  # def instrument_elixir_expr(expr, context, instrumenter \\ __MODULE__) do
+  #   IO.puts "instrument function #{context.name}"
+  #   instr_expr = Macro.postwalk(expr, fn
+  #     {:receive, _info} ->
+  #       # identify do: patterns Und after: clause, diese müssen bei
+  #       # gen_receive als Argument übernommen werden.
+  #       IO.puts "instrument receive with pattern #{Macro.to_string patterns}"
+  #       IO.puts "instrument receive with pattern #{inspect patterns}"
+  #       IO.puts "Body expression is: #{Macro.to_string expr}"
+  #       gen_receive(patterns)
+  #     {:receive, _info} ->
+  #       IO.puts "instrument a receive with an after pattern - this is ignored!"
+  #       gen_receive(patterns)
+  #     any -> any
+  #   end)
+  #   IO.puts "New body is: #{Macro.to_string(instr_expr)}"
+  #   IO.puts "New body is: #{inspect instr_expr, pretty: true}"
+  #   instr_expr
+  # end
 
-  def gen_receive(patterns) do
-    throw "Not Implemented"
-  end
+  # def gen_receive(patterns) do
+  #   throw "Not Implemented"
+  # end
 end
