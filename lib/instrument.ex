@@ -4,6 +4,8 @@ defmodule PropCheck.Instrument do
   other constructs to ease testing of concurrent programs and state machines.
   """
 
+  require Logger
+
   @doc """
   Handle the instrumentation of a (remote) function call. Must return a
   valid expression in Erlang Abstract Form.
@@ -26,9 +28,25 @@ defmodule PropCheck.Instrument do
   module as found in the code server.
   """
   def get_forms_of_module(mod) when is_atom(mod) do
-    {^mod, _filename, beam_code} = :code.get_object_code(mod)
+    {^mod, beam_code, filename} = :code.get_object_code(mod)
     case :beam_lib.chunks(beam_code, [:abstract_code]) do
-      {:ok, {^mod, [forms]}} -> {:ok, forms}
+      {:ok, {^mod, [forms]}} -> {:ok, filename, forms}
+      error -> error
+    end
+  end
+
+  @doc """
+  Compiles the abstract code of a module and loads it immediately into
+  the VM.
+  """
+  def compile_module(mod, filename, {:abstract_code, {:raw_abstract_v1, clauses}} = _abstract_code) do
+    options = [:binary, :debug_info, :return, :verbose]
+    case :compile.noenv_forms(clauses, options) do
+      {:ok, ^mod, bin_code, warnings} ->
+        Logger.debug "Module #{inspect mod} is compiled"
+        Logger.debug "Now loading the module"
+        {:module, ^mod} = :code.load_binary(mod, filename, bin_code)
+        {:ok, mod, bin_code, warnings}
       error -> error
     end
   end
@@ -82,8 +100,8 @@ defmodule PropCheck.Instrument do
     {:fun, line, map(cs, mod, &instrument_clause/2)}
   end
   def instrument_expr(_mod, {:fun, _, _} = f), do: f
-  def instrument_expr(mod, {:call, _l, _f, _args} = c), do: instrument_function_call(mod, c)
   def instrument_expr(mod, {:call, _l, {:remote, _m, _f}, _args} = c), do: instrument_function_call(mod, c)
+  def instrument_expr(mod, {:call, _l, _f, _args} = c), do: instrument_function_call(mod, c)
   def instrument_expr(mod, {:if, line, cs}), do: {:if, line, map(cs, mod, &instrument_clause/2)}
   def instrument_expr(mod, {:lc, line, e, qs}) do
     {:lc, line, instrument_expr(mod, e), map(qs, mod, &instrument_qualifier/2)}
@@ -130,9 +148,9 @@ defmodule PropCheck.Instrument do
   def instrument_clause(mod, {:clause, line, p, body}) do
     {:clause, line, instrument_pattern(mod, p), map_expr(body, mod)}
   end
-  def instrument_clause(mod, {:clause, line, ps, body}) when is_list(ps) do
-    {:clause, line, map_expr(ps, mod), map_expr(body, mod)}
-  end
+  # def instrument_clause(mod, {:clause, line, ps, body}) when is_list(ps) do
+  #   {:clause, line, map_expr(ps, mod), map_expr(body, mod)}
+  # end
   def instrument_clause(mod, {:clause, line, ps, [guards], body}) when is_list(ps) and is_list(guards) do
     {:clause, line, map_expr(ps, mod), [map_expr(guards, mod)], map_expr(body, mod)}
   end
@@ -184,59 +202,60 @@ defmodule PropCheck.Instrument do
       instrument_expr(mod, e), map_expr(b, mod)}
   end
 
+  @doc """
+  Prepends the call to `to_be_wrapped_call` by a call to `new_call`.
+  The result of `new_call` is ignored.
+  """
+  def prepend_call(to_be_wrapped_call, new_call) do
+    {:block, [generated: true], [new_call, to_be_wrapped_call]}
+  end
+
+  @doc """
+  Enocdes a call given as tuple `{m, f, a}` as Elixir values into an
+  abstract erlang form
+  """
+  def encode_call({m, f, a}) do
+    line = 0 # [generated: true]
+    {:call, line,
+      {:remote, line,
+        {:atom, line, m},
+        {:atom, line, f}},
+      Enum.map(a, &encode_value/1)}
+  end
+  def encode_call(m, f, a) when is_atom(m) and is_atom(f) and is_list(a),
+    do: encode_call({m, f, a})
+
+  @doc "Encodes a value"
+  def encode_value(nil), do: {:nil, [generated: true]}
+  def encode_value(value) when is_atom(value), do: {:atom, [generated: true], value}
+  def encode_value(value) when is_integer(value), do: {:integer, [generated: true], value}
+  def encode_value(value) when is_float(value), do: {:float, [generated: true], value}
+  def encode_value(value) when is_binary(value), do:
+    {:bin, [generated: true],
+      [{:bin_element, [generated: true], {:string, [generated: true], String.to_charlist(value)},
+        :default, :default}]}
+  def encode_value([]), do: encode_value(nil)
+  def encode_value(l) when is_list(l) do
+    l
+    |> Enum.reverse()
+    |> Enum.reduce({nil, 0}, fn v, acc -> {:cons, 0, encode_value(v), acc} end)
+  end
+  def encode_value(t) when is_tuple(t) do
+    {:tuple, [generated: true],
+      t
+      |> Tuple.to_list()
+      |> Enum.map(&encode_value/1)}
+  end
+  def encode_value(_unknown), do: throw ArgumentError
+
+  @doc "Encodes a call to `:erlang.yield()"
+  def call_yield do
+    encode_call({:erlang, :yield, []})
+  end
+
   # Generate the matcher for interestng functions by a macro
   # This list is taken from the opensource version of Pulse
   # (https://github.com/prowessproject/pulse-time/blob/master/src/pulse_time_scheduler.erl)
-  for {m, f} <- [
-    {:erlang, :spawn},
-    {:erlang, :spawn_link},
-    {:erlang, :link},
-    {:erlang, :process_flag},
-    # {:erlang, yield},
-    {:erlang, :now},
-    {:erlang, :is_process_alive},
-    {:erlang, :demonitor},
-    {:erlang, :monitor},
-    {:erlang, :exit},
-    {:erlang, :is_process_alive},
-
-    {:os, :timestamp},
-
-    {:timer, :sleep},
-    {:timer, :apply_after},
-    {:timer, :sleep},
-
-    {:io, :format},
-
-    {:file, :write_file},
-
-    {:supervisor, :start_link},
-    {:supervisor, :start_child},
-    {:supervisor, :which_children},
-
-    {:gen_event, :start_link},
-    {:gen_event, :send},
-    {:gen_event, :add_handler},
-    {:gen_event, :notify},
-
-    {:gen_fsm, :start_link},
-    {:gen_fsm, :send_event},
-    {:gen_fsm, :send_all_state_event},
-    {:gen_fsm, :sync_send_all_state_event},
-
-    {:gen_server, :start_link},
-    {:gen_server, :start},
-    {:gen_server, :call},
-    {:gen_server, :cast},
-    {:gen_server, :server},
-    {:gen_server, :loop}
-
-  ] do
-    quote do
-      def instrumentable_function({:atom, _, unquote(m)}, {:atom, _, unquote(f)}), do: true
-      def instrumentable_function(unquote(m), unquote(f)), do: true
-    end
-  end
   def instrumentable_function({:atom, _, :ets}, {:atom, _, :lookup}), do: true
   def instrumentable_function({:atom, _, :ets}, {:atom, _, :lookup_element}), do: true
   def instrumentable_function({:atom, _, :ets}, {:atom, _, :update_element}), do: true
@@ -262,9 +281,9 @@ defmodule PropCheck.Instrument do
   def instrumentable_function({:atom, _, :supervisor}, {:atom, _, :start_child}), do: true
   def instrumentable_function({:atom, _, :supervisor}, {:atom, _, :which_children}), do: true
 
-  def intrumentable_function({:atom, _, :timer}, {:atom, _, :sleep}), do: true
-  def intrumentable_function({:atom, _, :timer}, {:atom, _, :apply_after}), do: true
-  def intrumentable_function({:atom, _, :timer}, {:atom, _, :exit_after}), do: true
+  def instrumentable_function({:atom, _, :timer}, {:atom, _, :sleep}), do: true
+  def instrumentable_function({:atom, _, :timer}, {:atom, _, :apply_after}), do: true
+  def instrumentable_function({:atom, _, :timer}, {:atom, _, :exit_after}), do: true
 
   def instrumentable_function({:atom, _, :erlang}, {:atom, _, :spawn}), do: true
   def instrumentable_function({:atom, _, :erlang}, {:atom, _, :spawn_link}), do: true
@@ -276,7 +295,6 @@ defmodule PropCheck.Instrument do
   def instrumentable_function({:atom, _, :erlang}, {:atom, _, :demonitor}), do: true
   def instrumentable_function({:atom, _, :erlang}, {:atom, _, :monitor}), do: true
   def instrumentable_function({:atom, _, :erlang}, {:atom, _, :exit}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :is_process_alive}), do: true
 
   def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :start_link}), do: true
   def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :send}), do: true
@@ -288,12 +306,18 @@ defmodule PropCheck.Instrument do
   def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :send_all_state_event}), do: true
   def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :sync_send_all_state_event}), do: true
 
+  def instrumentable_function({:atom, _, :io}, {:atom, _, :format}), do: true
+
+  def instrumentable_function({:atom, _, :file}, {:atom, _, :write_file}), do: true
+
+  def instrumentable_function({:atom, _, :"Elixir.IO"}, {:atom, _, :puts}), do: true
+
   def instrumentable_function(_mod, _fun), do: false
 
-  @doc """
-  Instruments the body of a function to handle the `receive do ... end` expression
-  for Tracer
-  """
+  # @doc """
+  # Instruments the body of a function to handle the `receive do ... end` expression
+  # for Tracer
+  # """
   # def instrument_elixir_expr(expr, context, instrumenter \\ __MODULE__) do
   #   IO.puts "instrument function #{context.name}"
   #   instr_expr = Macro.postwalk(expr, fn
