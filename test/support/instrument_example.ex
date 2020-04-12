@@ -8,6 +8,8 @@ defmodule PropCheck.Support.InstrumentExample do
     private_hello(s)
   end
 
+  def hello, do: IO.puts "Hello"
+
   def fetch_from_ets(table, key) do
     [x] = :ets.lookup_element(table, key, 1)
     x
@@ -20,6 +22,7 @@ defmodule PropCheck.Support.InstrumentExample do
   def ets_in_expr(table, key) do
     case :ets.lookup_element(table, key, 1) do
       [] -> "empty list"
+      [1, 2, 3] -> "three values"
       l when is_list(l) -> "a value list"
       v -> "a single value"
     end
