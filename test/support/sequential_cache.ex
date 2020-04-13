@@ -22,7 +22,7 @@ defmodule PropCheck.Test.Cache do
     case :ets.match(@cache_name, {:_, {key, :"$1"}}) do
         [[val]] -> {:ok, val}
         [] -> {:error, :not_found}
-        any -> {:error, :many_values}
+        _any -> {:error, :many_values}
     end
   end
 

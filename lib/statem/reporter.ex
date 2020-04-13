@@ -19,7 +19,7 @@ defmodule PropCheck.StateM.Reporter do
   def print_report({history, state, result}, commands, opts \\ []),
     do: pretty_report(result, history, state, commands, opts)
 
-  defp pretty_report(result, seq_history, par_history, cmds, opts) when is_tuple(cmds) do
+  defp pretty_report(_result, seq_history, par_history, cmds, opts) when is_tuple(cmds) do
     title = "Concurrency Failure, we don't show the state :-/"
     history = [{:sequential, seq_history}, {:parallel, par_history}]
     print_pretty_report(title, :parallel, history, :no_state, cmds, opts)
@@ -118,12 +118,12 @@ defmodule PropCheck.StateM.Reporter do
     #{last_state}
     """
   end
-  defp main_section(:parallel, history, _state, states, opts) do
-    {seq_states, [p1_states, p2_states]} = states
+  defp main_section(:parallel, history, _state, states, _opts) do
+    {seq_states, [_p1_states, p2_states]} = states
     {:ok, seq} = Keyword.fetch(history, :sequential)
     [p1, p2] = case Keyword.fetch(history, :parallel) do
       {:ok, val} -> val
-      :error -> [ [], [] ]
+      :error -> [[], []]
     end
     # seq_commands = zip_cmds_history(seq, seq_states)
     # |> print_command_lines(false, opts)
