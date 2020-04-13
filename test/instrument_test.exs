@@ -106,11 +106,6 @@ defmodule PropCheck.Test.InstrumentTester do
 
   test "instrument an entire module" do
     mod = PropCheck.Support.InstrumentExample
-    # the following assert is only trued if we are not running cover-compiled
-    case :cover.is_compiled(mod) do
-      false -> assert :code.modified_modules() == []
-      _ -> :we_dont_know
-    end
 
     assert {:ok, ^mod, _module, []} = Instrument.instrument_module(mod, MessageInstrumenter)
     # This is robust even if wae are running cover compiled, but we cannot check wheather
@@ -128,6 +123,6 @@ defmodule PropCheck.Test.InstrumentTester do
     # This assertion should hold, but does not, because the custom attribute is not stored.
     # assert Instrument.is_instrumented?(forms)  == {:attribute, 1, :instrumented, PropCheck}
     assert Instrument.is_instrumented?(forms)  == false
-    Logger.debug(mod.module_info(:attributes))
+    Logger.debug(inspect mod.module_info(:attributes))
   end
 end
