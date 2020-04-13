@@ -38,7 +38,7 @@ defmodule PropCheck.Test.Cache do
             :ets.insert(@cache_name, {n, {key, val}}) # overwrite dupe
         [] ->
             # provoke a potenial concurrency bug
-            :erlang.yield()
+            # :erlang.yield()
             insert(key, val)
         any ->
             Logger.error "Invalid result during :etc.match for key #{inspect key}: #{inspect any}"
