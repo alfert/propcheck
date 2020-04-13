@@ -92,6 +92,10 @@ defmodule PropCheck.Instrument do
       _ -> false
     end)
   end
+  def is_instrumented?(mod) do
+    mod.module_info(:attributes)
+    |> Keyword.has_key?(:instrumented)
+  end
 
   # Helper function for passing the module through the mapping process
   defp map(enum, mod, fun) when is_function(fun, 2) do

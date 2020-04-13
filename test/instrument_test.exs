@@ -27,7 +27,7 @@ defmodule PropCheck.Test.InstrumentTester do
 
   defmodule MessageInstrumenter do
     @moduledoc """
-    Implements the Instrumentation as puts of `"Instrumented!" before calling the original function.
+    Implements the Instrumentation as logging `"Instrumented!" before calling the original function.
     """
     require Logger
     @behaviour Instrument
@@ -49,7 +49,7 @@ defmodule PropCheck.Test.InstrumentTester do
   test "Read the forms of the beam" do
     mod = PropCheck.Support.InstrumentExample
     assert {:ok, filename, forms} = Instrument.get_forms_of_module(mod)
-    IO.inspect(forms, [pretty: true, limit: :infinity])
+    Logger.debug("#{inspect forms, [pretty: true, limit: :infinity]}")
     assert tuple_size(forms) == 2
     {:abstract_code, code} = forms
     assert tuple_size(code) == 2
@@ -94,9 +94,9 @@ defmodule PropCheck.Test.InstrumentTester do
     compile_result = Instrument.compile_module(mod, filename, altered_forms)
     assert {:ok, ^mod, _module, []} = compile_result
 
-    # This assertion might break if before this test another instrumentation happens
-    mods = :code.modified_modules()
-    assert [mod] == mods
+    # This is robust even if wae are running cover compiled, but we cannot check wheather
+    # if we modified the cover compiled module instance
+    assert Enum.member?(:code.modified_modules(), mod)
 
     {:ok, ^mod, _module, []} = compile_result
     log_output = capture_log fn -> mod.hello() end
@@ -106,10 +106,17 @@ defmodule PropCheck.Test.InstrumentTester do
 
   test "instrument an entire module" do
     mod = PropCheck.Support.InstrumentExample
-    assert :code.modified_modules() == []
+    # the following assert is only trued if we are not running cover-compiled
+    case :cover.is_compiled(mod) do
+      false -> assert :code.modified_modules() == []
+      _ -> :we_dont_know
+    end
 
     assert {:ok, ^mod, _module, []} = Instrument.instrument_module(mod, MessageInstrumenter)
-    assert :code.modified_modules() == [mod]
+    # This is robust even if wae are running cover compiled, but we cannot check wheather
+    # if we modified the cover compiled module instance
+    assert Enum.member?(:code.modified_modules(), mod)
+    assert Instrument.is_instrumented?(mod)
 
     {:ok, _filename, code} = Instrument.get_forms_of_module(mod)
     {:abstract_code, {:raw_abstract_v1, forms}} = code
@@ -121,5 +128,6 @@ defmodule PropCheck.Test.InstrumentTester do
     # This assertion should hold, but does not, because the custom attribute is not stored.
     # assert Instrument.is_instrumented?(forms)  == {:attribute, 1, :instrumented, PropCheck}
     assert Instrument.is_instrumented?(forms)  == false
+    Logger.debug(mod.module_info(:attributes))
   end
 end
