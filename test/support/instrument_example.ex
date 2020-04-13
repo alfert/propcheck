@@ -24,7 +24,7 @@ defmodule PropCheck.Support.InstrumentExample do
       [] -> "empty list"
       [1, 2, 3] -> "three values"
       l when is_list(l) -> "a value list"
-      v -> "a single value"
+      _v -> "a single value"
     end
   end
 
