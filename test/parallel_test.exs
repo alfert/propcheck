@@ -8,10 +8,17 @@ defmodule PropCheck.Test.Cache.DSL do
   use PropCheck.StateM.ModelDSL
   import PropCheck.TestHelpers, except: [config: 0]
 
+  alias PropCheck.Instrument
   alias PropCheck.Test.Cache
+
   require Logger
 
   @cache_size 10
+
+  setup_all do
+    Instrument.instrument_module(Cache, Instrument.YieldInstrumenter)
+    :ok # no update of a context
+  end
 
   property "run the sequential cache concurrently", [:verbose] do
     forall cmds <- parallel_commands(__MODULE__, initial_state()) do
