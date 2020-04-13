@@ -86,6 +86,7 @@ defmodule PropCheck.Mixfile do
         ex_unit
         iex
         mix
+        compiler
       )a,
       flags: ~w(
         error_handling
