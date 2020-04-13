@@ -125,4 +125,17 @@ defmodule PropCheck.Test.InstrumentTester do
     assert Instrument.is_instrumented?(forms)  == false
     Logger.debug(inspect mod.module_info(:attributes))
   end
+
+  test "instrument an entire application" do
+    Logger.error "All Apps: #{inspect Application.loaded_applications()}"
+    # The ASN1 compiler is not really used, so no damage is expected
+    app = :asn1
+    all_modules = Application.spec(app, :modules)
+    Enum.each(all_modules, fn m -> assert not Instrument.is_instrumented?(m) end)
+
+    assert :ok == Instrument.instrument_app(app, MessageInstrumenter)
+
+    Enum.each(all_modules, fn m -> assert Instrument.is_instrumented?(m) end)
+
+  end
 end
