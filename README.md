@@ -6,7 +6,6 @@ based property testing framework in the spirit of QuickCheck.
 [![Build Status](https://travis-ci.org/alfert/propcheck.svg?branch=master)](https://travis-ci.org/alfert/propcheck)
 [![Hex.pm version](https://img.shields.io/hexpm/v/propcheck.svg)](https://hex.pm/packages/propcheck)
 [![Gitter](https://badges.gitter.im/propcheck/community.svg)](https://gitter.im/propcheck/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-![Elixir CI](https://github.com/alfert/propcheck/workflows/Elixir%20CI/badge.svg)
 
 ## Installation
 To use PropCheck with your project, add it as a dependency to `mix.exs`:
