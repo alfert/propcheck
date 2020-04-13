@@ -10,13 +10,14 @@ defmodule PropCheck.Test.Cache.DSL do
 
   alias PropCheck.Instrument
   alias PropCheck.Test.Cache
+  alias PropCheck.YieldInstrumenter
 
   require Logger
 
   @cache_size 10
 
   setup_all do
-    Instrument.instrument_module(Cache, Instrument.YieldInstrumenter)
+    Instrument.instrument_module(Cache, YieldInstrumenter)
     :ok # no update of a context
   end
 
