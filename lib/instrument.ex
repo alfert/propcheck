@@ -19,6 +19,13 @@ defmodule PropCheck.Instrument do
   """
   @callback is_instrumentable_function(mod ::module, fun :: atom) :: boolean
 
+  def instrument_app(app, instrumenter) do
+    case  Application.spec(app, :modules) do
+      mods when is_list(mods) -> Enum.each(mods, &(instrument_module(&1, instrumenter)))
+      nil -> :ok
+    end
+  end
+
   @doc """
   Takes the object code of the module, instruments it and update the module
   in the code server with instrumented byte code.
