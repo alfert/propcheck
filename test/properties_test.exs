@@ -1,4 +1,7 @@
 defmodule PropertiesTest do
+  @moduledoc """
+  Tests for setup and options
+  """
   use ExUnit.Case, async: true
   use PropCheck, default_opts: [numtests: 1]
 

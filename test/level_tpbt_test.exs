@@ -1,4 +1,7 @@
 defmodule PropCheck.Test.LevelTest do
+  @moduledoc """
+  Tests for targeted properties.
+  """
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use ExUnit.Case, async: true
   import PropCheck.TestHelpers, except: [config: 0]

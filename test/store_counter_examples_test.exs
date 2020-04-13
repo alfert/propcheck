@@ -4,6 +4,7 @@
 # we can verify that no test here resulted in a stored counter example.
 #
 defmodule StoreCounterExample.ModuleTag do
+  @moduledoc "A test for stroring counter examples"
   use ExUnit.Case
   use PropCheck
   @moduletag store_counter_example: false, manual: true
@@ -17,6 +18,7 @@ defmodule StoreCounterExample.ModuleTag do
 end
 
 defmodule StoreCounterExample.DescribeTag do
+  @moduledoc "A test for stroring counter examples"
   use ExUnit.Case
   use PropCheck
 
@@ -35,6 +37,7 @@ defmodule StoreCounterExample.DescribeTag do
 end
 
 defmodule StoreCounter.ExampleTag do
+  @moduledoc "A test for stroring counter examples"
   use ExUnit.Case
   use PropCheck
 

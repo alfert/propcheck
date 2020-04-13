@@ -1,4 +1,7 @@
 defmodule VerifyVerboseElixirSyntaxTest do
+  @moduledoc """
+  Verifies the verbose syntax
+  """
   use ExUnit.Case, async: false
   use PropCheck, default_opts: [:verbose]
 

@@ -1,4 +1,7 @@
 defmodule PropCheck.TreeTest do
+  @moduledoc """
+  A set of properties for various tree implementations
+  """
   use ExUnit.Case, async: true
   alias PropCheck.Test.Tree
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0

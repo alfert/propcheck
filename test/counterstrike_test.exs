@@ -1,5 +1,8 @@
 defmodule PropCheck.Test.CounterStrikeTest do
 
+  @moduledoc """
+  Tests for the handling counter examples.
+  """
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   import PropCheck.TestHelpers, except: [config: 0]
