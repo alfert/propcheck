@@ -299,23 +299,7 @@ defmodule PropCheck.StateM.Reporter do
     inspect x, Keyword.merge(default_opts, opts)
   end
 
-  # added some default colors, since GitHub Actions does not provide a colorized terminal
-  # such that some tests fail for the Reporter.
   defp syntax_colors do
-    default_colors = [
-      atom: :cyan,
-      string: :green,
-      list: :default_color,
-      boolean: :magenta,
-      nil: :magenta,
-      tuple: :default_color,
-      binary: :default_color,
-      map: :default_color
-    ]
-    case IEx.Config.color(:syntax_colors) do
-      [] -> default_colors
-      kw when is_list(kw) -> kw
-      _anything_else -> default_colors
-    end
+    IEx.Config.color :syntax_colors
   end
 end
