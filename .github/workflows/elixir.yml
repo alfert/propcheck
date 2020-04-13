@@ -21,7 +21,8 @@ jobs:
     - name: Install Dependencies
       run: mix do deps.get, deps.compile, compile --warnings-as-errors
     - name: Run Tests
-      run: 
-        - PROPCHECK_DEBUG=1 PROPCHECK_VERBOSE=1 PROPCHECK_NUMTESTS=200 PROPCHECK_SEARCH_STEPS=1000 mix tests --cover --trace
-        - mix credo --strict
-        - env MIX_ENV=test mix dialyzer
+      run: PROPCHECK_DEBUG=1 PROPCHECK_VERBOSE=1 PROPCHECK_NUMTESTS=200 PROPCHECK_SEARCH_STEPS=1000 mix tests --cover --trace
+    - name: Check Credo
+      run: mix credo --strict
+    - name: Run the Dialyzer
+      run; mix env MIX_ENV=test mix dialyzer
