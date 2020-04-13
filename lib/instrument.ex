@@ -19,6 +19,24 @@ defmodule PropCheck.Instrument do
   """
   @callback is_instrumentable_function(mod ::module, fun :: atom) :: boolean
 
+  defmodule YieldInstrumenter do
+    @moduledoc """
+    Instruments with prepending `:erlang.yield/0` for calls typical concurrency bug
+    aware functions.
+    """
+    alias PropCheck.Instrument
+    @behaviour Instrument
+    @impl true
+    def handle_function_call(call) do
+      Logger.debug("handle_function: #{inspect call}")
+      Instrument.prepend_call(call, Instrument.call_yield())
+    end
+
+    @impl true
+    def is_instrumentable_function(mod, fun), do: Instrument.instrumentable_function(mod, fun)
+
+  end
+
   def instrument_app(app, instrumenter) do
     case  Application.spec(app, :modules) do
       mods when is_list(mods) -> Enum.each(mods, &(instrument_module(&1, instrumenter)))
