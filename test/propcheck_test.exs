@@ -1,4 +1,7 @@
 defmodule PropcheckTest do
+  @moduledoc """
+  Basic Tests for PropCheck, delegating mostly to doc tests.
+  """
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   import PropCheck.TestHelpers, except: [config: 0]

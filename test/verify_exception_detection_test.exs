@@ -1,5 +1,5 @@
 defmodule VerifyExceptionDetectionTest do
-  # Tests to check that exception detection works as intended.
+  @moduledoc "Tests to check that exception detection works as intended."
   use ExUnit.Case
   use PropCheck
 

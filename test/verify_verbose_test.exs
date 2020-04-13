@@ -1,5 +1,5 @@
 defmodule VerifyVerbose do
-  # Check that setting verboseness using PROPCHECK_VERBOSE works as intended.
+  @moduledoc "Check that setting verboseness using PROPCHECK_VERBOSE works as intended."
   use ExUnit.Case
   use PropCheck
 

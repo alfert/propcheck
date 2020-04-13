@@ -69,7 +69,7 @@ defmodule PropCheck.Instrument do
   Compiles the abstract code of a module and loads it immediately into
   the VM.
   """
-  def compile_module(mod, filename, {:abstract_code, {:raw_abstract_v1, clauses}} = _abstract_code) do
+  def compile_module(mod, filename, _code = {:abstract_code, {:raw_abstract_v1, clauses}}) do
     compile_module(mod, filename, clauses)
   end
   def compile_module(mod, filename, clauses) when is_list(clauses) do
@@ -126,7 +126,7 @@ defmodule PropCheck.Instrument do
   end
 
   @doc "This is a big switch over all kinds of expressions for instrumenting them"
-  def instrument_expr(_instrumenter, {:atom, _, _} = a), do: a
+  def instrument_expr(_instrumenter, a = {:atom, _, _}), do: a
   def instrument_expr(instrumenter, {:bc, line, expr, qs}) do
     {:bc, line, instrument_expr(instrumenter, expr), map(qs, instrumenter, &instrument_qualifier/2)}
   end
@@ -145,9 +145,9 @@ defmodule PropCheck.Instrument do
   def instrument_expr(instrumenter, {:fun, line, cs}) when is_list(cs) do
     {:fun, line, map(cs, instrumenter, &instrument_clause/2)}
   end
-  def instrument_expr(_instrumenter, {:fun, _, _} = f), do: f
-  def instrument_expr(instrumenter, {:call, _l, {:remote, _m, _f}, _args} = c), do: instrument_function_call(instrumenter, c)
-  def instrument_expr(instrumenter, {:call, _l, _f, _args} = c), do: instrument_function_call(instrumenter, c)
+  def instrument_expr(_instrumenter, f = {:fun, _, _}), do: f
+  def instrument_expr(instrumenter, c = {:call, _l, {:remote, _m, _f}, _args}), do: instrument_function_call(instrumenter, c)
+  def instrument_expr(instrumenter, c = {:call, _l, _f, _args}), do: instrument_function_call(instrumenter, c)
   def instrument_expr(instrumenter, {:if, line, cs}), do: {:if, line, map(cs, instrumenter, &instrument_clause/2)}
   def instrument_expr(instrumenter, {:lc, line, e, qs}) do
     {:lc, line, instrument_expr(instrumenter, e), map(qs, instrumenter, &instrument_qualifier/2)}
@@ -163,8 +163,8 @@ defmodule PropCheck.Instrument do
   def instrument_expr(instrumenter, {:op, line, op, e1}), do: {:op, line, op, instrument_expr(instrumenter, e1)}
   def instrument_expr(instrumenter, {:op, line, op, e1, e2}), do:
     {:op, line, op, instrument_expr(instrumenter, e1), instrument_expr(instrumenter, e2)}
-  def instrument_expr(instrumenter, {:receive, _line, _cs} = r), do: instrument_receive(instrumenter, r)
-  def instrument_expr(instrumenter, {:receive, _line, _cs, _e, _b} = r), do: instrument_receive(instrumenter, r)
+  def instrument_expr(instrumenter, r = {:receive, _line, _cs}), do: instrument_receive(instrumenter, r)
+  def instrument_expr(instrumenter, r = {:receive, _line, _cs, _e, _b}), do: instrument_receive(instrumenter, r)
   def instrument_expr(instrumenter, {:record, line, name, fields}) do # record creation
     {:record, line, name, map_expr(fields, instrumenter)}
   end
@@ -174,7 +174,7 @@ defmodule PropCheck.Instrument do
   def instrument_expr(instrumenter, {:record_field, line, field, expr}), do: {:record, line, field, instrument_expr(instrumenter, expr)}
   def instrument_expr(instrumenter, {:record_field, line, expr, name, field}), do:
     {:record, line, instrument_expr(instrumenter, expr), name, field}
-  def instrument_expr(_instrumenter, {:record_index, _line, _name, _fields} = r), do: r
+  def instrument_expr(_instrumenter, r = {:record_index, _line, _name, _fields}), do: r
   def instrument_expr(instrumenter, {:tuple, line, es}), do: {:tuple, line, map_expr(es, instrumenter)}
   def instrument_expr(instrumenter, {:try, line, body, cases, catches, expr}) do
     i_body = map_expr(body, instrumenter)
@@ -182,8 +182,8 @@ defmodule PropCheck.Instrument do
     i_catches = map(catches, instrumenter, &instrument_clause/2)
     {:try, line, i_body, i_cases, i_catches, instrument_expr(instrumenter, expr)}
   end
-  def instrument_expr(_instrumenter, {:var, _l, _name} = v), do: v
-  def instrument_expr(_instrumenter, {literal, _line, _val} = l) when literal in [:atom, :integer, :float, :char, :string], do: l
+  def instrument_expr(_instrumenter, v = {:var, _l, _name}), do: v
+  def instrument_expr(_instrumenter, l = {literal, _line, _val}) when literal in [:atom, :integer, :float, :char, :string], do: l
 
   @doc "Instrument a part of binary pattern definition"
   def instrument_bin_element(instrumenter, {:bin_element, line, expr, size, tsl}) do

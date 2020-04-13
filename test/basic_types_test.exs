@@ -1,4 +1,7 @@
 defmodule PropCheck.Test.BasicTypes do
+  @moduledoc """
+  Tests for the basic generators or types, Mostly delegated as doctest to `PropCheck.BasicTypes?.
+  """
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   import PropCheck.TestHelpers, except: [config: 0]

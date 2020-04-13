@@ -1,4 +1,7 @@
 defmodule PropertiesDefaultOptsFunctionTest do
+  @moduledoc """
+  A Test for property options.
+  """
   alias PropCheck.Test
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &DefaultOpts.config/0

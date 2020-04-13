@@ -1,4 +1,7 @@
 defmodule PropCheck.StackTypeTest do
+  @moduledoc """
+  A simple test for a simple stack.
+  """
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   import PropCheck.TestHelpers, except: [config: 0]

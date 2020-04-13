@@ -1,5 +1,8 @@
 defmodule PropCheck.Test.PingPongTest do
 
+  @moduledoc """
+  A test for a strange call sequence, which once troubled us.
+  """
   use ExUnit.Case, async: false
   use PropCheck
 

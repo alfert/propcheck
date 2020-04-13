@@ -1,4 +1,7 @@
 defmodule PropCheck.Test.PrettyReportsDSL do
+  @moduledoc """
+  Tests for reporting the DSL models
+  """
   use PropCheck
   use PropCheck.StateM.ModelDSL
   use ExUnit.Case

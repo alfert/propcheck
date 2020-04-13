@@ -1,4 +1,7 @@
 defmodule PropCheck.Test.PrettyReports do
+  @moduledoc """
+  Tests for the pretty reporter.
+  """
   use PropCheck
   use PropCheck.StateM
   use ExUnit.Case
