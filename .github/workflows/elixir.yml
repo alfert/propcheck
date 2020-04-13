@@ -25,4 +25,4 @@ jobs:
     - name: Check Credo
       run: mix credo --strict
     - name: Run the Dialyzer
-      run; mix env MIX_ENV=test mix dialyzer
+      run: mix env MIX_ENV=test mix dialyzer
