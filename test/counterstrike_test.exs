@@ -53,11 +53,12 @@ defmodule PropCheck.Test.CounterStrikeTest do
     end
   end
 
-  #
-  # helper for "PropEr error is not stored" test, can't be inside the tests
-  # because it triggers strange error in ExUnit when `async` is true and
-  # `--trace` options is enabled. Bug is already fixed in Elixir master
   defmodule Helper do
+    @moduledoc """
+    Helper for "PropEr error is not stored" test, can't be inside the tests
+    because it triggers strange error in ExUnit when `async` is true and
+    `--trace` options is enabled. Bug is already fixed in Elixir master
+    """
     use ExUnit.Case
     use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
     import PropCheck.TestHelpers, except: [config: 0]
