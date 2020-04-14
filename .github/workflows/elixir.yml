@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  ELIXIR_VERSION: 1.9.4
+  OTP_VERSION: 22.2
+
 jobs:
   # Build the dialyzer core PLT and dependency caches early.
   lint_caches:
@@ -15,8 +19,8 @@ jobs:
       - name: Setup elixir
         uses: actions/setup-elixir@v1
         with:
-          elixir-version: 1.9.4 # Define the elixir version [required] - must equal the dialyzer cache key
-          otp-version: 22.2 # Define the OTP version [required]
+          elixir-version: ${{ env.ELIXIR_VERSION }} # Define the elixir version [required]
+          otp-version: ${{ env.OTP_VERSION }} # Define the OTP version [required]
       - name: Cache Dependencies
         id: cache-deps
         uses: actions/cache@v1
@@ -28,7 +32,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.mix
-          key: 1.9.4-core-plt
+          key: ${{ env.ELIXIR_VERSION }}-core-plt
       - name: Build Core PLTs
         if: steps.cache-core-plts.outputs.cache-hit != 'true'
         run: mix dialyzer --plt
@@ -40,8 +44,8 @@ jobs:
       - name: Setup elixir
         uses: actions/setup-elixir@v1
         with:
-          elixir-version: 1.9.4 # Define the elixir version [required] - must equal the dialyzer cache key
-          otp-version: 22.2 # Define the OTP version [required]
+          elixir-version: ${{ env.ELIXIR_VERSION }} # Define the elixir version [required]
+          otp-version: ${{ env.OTP_VERSION }} # Define the OTP version [required]
       - name: Cache Dependencies
         id: cache-deps
         uses: actions/cache@v1
@@ -53,7 +57,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.mix
-          key: 1.9.4-plt
+          key: ${{ env.ELIXIR_VERSION }}-plt
       - name: Check Credo
         run: mix credo --strict
       - name: Run the Dialyzer
