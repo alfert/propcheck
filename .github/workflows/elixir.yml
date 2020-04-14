@@ -27,6 +27,9 @@ jobs:
         with:
           path: deps
           key: ${{ hashFiles('**/mix.lock') }}-deps
+      - name: Get Dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: mix deps.get
       - name: Cache Core PLTs
         id: cache-core-plts
         uses: actions/cache@v1
