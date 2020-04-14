@@ -71,7 +71,7 @@ jobs:
         id: cache-plts
         uses: actions/cache@v1
         with:
-          path: ~/.mix
+          path: _build/dev
           key: ${{ env.ELIXIR_VERSION }}-plt
       - name: Check Credo
         run: mix credo --strict
