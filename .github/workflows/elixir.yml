@@ -26,15 +26,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup elixir
-      uses: actions/setup-elixir@v1
-      with:
-        elixir-version: 1.9.4 # Define the elixir version [required]
-        otp-version: 22.2 # Define the OTP version [required]
-    - name: Install Dependencies
-      run: env MIX_ENV=TEST mix do deps.get, deps.compile
-    - name: Compile PropCheck
-      run: env MIX_ENV=TEST mix compile --warnings-as-errors
-    - name: Run Tests
-      run: PROPCHECK_DEBUG=1 PROPCHECK_VERBOSE=1 PROPCHECK_NUMTESTS=200 PROPCHECK_SEARCH_STEPS=1000 mix tests --cover --trace
+      - uses: actions/checkout@v2
+      - name: Setup elixir
+        uses: actions/setup-elixir@v1
+        with:
+          elixir-version: 1.9.4 # Define the elixir version [required]
+          otp-version: 22.2 # Define the OTP version [required]
+      - name: Install Dependencies
+        run: env MIX_ENV=TEST mix do deps.get, deps.compile
+      - name: Compile PropCheck
+        run: env MIX_ENV=TEST mix compile --warnings-as-errors
+      - name: Run Tests
+        run: PROPCHECK_DEBUG=1 PROPCHECK_VERBOSE=1 PROPCHECK_NUMTESTS=200 PROPCHECK_SEARCH_STEPS=1000 mix tests --cover --trace
