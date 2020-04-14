@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: _build/dev
-          key: ${{ env.ELIXIR_VERSION }}-plt
+          key: ${{ hashFiles('**/mix.lock') }}-plt
       - name: Build PLTs
         if: steps.cache-core-plts.outputs.cache-hit != 'true' || steps.cache-core-plts.outputs.cache-hit != 'true'
         run: mix dialyzer --plt
@@ -72,7 +72,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: _build/dev
-          key: ${{ env.ELIXIR_VERSION }}-plt
+          key: ${{ hashFiles('**/mix.lock') }}-plt
       - name: Check Credo
         run: mix credo --strict
       - name: Run the Dialyzer
