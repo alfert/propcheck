@@ -33,8 +33,14 @@ jobs:
         with:
           path: ~/.mix
           key: ${{ env.ELIXIR_VERSION }}-core-plt
-      - name: Build Core PLTs
-        if: steps.cache-core-plts.outputs.cache-hit != 'true'
+      - name: Cache PLTs
+        id: cache-plts
+        uses: actions/cache@v1
+        with:
+          path: _build/dev
+          key: ${{ env.ELIXIR_VERSION }}-plt
+      - name: Build PLTs
+        if: steps.cache-core-plts.outputs.cache-hit != 'true' || steps.cache-core-plts.outputs.cache-hit != 'true'
         run: mix dialyzer --plt
   lint:
     needs: lint_caches
@@ -54,6 +60,12 @@ jobs:
           key: ${{ hashFiles('**/mix.lock') }}-deps
       - name: Cache Core PLTs
         id: cache-core-plts
+        uses: actions/cache@v1
+        with:
+          path: ~/.mix
+          key: ${{ env.ELIXIR_VERSION }}-core-plt
+      - name: Cache PLTs
+        id: cache-plts
         uses: actions/cache@v1
         with:
           path: ~/.mix
