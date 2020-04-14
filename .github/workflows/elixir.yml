@@ -7,7 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  lint:
+  # Build the dialyzer core PLT and dependency caches early.
+  lint_caches:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,18 +23,37 @@ jobs:
         with:
           path: deps
           key: ${{ hashFiles('**/mix.lock') }}-deps
-      - name: Get Dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: mix deps.get
+      - name: Cache Core PLTs
+        id: cache-core-plts
+        uses: actions/cache@v1
+        with:
+          path: ~/.mix
+          key: 1.9.4-core-plt
+      - name: Build Core PLTs
+        if: steps.cache-core-plts.outputs.cache-hit != 'true'
+        run: mix dialyzer --plt
+  lint:
+    needs: lint_caches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup elixir
+        uses: actions/setup-elixir@v1
+        with:
+          elixir-version: 1.9.4 # Define the elixir version [required] - must equal the dialyzer cache key
+          otp-version: 22.2 # Define the OTP version [required]
+      - name: Cache Dependencies
+        id: cache-deps
+        uses: actions/cache@v1
+        with:
+          path: deps
+          key: ${{ hashFiles('**/mix.lock') }}-deps
       - name: Cache Core PLTs
         id: cache-core-plts
         uses: actions/cache@v1
         with:
           path: ~/.mix
           key: 1.9.4-plt
-      - name: Build Core PLTs
-        if: steps.cache-core-plts.outputs.cache-hit != 'true'
-        run: mix dialyzer --plt
       - name: Check Credo
         run: mix credo --strict
       - name: Run the Dialyzer
