@@ -43,7 +43,7 @@ jobs:
           path: _build/dev
           key: ${{ hashFiles('**/mix.lock') }}-plt
       - name: Build PLTs
-        if: steps.cache-core-plts.outputs.cache-hit != 'true' || steps.cache-core-plts.outputs.cache-hit != 'true'
+        if: steps.cache-core-plts.outputs.cache-hit != 'true' || steps.cache-plts.outputs.cache-hit != 'true'
         run: mix dialyzer --plt
   lint:
     needs: lint_caches
