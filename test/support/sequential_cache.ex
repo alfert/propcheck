@@ -1,7 +1,8 @@
 defmodule PropCheck.Test.Cache do
   @moduledoc """
-  Implements the basic sequential cache from
-  http://propertesting.com/book_stateful_properties.html
+  Implements the basic sequential cache from http://propertesting.com/book_stateful_properties.html and beware!
+  It is a sequential cache that is not thread-safe, i.e. we will find data race if we use it from several
+  concurrent threads at the same time.
   """
 
   use GenServer
