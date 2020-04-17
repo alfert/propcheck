@@ -10,7 +10,7 @@ defmodule PropCheck.Instrument do
   Handle the instrumentation of a (remote) function call. Must return a
   valid expression in Erlang Abstract Form.
   """
-  @callback handle_function_call(call :: any) :: any
+  @callback handle_function_call(call :: :erl_parse.abstract_expr) :: :erl_parse.abstract_expr()
 
   @doc """
   A callback to decide if the function `mod:fun` with any arity is a candidate
