@@ -41,7 +41,7 @@ defmodule PropCheck.Test.Cache do
             # :erlang.yield()
             insert(key, val)
         any ->
-            Logger.error "Invalid result during :etc.match for key #{inspect key}: #{inspect any}"
+            _ignore = Logger.error "Invalid result during :etc.match for key #{inspect key}: #{inspect any}"
             :invalid_match_result
     end
     # Logger.debug "Updated Cache is: #{inspect dump()}"
@@ -58,7 +58,7 @@ defmodule PropCheck.Test.Cache do
                          {:count, current + 1, max}])
     else
       # table is full, override from the beginning
-       Logger.debug "Cache is full, override position 1"
+       _ignore = Logger.debug "Cache is full, override position 1"
       :ets.insert(@cache_name, [{1, {key, val}}, {:count, 1, max}])
     end
   end

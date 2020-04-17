@@ -76,8 +76,8 @@ defmodule PropCheck.Instrument do
     options = [:binary, :debug_info, :return, :verbose]
     case :compile.noenv_forms(clauses, options) do
       {:ok, ^mod, bin_code, warnings} ->
-        Logger.debug "Module #{inspect mod} is compiled"
-        Logger.debug "Now loading the module"
+        _ignore = Logger.debug "Module #{inspect mod} is compiled"
+        _ignore = Logger.debug "Now loading the module"
         {:module, ^mod} = :code.load_binary(mod, filename, bin_code)
         {:ok, mod, bin_code, warnings}
       error -> error
