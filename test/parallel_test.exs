@@ -1,6 +1,7 @@
-defmodule PropCheck.Test.Cache.DSL do
+defmodule PropCheck.Test.Cache.DSL.Parallel do
   @moduledoc """
-  Testing of the cache based on the EQC api and PropEr as backend.
+  Testing of the cache based on the EQC api and PropEr as backend, but this time in parallel approachc
+  to find the data races in SequentialCache.
   """
 
   use ExUnit.Case, async: true
@@ -21,6 +22,7 @@ defmodule PropCheck.Test.Cache.DSL do
     :ok # no update of a context
   end
 
+  @tag concurrency_test: true
   property "run the sequential cache concurrently", [:verbose] do
     forall cmds <- parallel_commands(__MODULE__, initial_state()) do
       # Logger.debug "Commands to run: #{inspect cmds}"
@@ -42,31 +44,6 @@ defmodule PropCheck.Test.Cache.DSL do
       #   |> Enum.map(fn model -> model.count end)
       #   |> Enum.max())
     end
-  end
-
-  @tag will_fail: true
-  property "run the misconfigured sequential cache" do
-    forall cmds <- commands(__MODULE__) do
-      # Logger.debug "Commands to run: #{inspect cmds}"
-      # Cache size is half as big expected, so we will find some cache misses,
-      # where the model expects that the value is properly cached.
-      Cache.start_link(div(@cache_size, 2))
-      r = run_commands(__MODULE__, cmds)
-      {_history, _state, result} = r
-      Cache.stop()
-      # Logger.debug "Events are: #{inspect events}"
-
-      (result == :ok)
-      |> when_fail(print_report(r, cmds))
-      # |> collect(length cmds)
-      # |> aggregate(command_names cmds)
-      # |> collect(
-      #   history
-      #   |> history_of_states()
-      #   |> Enum.map(fn model -> model.count end)
-      #   |> Enum.max())
-    end
-    # |> fails
   end
 
   ###########################
