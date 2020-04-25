@@ -299,64 +299,167 @@ defmodule PropCheck.Instrument do
     encode_call({:erlang, :yield, []})
   end
 
-  # Generate the matcher for interestng functions by a macro
-  # This list is taken from the opensource version of Pulse
-  # (https://github.com/prowessproject/pulse-time/blob/master/src/pulse_time_scheduler.erl)
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :lookup}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :lookup_element}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :update_element}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :insert}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :insert_new}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :delete_object}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :delete}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :delete_all_objects}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :select_delete}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :match_delete}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :match_object}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :member}), do: true
-  def instrumentable_function({:atom, _, :ets}, {:atom, _, :new}), do: true
+  @doc false
+  # Debugging aid for analyzing code generations.
+  def print_fun(fun) do
+    {:ok, _filename, forms} = get_forms_of_module(__MODULE__)
+    {:abstract_code, {:raw_abstract_v1, clauses}} = forms
+    funs = Enum.filter(clauses, fn
+      {:function, _, ^fun, _, _} -> true
+      _ -> false
+    end)
+    case funs do
+      [f] -> :erl_pp.function(f) |> IO.puts()
+      [] -> IO.puts "Unknown function #{inspect fun}"
+    end
+  end
 
-  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :start_link}), do: true
-  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :start}), do: true
-  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :call}), do: true
-  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :cast}), do: true
-  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :server}), do: true
-  def instrumentable_function({:atom, _, :gen_server}, {:atom, _, :loop}), do: true
+  @doc """
+  Checks if the given function is a candidate for instrumentation, i.e. does something
+  interesting with respect to concurrency. Examples are process handling, handling
+  of shared state or sending and receiving messages.
+  """
+  @spec instrumentable_function(mod :: module(), fun :: atom) :: boolean()
+  # Generate the matcher for interestng functions by a macro. All these functions
+  # are concerned with process handling, sending or receiving messages and handling
+  # of shared state (in particular for :ets, Registry and the process dictionary)
+  all_instrumentable_functions = [
+    ets: :lookup,
+    ets: :lookup_element,
+    ets: :update_element,
+    ets: :insert,
+    ets: :insert_new,
+    ets: :delete_object,
+    ets: :delete,
+    ets: :delete_all_objects,
+    ets: :select_delete,
+    ets: :match_delete,
+    ets: :match_object,
+    ets: :member,
+    ets: :new,
 
-  def instrumentable_function({:atom, _, :supervisor}, {:atom, _, :start_link}), do: true
-  def instrumentable_function({:atom, _, :supervisor}, {:atom, _, :start_child}), do: true
-  def instrumentable_function({:atom, _, :supervisor}, {:atom, _, :which_children}), do: true
+    gen_server: :start_link,
+    gen_server: :start,
+    gen_server: :call,
+    gen_server: :cast,
+    gen_server: :server,
+    gen_server: :loop,
 
-  def instrumentable_function({:atom, _, :timer}, {:atom, _, :sleep}), do: true
-  def instrumentable_function({:atom, _, :timer}, {:atom, _, :apply_after}), do: true
-  def instrumentable_function({:atom, _, :timer}, {:atom, _, :exit_after}), do: true
+    supervisor: :start_link,
+    supervisor: :start_child,
+    supervisor: :which_children,
 
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :spawn}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :spawn_link}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :link}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :process_flag}), do: true
-  # def instrumentable_function({:atom, _, :erlang}, {:atom, _, yield}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :now}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :is_process_alive}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :demonitor}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :monitor}), do: true
-  def instrumentable_function({:atom, _, :erlang}, {:atom, _, :exit}), do: true
+    timer: :sleep,
+    timer: :apply_after,
+    timer: :exit_after,
 
-  def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :start_link}), do: true
-  def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :send}), do: true
-  def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :add_handler}), do: true
-  def instrumentable_function({:atom, _, :gen_event}, {:atom, _, :notify}), do: true
+    erlang: :spawn,
+    erlang: :spawn_link,
+    erlang: :link,
+    erlang: :process_flag,
+    # erlang: yield,
+    erlang: :now,
+    erlang: :is_process_alive,
+    erlang: :demonitor,
+    erlang: :monitor,
+    erlang: :exit,
 
-  def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :start_link}), do: true
-  def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :send_event}), do: true
-  def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :send_all_state_event}), do: true
-  def instrumentable_function({:atom, _, :gen_fsm}, {:atom, _, :sync_send_all_state_event}), do: true
+    gen_event: :start_link,
+    gen_event: :send,
+    gen_event: :add_handler,
+    gen_event: :notify,
 
-  def instrumentable_function({:atom, _, :io}, {:atom, _, :format}), do: true
+    gen_fsm: :start_link,
+    gen_fsm: :send_event,
+    gen_fsm: :send_all_state_event,
+    gen_fsm: :sync_send_all_state_event,
 
-  def instrumentable_function({:atom, _, :file}, {:atom, _, :write_file}), do: true
+    io: :format,
 
-  def instrumentable_function({:atom, _, :"Elixir.IO"}, {:atom, _, :puts}), do: true
+    file: :write_file,
+
+    IO: :puts,
+
+    GenServer: :start_link,
+    GenServer: :start,
+    GenServer: :call,
+    GenServer: :cast,
+    GenServer: :server,
+    GenServer: :loop,
+
+    Task: :start_link,
+    Task: :start,
+    Task: :call,
+    Task: :cast,
+    Task: :shutdown,
+    Task: :async,
+    Task: :await,
+    Task: :async_stream,
+    Task: :yield,
+    Task: :yield_many,
+
+    Supervisor: :start_link,
+    Supervisor: :start_child,
+    Supervisor: :restart_child,
+    Supervisor: :stop,
+    Supervisor: :count_children,
+    Supervisor: :delete_child,
+    Supervisor: :terminate_child,
+    Supervisor: :which_children,
+
+    DynamicSupervisor: :start_link,
+    DynamicSupervisor: :start_child,
+    DynamicSupervisor: :stop,
+    DynamicSupervisor: :count_children,
+    DynamicSupervisor: :delete_child,
+    DynamicSupervisor: :terminate_child,
+    DynamicSupervisor: :which_children,
+
+    Agent: :start_link,
+    Agent: :start,
+    Agent: :cast,
+    Agent: :stop,
+    Agent: :get,
+    Agent: :get_and_update,
+    Agent: :update,
+
+    Process: :delete_key,
+    Process: :get,
+    Process: :link,
+    Process: :put,
+    Process: :register,
+    Process: :whereis,
+
+    Registry: :start_link,
+    Registry: :count_match,
+    Registry: :count,
+    Registry: :dispatch,
+    Registry: :keys,
+    Registry: :lookup,
+    Registry: :match,
+    Registry: :meta,
+    Registry: :put_meta,
+    Registry: :register,
+    Registry: :select,
+    Registry: :unregister_match,
+    Registry: :unregister,
+    Registry: :update_value,
+  ] ++
+  [ # the name with the dot requires a different encoding
+    {:"Task.Supervisor", :start_link},
+    {:"Task.Supervisor", :start_child},
+    {:"Task.Supervisor", :stop},
+    {:"Task.Supervisor", :terminate_child},
+    {:"Task.Supervisor", :async},
+    {:"Task.Supervisor", :async_nolink},
+    {:"Task.Supervisor", :async_stream},
+    {:"Task.Supervisor", :async_stream_nolink},
+  ]
+  for {mod, fun} <- all_instrumentable_functions do
+    # IO.puts "generate fun for #{inspect mod}.#{inspect fun}()"
+    # This is an unquote fragment, no need for quote do ... end, designed for generating functions
+    def instrumentable_function({:atom, _, unquote(mod)}, {:atom, _, unquote(fun)}), do: true
+  end
 
   def instrumentable_function(_mod, _fun), do: false
 
