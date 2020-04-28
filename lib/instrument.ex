@@ -444,16 +444,15 @@ defmodule PropCheck.Instrument do
     Registry: :unregister_match,
     Registry: :unregister,
     Registry: :update_value,
-  ] ++
-  [ # the name with the dot requires a different encoding
-    {:"Task.Supervisor", :start_link},
-    {:"Task.Supervisor", :start_child},
-    {:"Task.Supervisor", :stop},
-    {:"Task.Supervisor", :terminate_child},
-    {:"Task.Supervisor", :async},
-    {:"Task.Supervisor", :async_nolink},
-    {:"Task.Supervisor", :async_stream},
-    {:"Task.Supervisor", :async_stream_nolink},
+
+    "Task.Supervisor": :start_link,
+    "Task.Supervisor": :start_child,
+    "Task.Supervisor": :stop,
+    "Task.Supervisor": :terminate_child,
+    "Task.Supervisor": :async,
+    "Task.Supervisor": :async_nolink,
+    "Task.Supervisor": :async_stream,
+    "Task.Supervisor": :async_stream_nolink,
   ]
   for {mod, fun} <- all_instrumentable_functions do
     # IO.puts "generate fun for #{inspect mod}.#{inspect fun}()"
