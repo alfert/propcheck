@@ -2,6 +2,7 @@ defmodule PropCheck.StateM.Reporter do
   @moduledoc false
 
   alias PropCheck.StateM
+  require Logger
 
   @type mod_alias :: module() | {module(), as :: module()}
   @type option :: {:return_values, boolean}
@@ -20,6 +21,7 @@ defmodule PropCheck.StateM.Reporter do
     do: pretty_report(result, history, state, commands, opts)
 
   defp pretty_report(_result, seq_history, par_history, cmds, opts) when is_tuple(cmds) do
+    Logger.error "Pretty Report for Concurrency"
     title = "Concurrency Failure, we don't show the state :-/"
     history = [{:sequential, seq_history}, {:parallel, par_history}]
     print_pretty_report(title, :parallel, history, :no_state, cmds, opts)
@@ -203,6 +205,15 @@ defmodule PropCheck.StateM.Reporter do
     pretty_cmd_name(cmd, [syntax_colors: []]) <> "\n"
   end
 
+  def pretty_print_counter_example_parallel({seq, [par1, par2]}) do
+    "Sequential Start: \n" <>
+    (pretty_cmds_name(seq, [syntax_colors: []])  |> Enum.join("\n")) <> "\n" <>
+    "Parallel Process 1: \n" <>
+    (pretty_cmds_name(par1, [syntax_colors: []]) |> Enum.join("\n")) <> "\n" <>
+    "Parallel Process 1: \n" <>
+    (pretty_cmds_name(par2, [syntax_colors: []]) |> Enum.join("\n")) <> "\n"
+  end
+
   @cmd_indent_level 3
   @comment_indent_level 10
   defp print_command(cmd, failing?, opts)
@@ -271,6 +282,7 @@ defmodule PropCheck.StateM.Reporter do
     Enum.map(cmds, &pretty_cmd_name(&1, opts))
   end
 
+  def pretty_cmd_name({:init, data}, _opts), do: "init call -> #{inspect data, pretty: true}"
   def pretty_cmd_name({:set, {:var, n}, {:call, mod, fun, args}}, opts) do
     aliases = Keyword.get(opts, :alias, [mod])
     mod = alias_module(mod, aliases)
