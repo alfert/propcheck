@@ -166,15 +166,8 @@ defmodule PropCheck.Properties do
     proper_opts = PropCheck.Utils.to_proper_opts(opts)
 
     case CounterStrike.counter_example(name) do
-      :none -> try do
+      :none ->
         PropCheck.quickcheck(p, [:long_result] ++ proper_opts)
-        rescue
-          error ->
-            Logger.error "Ouch, we rescued from error: #{inspect error}"
-            {:error, error}
-        catch
-          :exit, e -> {:error, e}
-      end
       :others ->
         # since the tag is set, we execute everything. You can limit
         # the amount of checks by using either --stale or --only failing_prop

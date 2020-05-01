@@ -2,7 +2,6 @@ defmodule PropCheck.StateM.Reporter do
   @moduledoc false
 
   alias PropCheck.StateM
-  require Logger
 
   @type mod_alias :: module() | {module(), as :: module()}
   @type option :: {:return_values, boolean}
@@ -21,7 +20,6 @@ defmodule PropCheck.StateM.Reporter do
     do: pretty_report(result, history, state, commands, opts)
 
   defp pretty_report(_result, seq_history, par_history, cmds, opts) when is_tuple(cmds) do
-    Logger.error "Pretty Report for Concurrency"
     title = "Concurrency Failure, we don't show the state :-/"
     history = [{:sequential, seq_history}, {:parallel, par_history}]
     print_pretty_report(title, :parallel, history, :no_state, cmds, opts)
