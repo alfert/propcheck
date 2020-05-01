@@ -6,6 +6,9 @@ defmodule PropCheck.Instrument do
 
   require Logger
 
+  @typedoc "The type for a node in the Erlang AST encoding an atom value"
+  @type erl_ast_atom_type :: {:atom, any, atom}
+
   @doc """
   Handle the instrumentation of a (remote) function call. Must return a
   valid expression in Erlang Abstract Form.
@@ -17,7 +20,7 @@ defmodule PropCheck.Instrument do
   for instrumentation. The default implementation is simply calling
   `instrumentable_function/2`.
   """
-  @callback is_instrumentable_function(mod ::module, fun :: atom) :: boolean
+  @callback is_instrumentable_function(mod ::erl_ast_atom_type, fun :: erl_ast_atom_type) :: boolean
 
   def instrument_app(app, instrumenter) do
     case  Application.spec(app, :modules) do
