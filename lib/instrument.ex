@@ -319,7 +319,7 @@ defmodule PropCheck.Instrument do
   interesting with respect to concurrency. Examples are process handling, handling
   of shared state or sending and receiving messages.
   """
-  @spec instrumentable_function(mod :: module(), fun :: atom) :: boolean()
+  @spec instrumentable_function({:atom, any, mod :: module()}, {:atom, any, fun :: atom}) :: boolean()
   # Generate the matcher for interestng functions by a macro. All these functions
   # are concerned with process handling, sending or receiving messages and handling
   # of shared state (in particular for :ets, Registry and the process dictionary)
@@ -378,81 +378,81 @@ defmodule PropCheck.Instrument do
 
     file: :write_file,
 
-    IO: :puts,
+    "Elixir.IO": :puts,
 
-    GenServer: :start_link,
-    GenServer: :start,
-    GenServer: :call,
-    GenServer: :cast,
-    GenServer: :server,
-    GenServer: :loop,
+    "Elixir.GenServer": :start_link,
+    "Elixir.GenServer": :start,
+    "Elixir.GenServer": :call,
+    "Elixir.GenServer": :cast,
+    "Elixir.GenServer": :server,
+    "Elixir.GenServer": :loop,
 
-    Task: :start_link,
-    Task: :start,
-    Task: :call,
-    Task: :cast,
-    Task: :shutdown,
-    Task: :async,
-    Task: :await,
-    Task: :async_stream,
-    Task: :yield,
-    Task: :yield_many,
+    "Elixir.Task": :start_link,
+    "Elixir.Task": :start,
+    "Elixir.Task": :call,
+    "Elixir.Task": :cast,
+    "Elixir.Task": :shutdown,
+    "Elixir.Task": :async,
+    "Elixir.Task": :await,
+    "Elixir.Task": :async_stream,
+    "Elixir.Task": :yield,
+    "Elixir.Task": :yield_many,
 
-    Supervisor: :start_link,
-    Supervisor: :start_child,
-    Supervisor: :restart_child,
-    Supervisor: :stop,
-    Supervisor: :count_children,
-    Supervisor: :delete_child,
-    Supervisor: :terminate_child,
-    Supervisor: :which_children,
+    "Elixir.Supervisor": :start_link,
+    "Elixir.Supervisor": :start_child,
+    "Elixir.Supervisor": :restart_child,
+    "Elixir.Supervisor": :stop,
+    "Elixir.Supervisor": :count_children,
+    "Elixir.Supervisor": :delete_child,
+    "Elixir.Supervisor": :terminate_child,
+    "Elixir.Supervisor": :which_children,
 
-    DynamicSupervisor: :start_link,
-    DynamicSupervisor: :start_child,
-    DynamicSupervisor: :stop,
-    DynamicSupervisor: :count_children,
-    DynamicSupervisor: :delete_child,
-    DynamicSupervisor: :terminate_child,
-    DynamicSupervisor: :which_children,
+    "Elixir.DynamicSupervisor": :start_link,
+    "Elixir.DynamicSupervisor": :start_child,
+    "Elixir.DynamicSupervisor": :stop,
+    "Elixir.DynamicSupervisor": :count_children,
+    "Elixir.DynamicSupervisor": :delete_child,
+    "Elixir.DynamicSupervisor": :terminate_child,
+    "Elixir.DynamicSupervisor": :which_children,
 
-    Agent: :start_link,
-    Agent: :start,
-    Agent: :cast,
-    Agent: :stop,
-    Agent: :get,
-    Agent: :get_and_update,
-    Agent: :update,
+    "Elixir.Agent": :start_link,
+    "Elixir.Agent": :start,
+    "Elixir.Agent": :cast,
+    "Elixir.Agent": :stop,
+    "Elixir.Agent": :get,
+    "Elixir.Agent": :get_and_update,
+    "Elixir.Agent": :update,
 
-    Process: :delete_key,
-    Process: :get,
-    Process: :link,
-    Process: :put,
-    Process: :register,
-    Process: :whereis,
+    "Elixir.Process": :delete_key,
+    "Elixir.Process": :get,
+    "Elixir.Process": :link,
+    "Elixir.Process": :put,
+    "Elixir.Process": :register,
+    "Elixir.Process": :whereis,
 
-    Registry: :start_link,
-    Registry: :count_match,
-    Registry: :count,
-    Registry: :dispatch,
-    Registry: :keys,
-    Registry: :lookup,
-    Registry: :match,
-    Registry: :meta,
-    Registry: :put_meta,
-    Registry: :register,
-    Registry: :select,
-    Registry: :unregister_match,
-    Registry: :unregister,
-    Registry: :update_value,
+    "Elixir.Registry": :start_link,
+    "Elixir.Registry": :count_match,
+    "Elixir.Registry": :count,
+    "Elixir.Registry": :dispatch,
+    "Elixir.Registry": :keys,
+    "Elixir.Registry": :lookup,
+    "Elixir.Registry": :match,
+    "Elixir.Registry": :meta,
+    "Elixir.Registry": :put_meta,
+    "Elixir.Registry": :register,
+    "Elixir.Registry": :select,
+    "Elixir.Registry": :unregister_match,
+    "Elixir.Registry": :unregister,
+    "Elixir.Registry": :update_value,
 
-    "Task.Supervisor": :start_link,
-    "Task.Supervisor": :start_child,
-    "Task.Supervisor": :stop,
-    "Task.Supervisor": :terminate_child,
-    "Task.Supervisor": :async,
-    "Task.Supervisor": :async_nolink,
-    "Task.Supervisor": :async_stream,
-    "Task.Supervisor": :async_stream_nolink,
+    "Elixir.Task.Supervisor": :start_link,
+    "Elixir.Task.Supervisor": :start_child,
+    "Elixir.Task.Supervisor": :stop,
+    "Elixir.Task.Supervisor": :terminate_child,
+    "Elixir.Task.Supervisor": :async,
+    "Elixir.Task.Supervisor": :async_nolink,
+    "Elixir.Task.Supervisor": :async_stream,
+    "Elixir.Task.Supervisor": :async_stream_nolink,
   ]
   for {mod, fun} <- all_instrumentable_functions do
     # IO.puts "generate fun for #{inspect mod}.#{inspect fun}()"
@@ -460,7 +460,8 @@ defmodule PropCheck.Instrument do
     def instrumentable_function({:atom, _, unquote(mod)}, {:atom, _, unquote(fun)}), do: true
   end
 
-  def instrumentable_function(_mod, _fun), do: false
+  def instrumentable_function({:atom, _, m}, {:atom, _, f}) when is_atom(m) and is_atom(f), do: false
+  # def instrumentable_function(mod, fun), do: false
 
   # @doc """
   # Instruments the body of a function to handle the `receive do ... end` expression
