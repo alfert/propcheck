@@ -49,7 +49,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
   property "often_failing" do
     Logger.debug(fn -> "Lets ask counter_strike: #{CounterStrike.counter_example({:a, :b, []})}" end)
     forall l <- list(integer()) do
-      l == List.reverse(l)
+      l == Enum.reverse(l)
     end
   end
 
