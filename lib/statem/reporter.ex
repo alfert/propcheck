@@ -204,12 +204,18 @@ defmodule PropCheck.StateM.Reporter do
   end
 
   def pretty_print_counter_example_parallel({seq, [par1, par2]}) do
-    "Sequential Start: \n" <>
-    (pretty_cmds_name(seq, [syntax_colors: []])  |> Enum.join("\n")) <> "\n" <>
+    (IO.ANSI.format([:reset, "Sequential Start: \n"]) |> to_string()) <>
+    (print_parallel_commands(seq, false, [syntax_colors: []])  |> Enum.join("")) <> "\n" <>
     "Parallel Process 1: \n" <>
-    (pretty_cmds_name(par1, [syntax_colors: []]) |> Enum.join("\n")) <> "\n" <>
-    "Parallel Process 1: \n" <>
-    (pretty_cmds_name(par2, [syntax_colors: []]) |> Enum.join("\n")) <> "\n"
+    (print_parallel_commands(par1, false, [syntax_colors: []]) |> Enum.join("")) <> "\n" <>
+    "Parallel Process 2: \n" <>
+    (print_parallel_commands(par2, false, [syntax_colors: []]) |> Enum.join("")) <> "\n"
+  end
+  defp print_parallel_commands(cmds, failing?, opts) do
+    history = [] # there is no history in parallel test cases
+    cmds
+    |> zip_cmds_history(history)
+    |> print_command_lines(failing?, opts)
   end
 
   @cmd_indent_level 3
