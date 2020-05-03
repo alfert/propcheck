@@ -118,7 +118,7 @@ defmodule PropCheck.StateM.Reporter do
     #{last_state}
     """
   end
-  defp main_section(:parallel, history, state, cmds, opts) do
+  defp main_section(:parallel, history, _state, cmds, opts) do
 
     # require Logger
     # Logger.info "Main Section (parallel): history = #{inspect history, pretty: true}"
