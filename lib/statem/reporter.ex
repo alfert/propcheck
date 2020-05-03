@@ -118,34 +118,53 @@ defmodule PropCheck.StateM.Reporter do
     #{last_state}
     """
   end
-  defp main_section(:parallel, history, _state, states, _opts) do
-    {seq_states, [_p1_states, p2_states]} = states
-    {:ok, seq} = Keyword.fetch(history, :sequential)
-    [p1, p2] = case Keyword.fetch(history, :parallel) do
-      {:ok, val} -> val
+  defp main_section(:parallel, history, state, cmds, opts) do
+
+    # require Logger
+    # Logger.info "Main Section (parallel): history = #{inspect history, pretty: true}"
+    # Logger.info "Main Section (parallel): state = #{inspect state, pretty: true}"
+    # Logger.info "Main Section (parallel): cmds = #{inspect cmds, pretty: true}"
+
+    {seq_cmds, [p1_cmds, p2_cmds]} = cmds
+    seq_history = Keyword.fetch!(history, :sequential)
+
+    [p1_history, p2_history] = case Keyword.fetch(history, :parallel) do
+      {:ok, [h1, h2]} ->
+        remove_cmd = fn {_cmd, return} -> {nil, return} end
+        [Enum.map(h1, remove_cmd), Enum.map(h2, remove_cmd)]
       :error -> [[], []]
     end
-    # seq_commands = zip_cmds_history(seq, seq_states)
-    # |> print_command_lines(false, opts)
-    # |> Enum.join("\n")
-    # p2_cmds = zip_cmds_history(p2, p2_states) |> print_command_lines(false, opts)|> Enum.join("\n")
-    seq_commands = "#{inspect seq, pretty: true}"
-    seq_state_0 = "#{inspect seq_states, pretty: true}"
-    par_commands_1 = "#{inspect p1, pretty: true}"
-    par_commands_2 = "#{inspect p2, pretty: true}"
-    par_states_2 = "#{inspect p2_states, pretty: true}"
+
+    seq_commands = zip_sequential_cmds_history(seq_cmds, seq_history)
+    |> print_command_lines(false, opts)
+    |> Enum.join("")
+
+    par_opts = Keyword.merge([post_cmd_state: false], opts)
+    p1_states = zip_parallel_cmds_history(p1_cmds, p1_history) |> print_command_lines(false, par_opts)|> Enum.join("")
+    p2_states = zip_parallel_cmds_history(p2_cmds, p2_history) |> print_command_lines(false, par_opts)|> Enum.join("")
+
+    # par_commands_1 = "#{inspect p1_history, pretty: true}"
+    # par_commands_2 = "#{inspect p2_history, pretty: true}"
     """
     Sequential commands:
     #{seq_commands}
-    #{seq_state_0}
 
     Process 1:
-    #{par_commands_1}
+    #{p1_states}
 
     Process 2:
-    #{par_commands_2}
-    #{par_states_2}
+    #{p2_states}
     """
+  end
+
+  defp zip_parallel_cmds_history(cmds, history) do
+    Enum.zip(cmds, history)
+    |> Enum.map(fn {cmd, {_cmd_hist, ret_value}} -> {cmd, {ret_value, nil, nil}} end)
+  end
+
+  defp zip_sequential_cmds_history(cmds, history) do
+    Enum.zip(cmds, history)
+    |> Enum.map(fn {cmd, {post_state, ret_value}} -> {cmd, {ret_value, nil, {:just, post_state}}} end)
   end
 
   defp last_state_section(state, opts) do
