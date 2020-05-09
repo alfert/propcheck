@@ -2,6 +2,57 @@ defmodule PropCheck.Instrument do
   @moduledoc """
   Provides functions and macros for instrument byte code with additional yields and
   other constructs to ease testing of concurrent programs and state machines.
+
+  ## Why is instrumentation important?
+
+  The Erlang scheduler is relatively predictable and stable with regard to pre-emptive
+  scheduling. This means that every run has more or the less the same amount of
+  virtual machine instructions before a switch to another process happens. These
+  process switches are required to reveal any concurrency bugs. A simple way to
+  provoke more process switches are calls to `:erlang.yield()` which gives the scheduler
+  the possibility to switch early on to another process. It is not defined if
+  the scheduler reacts on this hint, but it often does and allows for more
+  unpredictable schedules revealing more concurrency bugs.
+
+  The usual advice is to sprinkle the code under test with manually added
+  calls to `:erlang.yield()`, but this is a daunting task. Additionally, you
+  need to remove this additional code before production use.
+
+  ## The instrumentation
+
+  The functions in this module automate the instrumentation immediately before
+  running the tests. We instrument call to "interesting" functions of the Erlang
+  and Elixir ecosystem, e.g. calls to `GenServer` or `ets` tables. We do this by examining
+  the byte code, checking each function call, and if we found some interesting call target,
+  we add a call to `:erlang.yield()` immediately before. This is what the
+  `PropCheck.YieldInstrumenter` module provides. It implements the behaviour `Instrument`,
+  which requires the implementation of two callbacks `c:handle_function_call/1` and
+  `c:is_instrumentable_function/2`. After instrumentation, the code reloading mechanism of
+  the Erlang VM enables the new code and the tests can run.
+
+  ## Typical usage
+
+  To ensure instrumentation before running the tests, you implement the `setup_all` macro
+  of `ExUnit`:
+
+      setup_all do
+        Instrument.instrument_module(Cache, YieldInstrumenter)
+        :ok # no update of a context
+      end
+
+  In this example, we instrument only a specific module. You can also instrument
+  all modules of an application by calling `Instrument.instrument_app(:my_app_under_test, YieldInstrumenter)`.
+
+  ## Implementing your own instrumenter
+
+  For implementing your own instrumenter, you need to get acquainted with the Erlang
+  Abstract Form (EAF), which is the internal abstract syntax tree available to the Erlang VM at runtime.
+  This format is quite different from the Elixir AST, in particular it has not the regular form but
+  consists of many different structures. This requires a lot of cases to be handled for analyizing
+  the AST. Little helpers for encoding the instrumented code is provided by `encode_call/1` and
+  `encode_value/1` as well as by `prepend_call/2`. For debugging and revealing the structure of
+  a specific EAF, you can use `print_fun/1`.
+
   """
 
   require Logger
@@ -22,6 +73,9 @@ defmodule PropCheck.Instrument do
   """
   @callback is_instrumentable_function(mod ::erl_ast_atom_type, fun :: erl_ast_atom_type) :: boolean
 
+  @doc """
+  Instruments all modules of an entire OTP application.
+  """
   def instrument_app(app, instrumenter) do
     case  Application.spec(app, :modules) do
       mods when is_list(mods) -> Enum.each(mods, &(instrument_module(&1, instrumenter)))
@@ -297,15 +351,18 @@ defmodule PropCheck.Instrument do
   end
   def encode_value(_unknown), do: throw ArgumentError
 
-  @doc "Encodes a call to `:erlang.yield()"
+  @doc "Encodes a call to `:erlang.yield()`"
   def call_yield do
     encode_call({:erlang, :yield, []})
   end
 
-  @doc false
-  # Debugging aid for analyzing code generations.
-  def print_fun(fun) do
-    {:ok, _filename, forms} = get_forms_of_module(__MODULE__)
+  @doc """
+  Debugging aid for analyzing code generations. Prints the restructered Erlang code of function
+  `fun` in module `mod`. We use Erlang code here, because Elixir source code cannot generated from
+  the byte code format due to macros, which change the compilation process too heavily.
+  """
+  def print_fun(fun, mod \\ __MODULE__) do
+    {:ok, _filename, forms} = get_forms_of_module(mod)
     {:abstract_code, {:raw_abstract_v1, clauses}} = forms
     funs = Enum.filter(clauses, fn
       {:function, _, ^fun, _, _} -> true
@@ -463,7 +520,7 @@ defmodule PropCheck.Instrument do
     def instrumentable_function({:atom, _, unquote(mod)}, {:atom, _, unquote(fun)}), do: true
   end
 
-  def instrumentable_function({:atom, _, m}, {:atom, _, f}) when is_atom(m) and is_atom(f), do: false
+  def instrumentable_function(_mod = {:atom, _, m}, _fun = {:atom, _, f}) when is_atom(m) and is_atom(f), do: false
   # def instrumentable_function(mod, fun), do: false
 
   # @doc """

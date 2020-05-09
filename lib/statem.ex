@@ -414,6 +414,10 @@ defmodule PropCheck.StateM do
   * `Result` specifies the outcome of the attempt to serialize command
     execution, based on the results observed. It can be one of the following:
     <ul><li> `ok` <li> `no_possible_interleaving` </ul>
+
+  Since the scheduler of the runtime system is quite predictable, you are advised to add
+  more turbulences in the execution traces by instrumenting the code under test
+  via `PropCheck.Instrument`.
   """
   defdelegate run_parallel_commands(mod, testcase),  to: :proper_statem
 
