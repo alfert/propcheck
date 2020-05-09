@@ -183,4 +183,30 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
+  defmodule LetChainingTest do
+    use ExUnit.Case
+    use PropCheck
+
+    property "one let chaining" do
+      q = 14
+      a = 11
+      eq = let [a <- number(0, a), b <- exactly(^a), c <- exactly(q)] do
+        {a, b}
+      end
+      forall {a, b} <- eq do
+        a == b
+      end
+    end
+
+    # property "seq of 3 nondecreasing integers in one let" do
+    #   nondec =
+    #     let [l <- integer(), m <- integer(l, :inf), h <- integer(m, :inf)] do
+    #       {l, m, h}
+    #     end
+    #   forall {l, m, h} <- nondec do
+    #     l <= m and m <= h
+    #   end
+    # end
+  end
+
 end

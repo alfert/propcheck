@@ -142,4 +142,63 @@ defmodule PropCheck.Utils do
   end
   defp parse_io_spec_format(char_or_spec), do: char_or_spec
 
+  def invert_graph({tag, graph}) do
+    tag = case tag do
+      :in -> :out
+      :out -> :in
+    end
+    updater =
+      fn {vert, inds}, acc ->
+        add_vert = fn out_inds -> [vert | out_inds] end
+        acc = Map.put_new(acc, vert, [])
+        Enum.reduce(
+          inds,
+          acc,
+          &Map.update(&2, &1, [vert], add_vert)
+        )
+      end
+    {tag, Enum.reduce(graph, %{}, updater)}
+
+  end
+
+  def topsort({:out, graph}), do: tarjan_topsort(graph)
+  def topsort({:in, graph}), do: kahn_topsort(graph)
+
+  defp tarjan_topsort(graph) do
+    case Enum.reduce_while(Map.keys(graph), {graph, %{}, []}, &tarjan_topsort/2) do
+      {_, _, output} -> {:ok, output}
+      error -> error
+    end
+  end
+
+  defp tarjan_topsort(vert, {graph, colors, output}) do
+    with(
+      :white <- Map.get(colors, vert, :white),
+      colors <- Map.put(colors, vert, :grey),
+      {graph, colors, output} <-
+        Enum.reduce_while(graph[vert], {graph, colors, output}, &tarjan_topsort/2)
+    ) do
+      {:cont, {graph, Map.put(colors, vert, :black), [vert | output]}}
+    else
+      :black -> {:cont, {graph, colors, output}}
+      :grey -> {:halt, {:error, "A cycle was found"}}
+    end
+  end
+
+  defp kahn_topsort(graph, output \\ []) do
+    case Enum.split_with(graph, fn {_k, v} -> v == [] end) do
+      {[], []} -> {:ok, output}
+      {[], _} -> {:error, "A cycle was found"}
+      {start_verts, tail} ->
+        start_verts = Enum.map(start_verts, &elem(&1, 0))
+        rest_graph =
+          tail
+          |> Enum.map(fn {k, v} -> {k, v -- start_verts} end)
+          |> Map.new()
+
+        kahn_topsort(rest_graph, output ++ start_verts)
+    end
+
+  end
+
 end
