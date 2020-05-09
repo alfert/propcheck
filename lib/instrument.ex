@@ -76,6 +76,7 @@ defmodule PropCheck.Instrument do
   @doc """
   Instruments all modules of an entire OTP application.
   """
+  @spec instrument_app(app :: atom, instrumenter :: module) :: :ok
   def instrument_app(app, instrumenter) do
     case  Application.spec(app, :modules) do
       mods when is_list(mods) -> Enum.each(mods, &(instrument_module(&1, instrumenter)))
@@ -87,7 +88,7 @@ defmodule PropCheck.Instrument do
   Takes the object code of the module, instruments it and update the module
   in the code server with instrumented byte code.
   """
-  @spec instrument_module(mod :: module, instrumeter :: module) :: any
+  @spec instrument_module(mod :: module, instrumenter :: module) :: :ok
   def instrument_module(mod, instrumenter) when is_atom(mod) and is_atom(instrumenter) do
     # 1. Get the forms of the mod
     {:ok, filename, forms} = get_forms_of_module(mod)
@@ -104,7 +105,9 @@ defmodule PropCheck.Instrument do
     end
   end
 
+  @doc false
   def add_attribute(attrs, forms), do: add_attribute(attrs, [], forms)
+  @doc false
   def add_attribute([], forms, []), do: Enum.reverse(forms)
   def add_attribute([], fs, [f | tail]), do: add_attribute([], [f | fs], tail)
   def add_attribute(as, fs1, [{:attribute, _, _, _} = a | tail]), do: add_attribute(as, [a | fs1], tail)
@@ -141,8 +144,8 @@ defmodule PropCheck.Instrument do
     end
   end
 
-  @doc "Checks if the code is already instrumented. If not, returns `false` otherwise returns the attribute"
-  def is_instrumented?({:abstract_code, {:raw_abstract_v1, clauses}}), do: is_instrumented?(clauses)
+  @doc "Checks if the code is already instrumented. If not, returns `false` otherwise returns `true`"
+  def is_instrumented?(_module_form = {:abstract_code, {:raw_abstract_v1, clauses}}), do: is_instrumented?(clauses)
   def is_instrumented?(clauses) when is_list(clauses) do
     Enum.find(clauses, false, fn
       {:attribute, _line, :instrumented, _} -> true
@@ -161,7 +164,8 @@ defmodule PropCheck.Instrument do
   # Helper function for mapping expressions
   defp map_expr(enum, mod), do: map(enum, mod, &instrument_expr/2)
 
-  @doc "Instruments the forms of a module"
+  @doc false
+  # "Instruments the forms of a module"
   def instrument_forms(instrumenter, {:abstract_code, {:raw_abstract_v1, clauses}}) when is_list(clauses) do
     instr_clauses = map(clauses, instrumenter, &instrument_mod_clause/2)
     {:abstract_code,
@@ -169,20 +173,20 @@ defmodule PropCheck.Instrument do
         instr_clauses}}
   end
 
-  @doc "Instruments the clauses of a module"
+  @doc false # "Instruments the clauses of a module"
   def instrument_mod_clause(instrumenter, {:function, line, name, arg_count, body}) do
     instr_body = map(body, instrumenter, &instrument_body/2)
     {:function, line, name, arg_count, instr_body}
   end
   def instrument_mod_clause(_instrumenter, clause), do: clause
 
-  @doc "Instruments the each body (a `:clause`) of a function"
+  @doc false # "Instruments the each body (a `:clause`) of a function"
   def instrument_body(instrumenter, {:clause, line, args, local_vars, exprs}) do
     instr_exprs = map_expr(exprs, instrumenter)
     {:clause, line, args, local_vars, instr_exprs}
   end
 
-  @doc "This is a big switch over all kinds of expressions for instrumenting them"
+  @doc false # "This is a big switch over all kinds of expressions for instrumenting them"
   def instrument_expr(_instrumenter, a = {:atom, _, _}), do: a
   def instrument_expr(instrumenter, {:bc, line, expr, qs}) do
     {:bc, line, instrument_expr(instrumenter, expr), map(qs, instrumenter, &instrument_qualifier/2)}
@@ -242,12 +246,12 @@ defmodule PropCheck.Instrument do
   def instrument_expr(_instrumenter, v = {:var, _l, _name}), do: v
   def instrument_expr(_instrumenter, l = {literal, _line, _val}) when literal in [:atom, :integer, :float, :char, :string], do: l
 
-  @doc "Instrument a part of binary pattern definition"
+  @doc false # "Instrument a part of binary pattern definition"
   def instrument_bin_element(instrumenter, {:bin_element, line, expr, size, tsl}) do
     {:bin_element, line, instrument_expr(instrumenter, expr), size, tsl}
   end
 
-  @doc "Instrument case, catch, function clauses"
+  @doc false # "Instrument case, catch, function clauses"
   def instrument_clause(instrumenter, {:clause, line, p, body}) do
     {:clause, line, instrument_pattern(instrumenter, p), map_expr(body, instrumenter)}
   end
@@ -261,26 +265,28 @@ defmodule PropCheck.Instrument do
     {:clause, line, map_expr(ps, instrumenter), map_expr(guards, instrumenter), map_expr(body, instrumenter)}
   end
 
-  @doc "Instrument qualifiers of list and bit comprehensions"
+  @doc false # "Instrument qualifiers of list and bit comprehensions"
   def instrument_qualifier(instrumenter, {:generate, line, p, e}), do: {:generate, line, instrument_pattern(instrumenter, p), instrument_expr(instrumenter, e)}
   def instrument_qualifier(instrumenter, {:b_generate, line, p, e}), do: {:b_generate, line, instrument_pattern(instrumenter, p), instrument_expr(instrumenter, e)}
   def instrument_qualifier(instrumenter, e), do: instrument_expr(instrumenter, e)
 
-  @doc "Instrument patterns, which are mostly expressions, except for variables/atoms"
+  @doc false # "Instrument patterns, which are mostly expressions, except for variables/atoms"
   # def instrument_pattern(instrumenter, {x, p, s}), do: {x, instrument_expr(instrumenter, p), s}
   def instrument_pattern(instrumenter, ps) when is_list(ps), do: map(ps, instrumenter, &instrument_pattern/2)
   def instrument_pattern(instrumenter, p), do: instrument_expr(instrumenter, p)
 
+  @doc false
   def instrument_assoc(instrumenter, {assoc, line, key, value}) do
     {assoc, line, instrument_expr(instrumenter, key), instrument_expr(instrumenter, value)}
   end
 
-  @doc """
-  Instruments a function call and gives control the handler module `instrumenter`.
-  For now, we only instrumenting a call, if it is any of the interesting functions,
-  i.e those might be a source of concurrency problems due to a shared mutable
-  state or otherwise tinkering with scheduling.
-  """
+  @doc false
+  # """
+  # Instruments a function call and gives control the handler module `instrumenter`.
+  # For now, we only instrumenting a call, if it is any of the interesting functions,
+  # i.e those might be a source of concurrency problems due to a shared mutable
+  # state or otherwise tinkering with scheduling.
+  # """
   def instrument_function_call(instrumenter, {:call, line, {:remote, line2, m, f}, as}) do
     module = instrument_expr(instrumenter, m)
     fun = instrument_expr(instrumenter, f)
@@ -296,7 +302,7 @@ defmodule PropCheck.Instrument do
     {:call, line, fun, args}
   end
 
-  @doc "The receive might be handled differently, therefore it has its own function"
+  @doc false # "The receive might be handled differently, therefore it has its own function"
   def instrument_receive(instrumenter, {:receive, line, cs}) do
     {:receive, line, map(cs, instrumenter, &instrument_clause/2)}
   end
@@ -308,16 +314,19 @@ defmodule PropCheck.Instrument do
   @doc """
   Prepends the call to `to_be_wrapped_call` by a call to `new_call`.
   The result of `new_call` is ignored.
+
+  All arugments and return values are in Erlang Astract Form.
   """
+  @spec prepend_call(to_be_wrapped_call :: :erl_parse.abstract_expr(), new_call :: :rl_parse.abstract_expr()) :: :erl_parse.abstract_expr()
   def prepend_call(to_be_wrapped_call, new_call) do
     {:block, [generated: true], [new_call, to_be_wrapped_call]}
   end
 
   @doc """
-  Enocdes a call given as tuple `{m, f, a}` as Elixir values into an
-  abstract erlang form
+  Enocdes a call given as tuple `{m, f, a}` as Erlang Abstract Form.
   """
-  def encode_call({m, f, a}) do
+  @spec encode_call({m :: module(), f :: atom(), a :: list()}) :: :erl_parse.abstract_expr()
+  def encode_call(_call = {m, f, a}) when is_atom(m) and is_atom(f) and is_list(a) do
     line = 0 # [generated: true]
     {:call, line,
       {:remote, line,
@@ -325,10 +334,13 @@ defmodule PropCheck.Instrument do
         {:atom, line, f}},
       Enum.map(a, &encode_value/1)}
   end
+  @doc "Encodes a call to `m.f.(a)` as Erlang Abstract Form."
+  @spec encode_call(m :: module(), f :: atom(), a :: list()) :: :erl_parse.abstract_expr()
   def encode_call(m, f, a) when is_atom(m) and is_atom(f) and is_list(a),
     do: encode_call({m, f, a})
 
-  @doc "Encodes a value"
+  @doc "Encodes a value as Erlang Astract Form."
+  @spec encode_value(val :: any) :: :erl_parse.abstract_expr()
   def encode_value(nil), do: {:nil, [generated: true]}
   def encode_value(value) when is_atom(value), do: {:atom, [generated: true], value}
   def encode_value(value) when is_integer(value), do: {:integer, [generated: true], value}
@@ -351,7 +363,8 @@ defmodule PropCheck.Instrument do
   end
   def encode_value(_unknown), do: throw ArgumentError
 
-  @doc "Encodes a call to `:erlang.yield()`"
+  @doc "Encodes a call to `:erlang.yield()` as Erlang Astract Form."
+  @spec call_yield() :: :erl_parse.abstract_expr()
   def call_yield do
     encode_call({:erlang, :yield, []})
   end
@@ -361,6 +374,7 @@ defmodule PropCheck.Instrument do
   `fun` in module `mod`. We use Erlang code here, because Elixir source code cannot generated from
   the byte code format due to macros, which change the compilation process too heavily.
   """
+  @spec print_fun(fun :: atom(), mod :: module()) :: :ok
   def print_fun(fun, mod \\ __MODULE__) do
     {:ok, _filename, forms} = get_forms_of_module(mod)
     {:abstract_code, {:raw_abstract_v1, clauses}} = forms
