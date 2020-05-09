@@ -418,6 +418,11 @@ defmodule PropCheck.StateM do
   Since the scheduler of the runtime system is quite predictable, you are advised to add
   more turbulences in the execution traces by instrumenting the code under test
   via `PropCheck.Instrument`.
+
+  The history shown when the execution fails, does not reveal in which exact interleaving of
+  commands the failure happens but simply shows the executed commands in both processes
+  running concurrently. This is a feature of PropEr, which cannot easily changed.
+
   """
   defdelegate run_parallel_commands(mod, testcase),  to: :proper_statem
 
