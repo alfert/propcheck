@@ -317,7 +317,8 @@ defmodule PropCheck.Instrument do
 
   All arugments and return values are in Erlang Astract Form.
   """
-  @spec prepend_call(to_be_wrapped_call :: :erl_parse.abstract_expr(), new_call :: :rl_parse.abstract_expr()) :: :erl_parse.abstract_expr()
+  @spec prepend_call(to_be_wrapped_call :: :erl_parse.abstract_expr(), new_call :: :rl_parse.abstract_expr())
+    :: :erl_parse.abstract_expr()
   def prepend_call(to_be_wrapped_call, new_call) do
     {:block, [generated: true], [new_call, to_be_wrapped_call]}
   end
