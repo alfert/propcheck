@@ -57,14 +57,20 @@ defmodule PropCheck.Instrument do
 
   require Logger
 
-  @typedoc "The type for a node in the Erlang AST encoding an atom value"
+  @typedoc "The type for a node in the Erlang Abstract Form encoding an atom value"
   @type erl_ast_atom_type :: {:atom, any, atom}
+
+  @typedoc "The type for a remote call in Erlang Abstract Form"
+  @type erl_ast_remote_call :: {:call, any, {:remote, any, erl_ast_atom_type, erl_ast_atom_type()}, [any]}
+
+  @typedoc "Type type for a block of expression in Erlang Abstract Form"
+  @type erl_ast_block :: {:block, any, [any]}
 
   @doc """
   Handle the instrumentation of a (remote) function call. Must return a
   valid expression in Erlang Abstract Form.
   """
-  @callback handle_function_call(call :: :erl_parse.abstract_expr) :: :erl_parse.abstract_expr()
+  @callback handle_function_call(call :: erl_ast_remote_call) :: :erl_parse.abstract_expr()
 
   @doc """
   A callback to decide if the function `mod:fun` with any arity is a candidate
@@ -317,8 +323,8 @@ defmodule PropCheck.Instrument do
 
   All arugments and return values are in Erlang Astract Form.
   """
-  @spec prepend_call(to_be_wrapped_call :: :erl_parse.abstract_expr(), new_call :: :rl_parse.abstract_expr())
-    :: :erl_parse.abstract_expr()
+  @spec prepend_call(to_be_wrapped_call :: erl_ast_remote_call, new_call :: erl_ast_remote_call)
+    :: erl_ast_block
   def prepend_call(to_be_wrapped_call, new_call) do
     {:block, [generated: true], [new_call, to_be_wrapped_call]}
   end
@@ -326,7 +332,7 @@ defmodule PropCheck.Instrument do
   @doc """
   Enocdes a call given as tuple `{m, f, a}` as Erlang Abstract Form.
   """
-  @spec encode_call({m :: module(), f :: atom(), a :: list()}) :: :erl_parse.abstract_expr()
+  @spec encode_call({m :: module(), f :: atom(), a :: list()}) :: erl_ast_remote_call
   def encode_call(_call = {m, f, a}) when is_atom(m) and is_atom(f) and is_list(a) do
     line = 0 # [generated: true]
     {:call, line,
@@ -336,7 +342,7 @@ defmodule PropCheck.Instrument do
       Enum.map(a, &encode_value/1)}
   end
   @doc "Encodes a call to `m.f.(a)` as Erlang Abstract Form."
-  @spec encode_call(m :: module(), f :: atom(), a :: list()) :: :erl_parse.abstract_expr()
+  @spec encode_call(m :: module(), f :: atom(), a :: list()) :: erl_ast_remote_call
   def encode_call(m, f, a) when is_atom(m) and is_atom(f) and is_list(a),
     do: encode_call({m, f, a})
 
@@ -365,7 +371,7 @@ defmodule PropCheck.Instrument do
   def encode_value(_unknown), do: throw ArgumentError
 
   @doc "Encodes a call to `:erlang.yield()` as Erlang Astract Form."
-  @spec call_yield() :: :erl_parse.abstract_expr()
+  @spec call_yield() :: erl_ast_remote_call
   def call_yield do
     encode_call({:erlang, :yield, []})
   end
