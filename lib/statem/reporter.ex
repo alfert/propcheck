@@ -19,6 +19,11 @@ defmodule PropCheck.StateM.Reporter do
   def print_report({history, state, result}, commands, opts \\ []),
     do: pretty_report(result, history, state, commands, opts)
 
+  defp pretty_report(_result, seq_history, par_history, cmds, opts) when is_tuple(cmds) do
+    title = "Concurrency Failure, we don't show the state :-/"
+    history = [{:sequential, seq_history}, {:parallel, par_history}]
+    print_pretty_report(title, :parallel, history, :no_state, cmds, opts)
+  end
   defp pretty_report(:ok, history, state, commands, opts),
     do: print_pretty_report(
           "All commands were successful and all postconditions were true.",
@@ -113,6 +118,54 @@ defmodule PropCheck.StateM.Reporter do
     #{last_state}
     """
   end
+  defp main_section(:parallel, history, _state, cmds, opts) do
+
+    # require Logger
+    # Logger.info "Main Section (parallel): history = #{inspect history, pretty: true}"
+    # Logger.info "Main Section (parallel): state = #{inspect state, pretty: true}"
+    # Logger.info "Main Section (parallel): cmds = #{inspect cmds, pretty: true}"
+
+    {seq_cmds, [p1_cmds, p2_cmds]} = cmds
+    seq_history = Keyword.fetch!(history, :sequential)
+
+    [p1_history, p2_history] = case Keyword.fetch(history, :parallel) do
+      {:ok, [h1, h2]} ->
+        remove_cmd = fn {_cmd, return} -> {nil, return} end
+        [Enum.map(h1, remove_cmd), Enum.map(h2, remove_cmd)]
+      :error -> [[], []]
+    end
+
+    seq_commands = zip_sequential_cmds_history(seq_cmds, seq_history)
+    |> print_command_lines(false, opts)
+    |> Enum.join("")
+
+    par_opts = Keyword.merge([post_cmd_state: false], opts)
+    p1_states = zip_parallel_cmds_history(p1_cmds, p1_history) |> print_command_lines(false, par_opts)|> Enum.join("")
+    p2_states = zip_parallel_cmds_history(p2_cmds, p2_history) |> print_command_lines(false, par_opts)|> Enum.join("")
+
+    # par_commands_1 = "#{inspect p1_history, pretty: true}"
+    # par_commands_2 = "#{inspect p2_history, pretty: true}"
+    """
+    Sequential commands:
+    #{seq_commands}
+
+    Process 1:
+    #{p1_states}
+
+    Process 2:
+    #{p2_states}
+    """
+  end
+
+  defp zip_parallel_cmds_history(cmds, history) do
+    Enum.zip(cmds, history)
+    |> Enum.map(fn {cmd, {_cmd_hist, ret_value}} -> {cmd, {ret_value, nil, nil}} end)
+  end
+
+  defp zip_sequential_cmds_history(cmds, history) do
+    Enum.zip(cmds, history)
+    |> Enum.map(fn {cmd, {post_state, ret_value}} -> {cmd, {ret_value, nil, {:just, post_state}}} end)
+  end
 
   defp last_state_section(state, opts) do
     case Keyword.get(opts, :last_state, true) do
@@ -167,6 +220,21 @@ defmodule PropCheck.StateM.Reporter do
   def pretty_print_counter_example_cmd({:init, _}), do: ""
   def pretty_print_counter_example_cmd(cmd) do
     pretty_cmd_name(cmd, [syntax_colors: []]) <> "\n"
+  end
+
+  def pretty_print_counter_example_parallel({seq, [par1, par2]}) do
+    (IO.ANSI.format([:reset, "Sequential Start: \n"]) |> to_string()) <>
+    (print_parallel_commands(seq, false, [syntax_colors: []])  |> Enum.join("")) <> "\n" <>
+    "Parallel Process 1: \n" <>
+    (print_parallel_commands(par1, false, [syntax_colors: []]) |> Enum.join("")) <> "\n" <>
+    "Parallel Process 2: \n" <>
+    (print_parallel_commands(par2, false, [syntax_colors: []]) |> Enum.join("")) <> "\n"
+  end
+  defp print_parallel_commands(cmds, failing?, opts) do
+    history = [] # there is no history in parallel test cases
+    cmds
+    |> zip_cmds_history(history)
+    |> print_command_lines(failing?, opts)
   end
 
   @cmd_indent_level 3
@@ -237,6 +305,7 @@ defmodule PropCheck.StateM.Reporter do
     Enum.map(cmds, &pretty_cmd_name(&1, opts))
   end
 
+  def pretty_cmd_name({:init, data}, _opts), do: "init call -> #{inspect data, pretty: true}"
   def pretty_cmd_name({:set, {:var, n}, {:call, mod, fun, args}}, opts) do
     aliases = Keyword.get(opts, :alias, [mod])
     mod = alias_module(mod, aliases)

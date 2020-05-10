@@ -28,7 +28,7 @@ defmodule PropCheck.TreeTest do
   # delete2 is not faulty
   property "delete2", [max_size: 20]               do
     forall {x, t} <- {integer(), tree(integer())} do
-      tsize = t |> Tree.pre_order |> Enum.count
+      _tsize = t |> Tree.pre_order |> Enum.count
       (not Tree.member(Tree.delete2(t, x), x))
       # |> collect(tsize)
       # |> measure("Tree Size", tsize)

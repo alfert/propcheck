@@ -166,7 +166,8 @@ defmodule PropCheck.Properties do
     proper_opts = PropCheck.Utils.to_proper_opts(opts)
 
     case CounterStrike.counter_example(name) do
-      :none -> PropCheck.quickcheck(p, [:long_result] ++ proper_opts)
+      :none ->
+        PropCheck.quickcheck(p, [:long_result] ++ proper_opts)
       :others ->
         # since the tag is set, we execute everything. You can limit
         # the amount of checks by using either --stale or --only failing_prop
@@ -261,26 +262,39 @@ defmodule PropCheck.Properties do
 
   defp counter_example_inspect(counter_example) do
     alias PropCheck.StateM.Reporter
-    case is_statem_commands?(counter_example) do
-      false ->
+    case is_statem_commands(counter_example) do
+      :data ->
         inspect(counter_example, pretty: true)
-      true ->
+      :commands ->
         counter_example
         |> hd
         |> Enum.map(&Reporter.pretty_print_counter_example_cmd/1)
+      :parallel_commands ->
+        [par_cmds] = counter_example
+        Reporter.pretty_print_counter_example_parallel(par_cmds)
     end
   end
 
-  defp is_statem_commands?([counter_example]) when is_list(counter_example) do
-    counter_example
+  defp is_statem_commands([counter_example]) when is_list(counter_example) do
+    is_command_list = counter_example
     |> Enum.all?(fn term ->
       match?({:init, _}, term) or
       match?({:set, {:var, _}, {:call, mod, fun, args}}
         when is_atom(mod) and is_atom(fun) and is_list(args),
         term)
     end)
+    case is_command_list do
+      true -> :commands
+      false -> :data
+    end
   end
-  defp is_statem_commands?(_), do: false
+  defp is_statem_commands([{seq_commands, _par_commands}]) do
+    case is_statem_commands([seq_commands]) do
+      :commands -> :parallel_commands
+      _ -> :data
+    end
+  end
+  defp is_statem_commands(_), do: :data
 
   # Add additional output to a message
   defp add_additional_output(message, opts) do

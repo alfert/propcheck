@@ -70,7 +70,10 @@ defmodule PropCheck.Test.InstrumentTester do
   end
 
   test "instrumentable functions" do
+    # Instrument.print_fun(:instrumentable_function)
     assert true == Instrument.instrumentable_function({:atom, 0, :gen_server}, {:atom, 0, :start_link})
+    assert true == Instrument.instrumentable_function({:atom, 0, GenServer}, {:atom, 0, :start_link})
+    assert true == Instrument.instrumentable_function({:atom, 0, IO}, {:atom, 0, :puts})
   end
 
   test "compile the retrieved forms" do
@@ -88,14 +91,14 @@ defmodule PropCheck.Test.InstrumentTester do
 
     {:ok, filename, forms} = Instrument.get_forms_of_module(mod)
     altered_forms = Instrument.instrument_forms(MessageInstrumenter, forms)
-
+    # There must change something, otherwise our instrumentation is wrong!
     assert altered_forms != forms
 
     compile_result = Instrument.compile_module(mod, filename, altered_forms)
     assert {:ok, ^mod, _module, []} = compile_result
 
     # This is robust even if wae are running cover compiled, but we cannot check wheather
-    # if we modified the cover compiled module instance
+    # we modified the cover compiled module instance
     assert Enum.member?(:code.modified_modules(), mod)
 
     {:ok, ^mod, _module, []} = compile_result
@@ -127,7 +130,7 @@ defmodule PropCheck.Test.InstrumentTester do
   end
 
   test "instrument an entire application" do
-    Logger.error "All Apps: #{inspect Application.loaded_applications()}"
+    Logger.debug "All Apps: #{inspect Application.loaded_applications()}"
     # The ASN1 compiler is not really used, so no damage is expected
     app = :asn1
     all_modules = Application.spec(app, :modules)

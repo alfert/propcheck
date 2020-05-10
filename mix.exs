@@ -18,7 +18,7 @@ defmodule PropCheck.Mixfile do
      description: description(),
      propcheck: [counter_examples: "_build/propcheck.ctx"],
      aliases: aliases(),
-     preferred_cli_env: [tests: :test, test_ext: :test],
+     preferred_cli_env: [tests: :test, test_ext: :test, dialyzer: :test, parallel_test: :test, test_parallel: :test],
      deps: deps(),
      dialyzer: dialyzer()]
   end
@@ -55,6 +55,8 @@ defmodule PropCheck.Mixfile do
     [
       clean: ["clean", "propcheck.clean"],
       test_ext: &external_tests/1,
+      parallel_test: ["test --include concurrency_test --only concurrency_test"],
+      test_parallel: ["test --include concurrency_test --only concurrency_test"],
       tests: ["test_ext", "test"],
     ]
   end
@@ -74,7 +76,7 @@ defmodule PropCheck.Mixfile do
       {:coverex, "~> 1.4", only: :test},
       {:poison, "~> 3.0", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0.0-rc.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.21", only: :dev}
     ]
   end

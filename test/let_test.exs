@@ -27,7 +27,8 @@ defmodule PropCheck.Test.LetAndShrinks do
     end
   end
 
-  defmodule DSLShrinkTest do # shrinks properly
+  defmodule DSLShrinkTest do
+    @moduledoc "shrinks properly"
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM.ModelDSL
@@ -60,7 +61,8 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
-  defmodule DSLLetTest do # shrinks properly
+  defmodule DSLLetTest do
+    @moduledoc "shrinks properly"
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM.ModelDSL
@@ -99,7 +101,8 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
-  defmodule LetStateMachineTest do # shrinks properly
+  defmodule LetStateMachineTest do
+    @moduledoc "shrinks properly"
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM
@@ -138,7 +141,8 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
-  defmodule DSLLetShrinkTest do # does shrink properly
+  defmodule DSLLetShrinkTest do
+    @moduledoc "shrinks properly"
     use ExUnit.Case
     use PropCheck
     use PropCheck.StateM.ModelDSL
