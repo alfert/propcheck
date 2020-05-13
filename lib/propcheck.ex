@@ -678,18 +678,28 @@ defmodule PropCheck do
     """
     defmacro let({:<-, _, [var, rawtype]}, generator) do
         [{:do, gen}] = generator
-        quote do
-            :proper_types.bind(unquote(rawtype),
-                fn(unquote(var)) -> unquote(gen) end, false)
-        end
+        prop_bind(var, rawtype, gen)
     end
 
     defmacro let([{:<-, _, _} | _rest] = bindings, [{:do, gen}]) do
-        {vars, raw_types} = bindings |> let_bind() |> Enum.reverse() |> Enum.unzip()
-        quote do
-          :proper_types.bind(unquote(raw_types),
-            fn(unquote(vars)) -> unquote(gen) end, false)
-        end
+        {vars, raw_types} = bindings |> let_bind() |> Enum.unzip()
+
+        declared_vars = Enum.map(vars, &elem(&1, 0))
+        required_vars =
+          raw_types
+          |> Enum.map(&PropCheck.Utils.find_all_vars/1)
+          |> check_shadowing_and_filter_external()
+
+        dep_graph = construct_dep_graph(declared_vars, required_vars)
+        declaration_order =
+          case PropCheck.Utils.toplevels(dep_graph) do
+            {:ok, levels} -> levels
+            {:error, msg} -> raise msg
+          end
+
+        unpinned_raw_types = Enum.map(raw_types, &PropCheck.Utils.unpin_vars/1)
+        binds_with_order = group_by_declaration_order(vars, unpinned_raw_types, declaration_order)
+        chain_lets(binds_with_order, gen)
     end
 
     defp let_bind(_bind = {:<-, _, [var, rawtype]}), do: {var, rawtype}
@@ -698,6 +708,53 @@ defmodule PropCheck do
     end
     defp let_bind([{:<-, _, [var, rawtype]} | rest]) do
       [{var, rawtype} | let_bind(rest)]
+    end
+
+    defp construct_dep_graph(declared_vars, required_vars) do
+      graph = Enum.zip(declared_vars, required_vars) |> Map.new()
+      {:in, graph}
+    end
+
+    defp check_shadowing_and_filter_external(required_vars) do
+      all_required_vars = Enum.concat(required_vars) |> MapSet.new()
+      checker = fn x ->
+        case x do
+          {:^, r_var} ->
+            if r_var in all_required_vars do
+              raise("Found shadowing in let block for var #{r_var}")
+            else
+              [r_var]
+            end
+          _ -> []
+        end
+      end
+      Enum.map(required_vars, &(Enum.flat_map(&1, checker)))
+    end
+
+    defp group_by_declaration_order(vars, raw_types, declaration_order) do
+      var_2_pair =
+        Enum.zip(vars, raw_types)
+        |> Map.new(fn {v, _} = p -> {elem(v, 0), p} end)
+
+      Enum.map(
+        declaration_order,
+        &(Enum.map(&1, fn x -> var_2_pair[x] end) |> Enum.unzip())
+      )
+    end
+
+    defp prop_bind(vars, raw_types, block) do
+      quote do
+        :proper_types.bind(
+          unquote(raw_types),
+          fn(unquote(vars)) -> unquote(block) end,
+          false
+        )
+      end
+    end
+
+    defp chain_lets([], block), do: block
+    defp chain_lets([{vars, raw_types} | rest], block) do
+      prop_bind(vars, raw_types, chain_lets(rest, block))
     end
 
     # -define(SETUP(SetupFun,Prop), proper:setup(SetupFun,Prop))
