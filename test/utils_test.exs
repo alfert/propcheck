@@ -36,7 +36,7 @@ defmodule UtilsTest do
     }}
   end
 
-  def top_check({:in, _} = graph, order), do: top_check(Utils.invert_graph(graph), order)
+  def top_check(graph = {:in, _}, order), do: top_check(Utils.invert_graph(graph), order)
   def top_check({:out, graph}, order) do
     vert_2_order = order |> Enum.with_index() |> Map.new()
     check_vert_order = fn {k, inds} ->

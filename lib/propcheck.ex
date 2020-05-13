@@ -717,14 +717,18 @@ defmodule PropCheck do
 
     defp check_shadowing_and_filter_external(required_vars) do
       all_required_vars = Enum.concat(required_vars) |> MapSet.new()
+
+      check_and_wrap = fn x ->
+        if x in all_required_vars do
+          raise("Found shadowing in let block for var #{x}")
+        else
+          [x]
+        end
+      end
+
       checker = fn x ->
         case x do
-          {:^, r_var} ->
-            if r_var in all_required_vars do
-              raise("Found shadowing in let block for var #{r_var}")
-            else
-              [r_var]
-            end
+          {:^, r_var} -> check_and_wrap.(r_var)
           _ -> []
         end
       end
