@@ -164,7 +164,7 @@ defmodule PropCheck.Utils do
   def topsort({:out, graph}), do: tarjan_topsort(graph)
   def topsort({:in, graph}), do: kahn_topsort(graph)
 
-  def toplevels({:out, _} = graph),
+  def toplevels(graph = {:out, _}),
     do: graph |> invert_graph() |> toplevels()
   def toplevels({:in, graph}) do
     case kahn_topsort(graph, [], :levels) do
@@ -213,24 +213,24 @@ defmodule PropCheck.Utils do
   end
 
   def find_all_vars(block) do
-    finder = fn b, acc ->
-      case b do
-        {:^, _, [{var, _, _} | _args]} ->
-          pinned = {:^, var}
-          case acc do
-            [^var | rest] -> {b, [pinned | rest]}
-            _ -> {b, [pinned | acc]}
-          end
-        {var, _, args} when not is_list(args) ->
-          {b, [var | acc]}
-        _ -> {b, acc}
-      end
-    end
-
     block
-    |> Macro.postwalk([], finder)
+    |> Macro.postwalk([], &finder/2)
     |> elem(1)
     |> Enum.uniq()
+  end
+
+  defp finder(block, acc) do
+    case block do
+      {:^, _, [{var, _, _} | _args]} ->
+        pinned = {:^, var}
+        case acc do
+          [^var | rest] -> {block, [pinned | rest]}
+          _ -> {block, [pinned | acc]}
+        end
+      {var, _, args} when not is_list(args) ->
+        {block, [var | acc]}
+      _ -> {block, acc}
+    end
   end
 
   def unpin_vars(block) do
