@@ -164,6 +164,15 @@ defmodule PropCheck.Utils do
   def topsort({:out, graph}), do: tarjan_topsort(graph)
   def topsort({:in, graph}), do: kahn_topsort(graph)
 
+  def toplevels({:out, _} = graph),
+    do: graph |> invert_graph() |> toplevels()
+  def toplevels({:in, graph}) do
+    case kahn_topsort(graph, [], :levels) do
+      {:ok, levels} -> {:ok, Enum.reverse(levels)}
+      err -> err
+    end
+  end
+
   defp tarjan_topsort(graph) do
     case Enum.reduce_while(Map.keys(graph), {graph, %{}, []}, &tarjan_topsort/2) do
       {_, _, output} -> {:ok, output}
@@ -185,7 +194,7 @@ defmodule PropCheck.Utils do
     end
   end
 
-  defp kahn_topsort(graph, output \\ []) do
+  defp kahn_topsort(graph, output \\ [], mode \\ :topsort) do
     case Enum.split_with(graph, fn {_k, v} -> v == [] end) do
       {[], []} -> {:ok, output}
       {[], _} -> {:error, "A cycle was found"}
@@ -196,9 +205,42 @@ defmodule PropCheck.Utils do
           |> Enum.map(fn {k, v} -> {k, v -- start_verts} end)
           |> Map.new()
 
-        kahn_topsort(rest_graph, output ++ start_verts)
+        case mode do
+          :levels -> kahn_topsort(rest_graph, [start_verts | output], mode)
+          :topsort -> kahn_topsort(rest_graph, output ++ start_verts, mode)
+        end
+    end
+  end
+
+  def find_all_vars(block) do
+    finder = fn b, acc ->
+      case b do
+        {:^, _, [{var, _, _} | _args]} ->
+          pinned = {:^, var}
+          case acc do
+            [^var | rest] -> {b, [pinned | rest]}
+            _ -> {b, [pinned | acc]}
+          end
+        {var, _, args} when not is_list(args) ->
+          {b, [var | acc]}
+        _ -> {b, acc}
+      end
     end
 
+    block
+    |> Macro.postwalk([], finder)
+    |> elem(1)
+    |> Enum.uniq()
+  end
+
+  def unpin_vars(block) do
+    replacer = fn b ->
+      case b do
+        {:^, _, [var]} -> var
+        _ -> b
+      end
+    end
+    Macro.prewalk(block, replacer)
   end
 
 end
