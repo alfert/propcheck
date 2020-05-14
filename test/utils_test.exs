@@ -86,7 +86,7 @@ defmodule UtilsTest do
     assert levels == [[:a, :b, :c], [:d, :e], [:f, :g, :h]]
   end
 
-  def qfunc() do
+  def qfunc do
     quote do
       foo(a + 1, bar(b, {dd, q}), ^c)
     end
