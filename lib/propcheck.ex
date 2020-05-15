@@ -710,7 +710,6 @@ defmodule PropCheck do
             {:ok, levels} -> levels
             {:error, msg} -> raise msg
           end
-
         unpinned_raw_types = Enum.map(raw_types, &PropCheck.Utils.unpin_vars/1)
         binds_with_order = group_by_declaration_order(vars, unpinned_raw_types, declaration_order)
         chain_lets(binds_with_order, gen)
@@ -725,8 +724,18 @@ defmodule PropCheck do
     end
 
     defp construct_dep_graph(declared_vars, required_vars) do
-      graph = Enum.zip(declared_vars, required_vars) |> Map.new()
-      {:in, graph}
+      adj_list_to_edges =
+        fn {declared, required_for} ->
+          Enum.map(required_for, &({&1, declared}))
+        end
+
+      edges =
+        Enum.zip(declared_vars, required_vars)
+        |> Enum.flat_map(adj_list_to_edges)
+
+      Graph.new(type: :directed)
+        |> Graph.add_vertices(declared_vars)
+        |> Graph.add_edges(edges)
     end
 
     defp check_shadowing_and_filter_external(required_vars) do
