@@ -49,18 +49,20 @@ defmodule PropCheck.Test.Cache do
   end
 
   defp insert(key, val) do
-    count = :ets.lookup(@cache_name, :count)
-    # Logger.debug "count is #{inspect count}"
-    [{:count, current, max}] = count
-    # Logger.debug "Current: #{current}, Max: #{inspect max}"
-    if current < max do
-      # Logger.debug "Cache: Incrementally add at pos #{current + 1}"
-      :ets.insert(@cache_name, [{current + 1, {key, val}},
-                         {:count, current + 1, max}])
-    else
-      # table is full, override from the beginning
-       _ignore = Logger.debug "Cache is full, override position 1"
-      :ets.insert(@cache_name, [{1, {key, val}}, {:count, 1, max}])
+    case :ets.lookup(@cache_name, :count) do
+      [{:count, current, max}] ->
+          # Logger.debug "Current: #{current}, Max: #{inspect max}"
+          if current < max do
+            # Logger.debug "Cache: Incrementally add at pos #{current + 1}"
+            :ets.insert(@cache_name, [{current + 1, {key, val}},
+                              {:count, current + 1, max}])
+          else
+            # table is full, override from the beginning
+            _ignore = Logger.debug "Cache is full, override position 1"
+            :ets.insert(@cache_name, [{1, {key, val}}, {:count, 1, max}])
+          end
+      _ -> # appears in concurrency situations when after calling :ets.match in cache(), a flush() happens.
+          :invalid_count_value
     end
   end
 
