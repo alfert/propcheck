@@ -142,74 +142,29 @@ defmodule PropCheck.Utils do
   end
   defp parse_io_spec_format(char_or_spec), do: char_or_spec
 
-  def invert_graph({tag, graph}) do
-    tag = case tag do
-      :in -> :out
-      :out -> :in
-    end
-    updater =
-      fn {vert, inds}, acc ->
-        add_vert = fn out_inds -> [vert | out_inds] end
-        acc = Map.put_new(acc, vert, [])
-        Enum.reduce(
-          inds,
-          acc,
-          &Map.update(&2, &1, [vert], add_vert)
-        )
-      end
-    {tag, Enum.reduce(graph, %{}, updater)}
-
-  end
-
-  def topsort({:out, graph}), do: tarjan_topsort(graph)
-  def topsort({:in, graph}), do: kahn_topsort(graph)
-
-  def toplevels(graph = {:out, _}),
-    do: graph |> invert_graph() |> toplevels()
-  def toplevels({:in, graph}) do
-    case kahn_topsort(graph, [], :levels) do
-      {:ok, levels} -> {:ok, Enum.reverse(levels)}
-      err -> err
-    end
-  end
-
-  defp tarjan_topsort(graph) do
-    case Enum.reduce_while(Map.keys(graph), {graph, %{}, []}, &tarjan_topsort/2) do
-      {_, _, output} -> {:ok, output}
-      error -> error
-    end
-  end
-
-  defp tarjan_topsort(vert, {graph, colors, output}) do
+  def toplevels(graph) do
     with(
-      :white <- Map.get(colors, vert, :white),
-      colors <- Map.put(colors, vert, :grey),
-      {graph, colors, output} <-
-        Enum.reduce_while(graph[vert], {graph, colors, output}, &tarjan_topsort/2)
+      top_order_verts when is_list(top_order_verts) <- Graph.topsort(graph),
+      {:ok, levels} <- toplevels(graph, top_order_verts, [])
     ) do
-      {:cont, {graph, Map.put(colors, vert, :black), [vert | output]}}
+      {:ok, Enum.reverse(levels)}
     else
-      :black -> {:cont, {graph, colors, output}}
-      :grey -> {:halt, {:error, "A cycle was found"}}
+      false -> {:error, "A cycle was found"}
     end
   end
 
-  defp kahn_topsort(graph, output \\ [], mode \\ :topsort) do
-    case Enum.split_with(graph, fn {_k, v} -> v == [] end) do
-      {[], []} -> {:ok, output}
-      {[], _} -> {:error, "A cycle was found"}
-      {start_verts, tail} ->
-        start_verts = Enum.map(start_verts, &elem(&1, 0))
-        rest_graph =
-          tail
-          |> Enum.map(fn {k, v} -> {k, v -- start_verts} end)
-          |> Map.new()
+  defp toplevels(_, [], levels) do
+    {:ok, levels}
+  end
+  defp toplevels(graph, top_order_verts, levels) do
 
-        case mode do
-          :levels -> kahn_topsort(rest_graph, [start_verts | output], mode)
-          :topsort -> kahn_topsort(rest_graph, output ++ start_verts, mode)
-        end
-    end
+    {level, rest} =
+      Enum.split_while(
+        top_order_verts,
+        &(Graph.in_degree(graph, &1) == 0)
+      )
+    reducted_graph = Graph.delete_vertices(graph, level)
+    toplevels(reducted_graph, rest, [level | levels])
   end
 
   def find_all_vars(block) do
