@@ -266,9 +266,8 @@ defmodule PropCheck.Properties do
       :data ->
         inspect(counter_example, pretty: true)
       :commands ->
-        counter_example
-        |> hd
-        |> Enum.map(&Reporter.pretty_print_counter_example_cmd/1)
+        [cmds] = counter_example
+        Reporter.pretty_print_counter_example_cmd(cmds)
       :parallel_commands ->
         [par_cmds] = counter_example
         Reporter.pretty_print_counter_example_parallel(par_cmds)
