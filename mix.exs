@@ -43,7 +43,7 @@ defmodule PropCheck.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :proper],
+    [applications: [:logger, :proper, :libgraph],
      mod: {PropCheck.App, []}]
   end
 
