@@ -665,7 +665,7 @@ defmodule PropCheck do
 
     You also can refer to variables declared in the current `let` scope with `^`.
     Such variables are not allowed to form a dependency cycle.
-    You cannot apply `^` to variables declared outside of the let macro.
+    You cannot apply `^` to variables declared outside of the `let` macro.
 
         iex> use PropCheck
         iex> non_decreasing =
