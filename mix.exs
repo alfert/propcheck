@@ -43,7 +43,7 @@ defmodule PropCheck.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :proper],
+    [applications: [:logger, :proper, :libgraph],
      mod: {PropCheck.App, []}]
   end
 
@@ -73,6 +73,7 @@ defmodule PropCheck.Mixfile do
   defp deps do
     [
       {:proper, "~> 1.3"},
+      {:libgraph, "~> 0.13"},
       {:coverex, "~> 1.4", only: :test},
       {:poison, "~> 3.0", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},

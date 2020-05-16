@@ -187,4 +187,58 @@ defmodule PropCheck.Test.LetAndShrinks do
 
   end
 
+  defmodule LetChainingTest do
+    use ExUnit.Case
+    use PropCheck
+
+    property "seq of 3 nondecreasing integers in one let" do
+      nondec =
+        let [m <- integer(^l, :inf), l <- integer(), h <- integer(^m, :inf)] do
+          {l, m, h}
+        end
+      forall {l, m, h} <- nondec do
+        l <= m and m <= h
+      end
+    end
+
+    property "let with functions inside" do
+      p2 = fn x -> x + 2 end
+      non_decreasing = let [
+        a <- integer(0, 1),
+        b <- integer(^a + 1, p2.(^a)),
+        c <- integer(^a, ^b)
+      ] do
+        {a, c, b}
+      end
+      forall {a, b, c} <- non_decreasing do
+        a <= b and b <= c
+      end
+    end
+
+    property "mix of inner and external vars in one let" do
+      a = 1
+      b = 10
+      bunch_of_integers = let [
+        l <- integer(0, a),
+        m <- integer(^l, b),
+        r <- integer(a + 5, b + 5)
+      ] do
+        {l, m, r, a, b}
+      end
+      forall {aa, bb, cc, dd, ee} <- bunch_of_integers do
+        (
+          0 <= aa
+          and aa <= 1
+          and aa <= bb
+          and bb <= b
+          and 6 <= cc
+          and cc <= 15
+          and dd == 1
+          and ee == 10
+        )
+      end
+    end
+
+  end
+
 end

@@ -663,6 +663,21 @@ defmodule PropCheck do
         ...>   end)
         true
 
+    You also can refer to variables declared in the current `let` scope with `^`.
+    Such variables are not allowed to form a dependency cycle.
+    You cannot apply `^` to variables declared outside of the `let` macro.
+
+        iex> use PropCheck
+        iex> non_decreasing =
+        ...> let [m <- integer(^l, :inf), l <- integer(), h <- integer(^m, :inf)] do
+        ...>  {l, m, h}
+        ...> end
+        iex> quickcheck(
+        ...>   forall {l, m, h} <- non_decreasing do
+        ...>     l <= m and m <= h
+        ...>   end)
+        true
+
     Similar to `forall/2`, multiple types can also be put into tuples or lists:
 
         iex> use PropCheck
@@ -678,18 +693,27 @@ defmodule PropCheck do
     """
     defmacro let({:<-, _, [var, rawtype]}, generator) do
         [{:do, gen}] = generator
-        quote do
-            :proper_types.bind(unquote(rawtype),
-                fn(unquote(var)) -> unquote(gen) end, false)
-        end
+        prop_bind(var, rawtype, gen)
     end
 
     defmacro let([{:<-, _, _} | _rest] = bindings, [{:do, gen}]) do
-        {vars, raw_types} = bindings |> let_bind() |> Enum.reverse() |> Enum.unzip()
-        quote do
-          :proper_types.bind(unquote(raw_types),
-            fn(unquote(vars)) -> unquote(gen) end, false)
-        end
+        {vars, raw_types} = bindings |> let_bind() |> Enum.unzip()
+
+        declared_vars = Enum.map(vars, &elem(&1, 0))
+        required_vars =
+          raw_types
+          |> Enum.map(&PropCheck.Utils.find_all_vars/1)
+          |> check_shadowing_and_filter_external()
+
+        dep_graph = construct_dep_graph(declared_vars, required_vars)
+        declaration_order =
+          case PropCheck.Utils.toplevels(dep_graph) do
+            {:ok, levels} -> levels
+            # {:error, msg} -> raise msg  # Currently it make dialyzer unhappy mostly because of `Graph.topsort/1` spec.
+          end
+        unpinned_raw_types = Enum.map(raw_types, &PropCheck.Utils.unpin_vars/1)
+        binds_with_order = group_by_declaration_order(vars, unpinned_raw_types, declaration_order)
+        chain_lets(binds_with_order, gen)
     end
 
     defp let_bind(_bind = {:<-, _, [var, rawtype]}), do: {var, rawtype}
@@ -698,6 +722,67 @@ defmodule PropCheck do
     end
     defp let_bind([{:<-, _, [var, rawtype]} | rest]) do
       [{var, rawtype} | let_bind(rest)]
+    end
+
+    defp construct_dep_graph(declared_vars, required_vars) do
+      adj_list_to_edges =
+        fn {declared, required_for} ->
+          Enum.map(required_for, &({&1, declared}))
+        end
+
+      edges =
+        Enum.zip(declared_vars, required_vars)
+        |> Enum.flat_map(adj_list_to_edges)
+
+      Graph.new(type: :directed)
+        |> Graph.add_vertices(declared_vars)
+        |> Graph.add_edges(edges)
+    end
+
+    defp check_shadowing_and_filter_external(required_vars) do
+      all_required_vars = Enum.concat(required_vars) |> MapSet.new()
+
+      check_and_wrap = fn x ->
+        if x in all_required_vars do
+          raise("Found shadowing in let block for var #{x}")
+        else
+          [x]
+        end
+      end
+
+      checker = fn x ->
+        case x do
+          {:^, r_var} -> check_and_wrap.(r_var)
+          _ -> []
+        end
+      end
+      Enum.map(required_vars, &(Enum.flat_map(&1, checker)))
+    end
+
+    defp group_by_declaration_order(vars, raw_types, declaration_order) do
+      var_2_pair =
+        Enum.zip(vars, raw_types)
+        |> Map.new(fn {v, _} = p -> {elem(v, 0), p} end)
+
+      Enum.map(
+        declaration_order,
+        &(Enum.map(&1, fn x -> var_2_pair[x] end) |> Enum.unzip())
+      )
+    end
+
+    defp prop_bind(vars, raw_types, block) do
+      quote do
+        :proper_types.bind(
+          unquote(raw_types),
+          fn(unquote(vars)) -> unquote(block) end,
+          false
+        )
+      end
+    end
+
+    defp chain_lets([], block), do: block
+    defp chain_lets([{vars, raw_types} | rest], block) do
+      prop_bind(vars, raw_types, chain_lets(rest, block))
     end
 
     # -define(SETUP(SetupFun,Prop), proper:setup(SetupFun,Prop))

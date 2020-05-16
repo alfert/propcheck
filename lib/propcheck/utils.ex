@@ -142,4 +142,61 @@ defmodule PropCheck.Utils do
   end
   defp parse_io_spec_format(char_or_spec), do: char_or_spec
 
+  @spec toplevels(Graph.t()) :: {:ok, [atom()]} | {:error, String.t()}
+  def toplevels(graph) do
+    with(
+      top_order_verts when is_list(top_order_verts) <- Graph.topsort(graph),
+      {:ok, levels} <- toplevels(graph, top_order_verts, [])
+    ) do
+      {:ok, Enum.reverse(levels)}
+    else
+      false -> {:error, "A cycle was found"}
+    end
+  end
+
+  defp toplevels(_, [], levels) do
+    {:ok, levels}
+  end
+  defp toplevels(graph, top_order_verts, levels) do
+
+    {level, rest} =
+      Enum.split_while(
+        top_order_verts,
+        &(Graph.in_degree(graph, &1) == 0)
+      )
+    reducted_graph = Graph.delete_vertices(graph, level)
+    toplevels(reducted_graph, rest, [level | levels])
+  end
+
+  def find_all_vars(block) do
+    block
+    |> Macro.postwalk([], &var_finder/2)
+    |> elem(1)
+    |> Enum.uniq()
+  end
+
+  defp var_finder(block, acc) do
+    case block do
+      {:^, _, [{var, _, _} | _args]} ->
+        pinned = {:^, var}
+        case acc do
+          [^var | rest] -> {block, [pinned | rest]}
+          _ -> {block, [pinned | acc]}
+        end
+      {var, _, args} when not is_list(args) ->
+        {block, [var | acc]}
+      _ -> {block, acc}
+    end
+  end
+
+  def unpin_vars(block) do
+    var_replacer = fn b ->
+      case b do
+        {:^, _, [var]} -> var
+        _ -> b
+      end
+    end
+    Macro.prewalk(block, var_replacer)
+  end
+
 end
