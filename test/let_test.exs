@@ -203,14 +203,14 @@ defmodule PropCheck.Test.LetAndShrinks do
 
     property "let with functions inside" do
       p2 = fn x -> x + 2 end
-      nondec = let [
+      non_decreasing = let [
         a <- integer(0, 1),
         b <- integer(^a + 1, p2.(^a)),
         c <- integer(^a, ^b)
       ] do
         {a, c, b}
       end
-      forall {a, b, c} <- nondec do
+      forall {a, b, c} <- non_decreasing do
         a <= b and b <= c
       end
     end
@@ -218,14 +218,14 @@ defmodule PropCheck.Test.LetAndShrinks do
     property "mix of inner and external vars in one let" do
       a = 1
       b = 10
-      nondec = let [
+      bunch_of_integers = let [
         l <- integer(0, a),
         m <- integer(^l, b),
         r <- integer(a + 5, b + 5)
       ] do
         {l, m, r, a, b}
       end
-      forall {aa, bb, cc, dd, ee} <- nondec do
+      forall {aa, bb, cc, dd, ee} <- bunch_of_integers do
         (
           0 <= aa
           and aa <= 1
