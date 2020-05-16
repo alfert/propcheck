@@ -1,6 +1,6 @@
 # PropCheck Changelog
 
-## 1.2.1
+## 1.2.1-Development
 * Support for Elixir 1.10 in tests
 * Support for parallel testing of state machines started. Requires also PRs in the upstream 
   PropEr. An upgrade to (the future) PropEr 1.4 will result in better reports. 
@@ -14,6 +14,8 @@
 * Include `credo` in the build. Thanks to [https://github.com/evnu](https://github.com/evnu)
 * Fix `PROPCHECK_VERBOSE` to work with `property`
 * Allow `PROPCHECK_VERBOSE=0` to make all properties quiet
+* GitHub Actions are the new CI environemnt.  Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Pinning of variables in `let` allows easier re-use of variables. Thanks to [https://github.com/Ecialo](https://github.com/Ecialo)
 
 ## 1.2.0
 * Handling of tags corrected. This changes slighty existing the behavior and gives
