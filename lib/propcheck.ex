@@ -709,7 +709,7 @@ defmodule PropCheck do
         declaration_order =
           case PropCheck.Utils.toplevels(dep_graph) do
             {:ok, levels} -> levels
-            {:error, msg} -> raise msg
+            # {:error, msg} -> raise msg  # Currently it make dialyzer unhappy mostly because of `Graph.topsort/1` spec.
           end
         unpinned_raw_types = Enum.map(raw_types, &PropCheck.Utils.unpin_vars/1)
         binds_with_order = group_by_declaration_order(vars, unpinned_raw_types, declaration_order)
