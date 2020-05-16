@@ -132,12 +132,42 @@ Please use the GitHub issue tracker for
 * bug reports and for
 * submitting pull requests
 
+### Test Policy
 Before submitting a pull request, please use Credo to ensure code consistency
 and run `mix tests` to check PropCheck itself. `mix tests` is a Mix alias that
 runs regular tests (via `mix test`) and some external tests (via another Mix
 alias `mix test_ext`) which test PropCheck's side effects, like storing
 counterexamples or proper output format, that can't be easily tested using
 regular tests.
+
+### Rebase Policy
+Ensure that your PR is based on the latest `master` version by rebasing. If your
+feature branch is `my_feature`, then do the following before published a 
+pull request: 
+
+    git checkout master
+    git pull --rebase 
+    git checkout my_feature
+    git rebase master
+
+If your PR implementation takes longer such that another PR is merged before 
+your own PR, then you have to repeat the above sequence. It might be that you 
+have fix some conflicts. But now you cannot push your branch again, because you
+changed the history of your local branch compared to the one published on GitHub. 
+Therefore, you have force-push your branch. Do this with 
+
+    git push --force-with-lease
+
+A simple `git push --force` is not allowed, `--force-with-lease` is more friendly 
+and thus allowed. See details in the Git documentation. 
+
+The rationale behind this policy is that we want a simple almost linear history, 
+where each merged PR create a sequence of merge with no parallel work. This history
+will not show how many active branches are available during development but the 
+sequence of incorporating changes to master. That is the important part and we 
+want to see which commit sequence lead to the specific feature. Merges destroy 
+this linearity. But beware, you can do nasty things with `git rebase`, therefore
+stick to the simple procedure explained above to not corrupt your repository. 
 
 ## License
 
