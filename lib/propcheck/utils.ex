@@ -142,6 +142,7 @@ defmodule PropCheck.Utils do
   end
   defp parse_io_spec_format(char_or_spec), do: char_or_spec
 
+  @spec toplevels(Graph.t()) :: {:ok, [atom()]} | {:error, String.t()}
   def toplevels(graph) do
     with(
       top_order_verts when is_list(top_order_verts) <- Graph.topsort(graph),
@@ -169,12 +170,12 @@ defmodule PropCheck.Utils do
 
   def find_all_vars(block) do
     block
-    |> Macro.postwalk([], &finder/2)
+    |> Macro.postwalk([], &var_finder/2)
     |> elem(1)
     |> Enum.uniq()
   end
 
-  defp finder(block, acc) do
+  defp var_finder(block, acc) do
     case block do
       {:^, _, [{var, _, _} | _args]} ->
         pinned = {:^, var}
@@ -189,13 +190,13 @@ defmodule PropCheck.Utils do
   end
 
   def unpin_vars(block) do
-    replacer = fn b ->
+    var_replacer = fn b ->
       case b do
         {:^, _, [var]} -> var
         _ -> b
       end
     end
-    Macro.prewalk(block, replacer)
+    Macro.prewalk(block, var_replacer)
   end
 
 end

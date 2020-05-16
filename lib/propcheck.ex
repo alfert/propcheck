@@ -663,16 +663,17 @@ defmodule PropCheck do
         ...>   end)
         true
 
-    You also can refer variables declared in var scope with `^` until they
-    not form cycle or mix with var with same name from outer scope.
+    You also can refer to variables declared in the current `let` scope with `^`.
+    Such variables are not allowed to form a dependency cycle.
+    You cannot apply `^` to variables declared outside of the let macro.
 
         iex> use PropCheck
-        iex> nondec =
+        iex> non_decreasing =
         ...> let [m <- integer(^l, :inf), l <- integer(), h <- integer(^m, :inf)] do
         ...>  {l, m, h}
         ...> end
         iex> quickcheck(
-        ...>   forall {l, m, h} <- nondec do
+        ...>   forall {l, m, h} <- non_decreasing do
         ...>     l <= m and m <= h
         ...>   end)
         true
