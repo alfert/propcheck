@@ -267,10 +267,10 @@ defmodule PropCheck.Properties do
         inspect(counter_example, pretty: true)
       :commands ->
         [cmds] = counter_example
-        Reporter.pretty_print_counter_example_cmd(cmds)
+        for cmd <- cmds, do: Reporter.pretty_print_counter_example_cmd(cmd)
       :parallel_commands ->
         [par_cmds] = counter_example
-        Reporter.pretty_print_counter_example_parallel(par_cmds)
+        for par_cmd <- par_cmds, do: Reporter.pretty_print_counter_example_parallel(par_cmd)
     end
   end
 
