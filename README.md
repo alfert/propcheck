@@ -21,7 +21,7 @@ end
 
 ## Changes
 
-Relevant changes are documented in the [Changelog](CHANGELOG.html), on [GitHub  
+Relevant changes are documented in the [Changelog](changelog.html), on [GitHub  
 follow this link](CHANGELOG.md).
 
 ## Basic Usage and Build Configuration
