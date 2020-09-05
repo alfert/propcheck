@@ -305,6 +305,7 @@ defmodule PropCheck.StateM.Reporter do
     Enum.map(cmds, &pretty_cmd_name(&1, opts))
   end
 
+  def pretty_cmd_name([tuple], opts), do: pretty_cmd_name(tuple, opts)
   def pretty_cmd_name({:init, data}, _opts), do: "init call -> #{inspect data, pretty: true}"
   def pretty_cmd_name({:set, {:var, n}, {:call, mod, fun, args}}, opts) do
     aliases = Keyword.get(opts, :alias, [mod])
