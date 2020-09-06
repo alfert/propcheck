@@ -142,7 +142,7 @@ regular tests.
 
 ### Rebase Policy
 Ensure that your PR is based on the latest `master` version by rebasing. If your
-feature branch is `my_feature`, then do the following before published a 
+feature branch is `my_feature`, then do the following before publishing a 
 pull request: 
 
     git checkout master

@@ -1,8 +1,11 @@
 # PropCheck Changelog
 
-## 1.2.2-Development
+## 1.2.3-Development
 * Support for parallel testing of state machines started. Requires also PRs in the upstream 
   PropEr. An upgrade to (the future) PropEr 1.4 will result in better reports. 
+## 1.2.2-Development
+* Fixes to statemachine reporter by [@aherranz](https://github.com/aherranz) and [@devonestes](https://github.com/devonestes) 
+* Fixes to the Readme linking by [@oo6](https://github.com/oo6)
 
 ## 1.2.1
 * Support for Elixir 1.10 in tests
