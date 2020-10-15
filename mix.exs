@@ -44,7 +44,8 @@ defmodule PropCheck.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [applications: [:logger, :proper, :libgraph],
-     mod: {PropCheck.App, []}]
+     mod: {PropCheck.App, []},
+     extra_applications: [:iex]]
   end
 
   # Specifies which paths to compile per environment
