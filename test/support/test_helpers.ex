@@ -55,15 +55,6 @@ defmodule PropCheck.TestHelpers do
 
   defp opt_num_value(name, val), do: {name, String.to_integer(val)}
 
-  defp opt_bool_value(name, val) do
-    case val do
-      "1" -> name
-      "TRUE" -> name
-      "true" -> name
-      _ -> nil
-    end
-  end
-
   defp push(cfg, env_var, default , opt_name, transform) do
     case System.get_env(env_var) do
       nil -> [transform.(opt_name, default) | cfg]

@@ -5,7 +5,7 @@ defmodule PropCheck.Mixfile do
   def project do
     [app: :propcheck,
      version: "1.2.3-dev",
-     elixir: ">= 1.7.0",
+     elixir: "~> 1.7",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -59,6 +59,11 @@ defmodule PropCheck.Mixfile do
       parallel_test: ["test --include concurrency_test --only concurrency_test"],
       test_parallel: ["test --include concurrency_test --only concurrency_test"],
       tests: ["test_ext", "test"],
+      lint: [
+        "credo --strict",
+        "hex.audit",
+        "dialyzer"
+      ]
     ]
   end
 
