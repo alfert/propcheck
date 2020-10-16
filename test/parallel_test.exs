@@ -7,7 +7,6 @@ defmodule PropCheck.Test.Cache.DSL.Parallel do
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.ModelDSL
-  import PropCheck.TestHelpers, except: [config: 0]
 
   alias PropCheck.Instrument
   alias PropCheck.Test.Cache
@@ -25,24 +24,14 @@ defmodule PropCheck.Test.Cache.DSL.Parallel do
   @tag concurrency_test: true
   property "run the sequential cache concurrently", [:verbose] do
     forall cmds <- parallel_commands(__MODULE__, initial_state()) do
-      # Logger.debug "Commands to run: #{inspect cmds}"
       Cache.start_link(@cache_size)
       r = run_parallel_commands(__MODULE__, cmds)
       {_history, _state, result} = r
-      # Logger.debug "History is #{inspect history}"
-      # Logger.debug "State is #{inspect state}"
+
       Cache.stop()
-      # Logger.debug "Events are: #{inspect events}"
 
       (result == :ok)
-      # |> collect(length cmds)
       |> when_fail(print_report(r, cmds))
-      # |> aggregate(command_names cmds)
-      # |> collect(
-      #   history
-      #   |> history_of_states()
-      #   |> Enum.map(fn model -> model.count end)
-      #   |> Enum.max())
     end
   end
 
@@ -110,14 +99,10 @@ defmodule PropCheck.Test.Cache.DSL.Parallel do
   defcommand :find do
     def impl(key), do: Cache.find(key)
     def post(%__MODULE__{entries: l}, [key], res) do
-      ret_val = case List.keyfind(l, key, 0, false) do
+      case List.keyfind(l, key, 0, false) do
           false       -> res == {:error, :not_found}
           {^key, val} -> res == {:ok, val}
       end
-      if not ret_val do
-        # Logger.error "Postcondition failed: find(#{inspect key}) resulted in #{inspect res})"
-      end
-      ret_val
     end
   end
 

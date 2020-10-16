@@ -4,7 +4,6 @@ defmodule PropcheckTest do
   """
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  import PropCheck.TestHelpers, except: [config: 0]
 
   import ExUnit.CaptureIO
   require Logger

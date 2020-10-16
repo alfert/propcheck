@@ -7,7 +7,7 @@ defmodule PropCheck.Test.MasterStateM do
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM
   use ExUnit.Case
-  import PropCheck.TestHelpers, except: [config: 0]
+
   alias PropCheck.Test.PingPongMaster
   @moduletag capture_log: true
 
@@ -19,7 +19,7 @@ defmodule PropCheck.Test.MasterStateM do
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
         PingPongMaster.stop
-        # IO.puts "Property finished. result is: #{inspect r}"
+
         (result == :ok)
         |> when_fail(
             IO.puts """
@@ -27,8 +27,6 @@ defmodule PropCheck.Test.MasterStateM do
             State: #{inspect state, pretty: true}
             Result: #{inspect result, pretty: true}
             """)
-        # |> aggregate(command_names cmds)
-        # |> collect(length cmds)
       end
     end
   end
@@ -95,14 +93,10 @@ defmodule PropCheck.Test.MasterStateM do
   that the new state can depend on the old state and the returned value.
   """
   def next_state(state, _value, {:call, PingPongMaster, :add_player, [name]}) do
-    #IO.puts "next_state: add player #{name} in model #{inspect state}"
-    state |> MapSet.put(name)
+    MapSet.put(state, name)
   end
   def next_state(state, _value, {:call, PingPongMaster, :remove_player, [name]}) do
-    #IO.puts "next_state: remove player #{name} in model #{inspect state}"
-    s = state |> MapSet.delete(name)
-    #IO.puts "next_state: the new state is #{inspect s}"
-    s
+    MapSet.delete(state, name)
   end
   def next_state(state, _value, _call), do: state
 

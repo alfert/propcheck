@@ -5,7 +5,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
   """
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  import PropCheck.TestHelpers, except: [config: 0]
+  import PropCheck.TestHelpers, only: [debugln: 1]
   require Logger
 
   alias PropCheck.CounterStrike
@@ -61,7 +61,6 @@ defmodule PropCheck.Test.CounterStrikeTest do
     """
     use ExUnit.Case
     use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-    import PropCheck.TestHelpers, except: [config: 0]
 
     @tag will_fail: true # must be run manually
     property "cant_generate" do

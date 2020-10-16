@@ -53,7 +53,7 @@ defmodule PropCheck.Test.InstrumentTester do
     assert tuple_size(forms) == 2
     {:abstract_code, code} = forms
     assert tuple_size(code) == 2
-    assert {:raw_abstract_v1, clauses} = code
+    assert {:raw_abstract_v1, _clauses} = code
 
     expected_path = Path.join(["_build", "test", "lib", "propcheck", "ebin"])
     assert expected_path == Path.relative_to_cwd(filename) |> Path.dirname()

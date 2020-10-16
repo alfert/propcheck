@@ -547,7 +547,7 @@ defmodule PropCheck do
         iex> quickcheck(
         ...>   trap_exit(forall n <- nat() do
         ...>     # this must fail
-        ...>     pid = spawn_link(fn() -> n / 0 end)
+        ...>     _pid = spawn_link(fn() -> n / 0 end)
         ...>     # wait for arrivial of the dieing linked process signal
         ...>     :timer.sleep(50)
         ...>     true #
