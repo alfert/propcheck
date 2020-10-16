@@ -9,6 +9,8 @@ jobs:
   include:
     - elixir: '1.10'
       otp_release: '21.0'
+    - elixir: '1.11'
+      opt_release: '23.0'
 cache:
     - deps
     - ~/.mix
