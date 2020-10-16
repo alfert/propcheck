@@ -10,12 +10,16 @@ defmodule PropCheck.App do
     import Supervisor.Spec, warn: false
 
     populate_application_env()
-
     children = [
       # Define workers and child supervisors to be supervised
-      # worker(PropCheck.Worker, [arg1, arg2, arg3])
-      worker(PropCheck.CounterStrike,
-        [Mix.counter_example_file(), [name: PropCheck.CounterStrike]])
+      %{
+        id: PropCheck.CounterStrike,
+        start: {
+          PropCheck.CounterStrike,
+          :start_link,
+          [Mix.counter_example_file(), [name: PropCheck.CounterStrike]]
+        }
+      }
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
