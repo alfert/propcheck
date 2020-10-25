@@ -429,20 +429,17 @@ defmodule PropCheck do
               unquote(prop)
             rescue
               e in ExUnit.AssertionError ->
-                stacktrace = System.stacktrace
                 if verbose? do
                   e |> ExUnit.AssertionError.message() |> IO.write()
-                  formatted = Exception.format_stacktrace(stacktrace)
+                  formatted = Exception.format_stacktrace(__STACKTRACE__)
                   IO.puts("stacktrace:\n#{formatted}")
                 end
                 false
               e ->
-                stacktrace = System.stacktrace
-
                 if detect_exceptions? do
                   output = """
                   PropCheck detected an error:
-                  #{Exception.format(:error, e, stacktrace)}
+                  #{Exception.format(:error, e, __STACKTRACE__)}
                   """
 
                   if output_agent != nil do
@@ -452,15 +449,13 @@ defmodule PropCheck do
                   end
                 end
 
-                reraise e, stacktrace
+                reraise e, __STACKTRACE__
             catch
               kind, exception ->
-                stacktrace = System.stacktrace
-
                 if detect_exceptions? do
                   output = """
                   PropCheck detected an exception:
-                  #{Exception.format(kind, exception, stacktrace)}
+                  #{Exception.format(kind, exception, __STACKTRACE__)}
                   """
 
                   if output_agent != nil do
@@ -547,7 +542,7 @@ defmodule PropCheck do
         iex> quickcheck(
         ...>   trap_exit(forall n <- nat() do
         ...>     # this must fail
-        ...>     pid = spawn_link(fn() -> n / 0 end)
+        ...>     _pid = spawn_link(fn() -> n / 0 end)
         ...>     # wait for arrivial of the dieing linked process signal
         ...>     :timer.sleep(50)
         ...>     true #

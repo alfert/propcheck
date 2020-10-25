@@ -7,7 +7,7 @@ defmodule PropCheck.Test.PingPongFSM do
   use PropCheck.FSM
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  import PropCheck.TestHelpers, except: [config: 0]
+  import PropCheck.TestHelpers, only: [scale_numtests: 1]
   alias PropCheck.Test.PingPongMaster
   require Logger
   @moduletag capture_log: true
@@ -17,16 +17,13 @@ defmodule PropCheck.Test.PingPongFSM do
       trap_exit do
         kill_all_player_processes()
         {:ok, _pid} = PingPongMaster.start_link()
-        # :ok = :sys.install(PingPongMaster, {&log_message/3, :no_state})
-        # :ok = :sys.trace(PingPongMaster, true)
+
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
-        # {:ok, messages} = :sys.log(PingPongMaster, :get)
+
         PingPongMaster.stop
-        # Logger.info "Property finished. result is: #{inspect r}"
-        # IO.puts "Property finished. result is: #{inspect r}"
+
         (result == :ok)
-        # |> aggregate(command_names cmds)
         |> when_fail(
             IO.puts """
             History: #{inspect history, pretty: true}
@@ -35,31 +32,6 @@ defmodule PropCheck.Test.PingPongFSM do
             """)
       end
     end
-  end
-
-  defp log_message(log_state, {:in, msg}, proc_state) do
-    Logger.debug(fn ->
-      "Got message #{inspect msg, :pretty} in state #{inspect proc_state, :pretty}"
-    end)
-    log_state
-  end
-  defp log_message(log_state, {:in, msg, client}, proc_state) do
-    Logger.debug(fn ->
-      "Got message #{inspect msg, :pretty} from client #{inspect client} in state #{inspect proc_state, :pretty}"
-    end)
-    log_state
-  end
-  defp log_message(log_state, {:out, msg, client}, proc_state) do
-    Logger.error(fn ->
-      "Send message #{inspect msg, :pretty} to client #{inspect client} in state #{inspect proc_state, :pretty}"
-    end)
-    log_state
-  end
-  defp log_message(log_state, any, proc_state) do
-    Logger.debug(fn ->
-      "Got unknown message #{inspect any, :pretty} in state #{inspect proc_state, :pretty}"
-    end)
-    log_state
   end
 
   # State is modelled as tuples of `{state_name, state}`

@@ -7,7 +7,7 @@ defmodule PropCheck.Test.PingPongDSL do
   use ExUnit.Case
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
   use PropCheck.StateM.ModelDSL
-  import PropCheck.TestHelpers, except: [config: 0]
+
   alias PropCheck.Test.PingPongMaster
   require Logger
   @moduletag capture_log: true
@@ -23,7 +23,6 @@ defmodule PropCheck.Test.PingPongDSL do
 
         (result == :ok)
         |> when_fail(print_report(r, cmds))
-        # |> aggregate(command_names cmds)
       end
     end
   end
@@ -105,7 +104,7 @@ defmodule PropCheck.Test.PingPongDSL do
     def next(state =  %__MODULE__{scores: scores}, [name], _res) do
       new_scores = Map.update!(scores, name, & (&1 + 1))
       Logger.debug(fn -> "New Scores are: #{inspect new_scores}" end)
-      # x = put_in(state, :scores, new_scores)
+
       x = %__MODULE__{state | scores: new_scores}
       Logger.debug(fn -> "new state: #{inspect x}" end)
       x

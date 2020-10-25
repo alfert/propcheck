@@ -56,7 +56,6 @@ defmodule PropCheck.CounterStrike do
   end
 
   def handle_call({:add, mfa, counter_example}, _from, state) do
-    # Logger.debug "add for #{inspect mfa} the example: #{inspect counter_example}"
     true = :dets.insert_new(state.dets, {mfa, counter_example})
     :ok = :dets.sync(state.dets)
     {:reply, :ok, state}
@@ -66,7 +65,6 @@ defmodule PropCheck.CounterStrike do
   end
 
   defp check_counter_example(counter_examples, mfa) do
-    # Logger.debug "#{inspect self()}: Asked for mfa #{inspect mfa} in #{inspect counter_examples}"
     if Enum.empty?(counter_examples) do
       :none
     else
@@ -82,17 +80,15 @@ defmodule PropCheck.CounterStrike do
   # storing new counter examples.
   @spec load_existing_counter_examples(%{mfa => any}, :dets.tab_name()) :: %{mfa => any}
   defp load_existing_counter_examples(ce, dets) do
-    # Logger.debug "Loading existing examples from #{inspect dets}"
     new_ce = :dets.foldl(fn {mfa, example}, ces ->
       Map.put_new(ces, mfa, example) end, ce, dets)
-    # Logger.debug "Found examples: #{inspect new_ce}"
+
     :ok = :dets.delete_all_objects(dets)
     :ok = :dets.sync(dets)
     new_ce
   end
 
   def terminate(_reason, state) do
-    # IO.puts "Terminating Counter Strike"
     :dets.close(state.dets)
   end
 end

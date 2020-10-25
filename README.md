@@ -3,7 +3,6 @@
 `PropCheck` is a testing library, that provides a wrapper around PropEr, an Erlang
 based property testing framework in the spirit of QuickCheck.
 
-[![Build Status](https://travis-ci.org/alfert/propcheck.svg?branch=master)](https://travis-ci.org/alfert/propcheck)
 [![Hex.pm version](https://img.shields.io/hexpm/v/propcheck.svg)](https://hex.pm/packages/propcheck)
 [![Gitter](https://badges.gitter.im/propcheck/community.svg)](https://gitter.im/propcheck/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 ![Elixir CI](https://github.com/alfert/propcheck/workflows/Elixir%20CI/badge.svg)
@@ -21,7 +20,7 @@ end
 
 ## Changes
 
-Relevant changes are documented in the [Changelog](changelog.html), on [GitHub  
+Relevant changes are documented in the [Changelog](changelog.html), on [GitHub
 follow this link](CHANGELOG.md).
 
 ## Basic Usage and Build Configuration
@@ -33,7 +32,7 @@ when running `mix test`. You find relevant information here:
   `PropCheck`,
 * the basic data generators are found in `PropCheck.BasicTypes`,
 * for property testing of state-based systems take a loot at
-  `PropCheck.StateM.ModelDSL` for the new DSL (since PropCheck 1.1.0-rc1), 
+  `PropCheck.StateM.ModelDSL` for the new DSL (since PropCheck 1.1.0-rc1),
   which is a layer on top of `PropCheck.StateM`.
 * The new targeted property based testing approach (TBPT) employing an automated
   search strategy towards more interesting test data is described in
@@ -142,32 +141,32 @@ regular tests.
 
 ### Rebase Policy
 Ensure that your PR is based on the latest `master` version by rebasing. If your
-feature branch is `my_feature`, then do the following before publishing a 
-pull request: 
+feature branch is `my_feature`, then do the following before publishing a
+pull request:
 
     git checkout master
-    git pull --rebase 
+    git pull --rebase
     git checkout my_feature
     git rebase master
 
-If your PR implementation takes longer such that another PR is merged before 
-your own PR, then you have to repeat the above sequence. It might be that you 
+If your PR implementation takes longer such that another PR is merged before
+your own PR, then you have to repeat the above sequence. It might be that you
 have fix some conflicts. But now you cannot push your branch again, because you
-changed the history of your local branch compared to the one published on GitHub. 
-Therefore, you have force-push your branch. Do this with 
+changed the history of your local branch compared to the one published on GitHub.
+Therefore, you have force-push your branch. Do this with
 
     git push --force-with-lease
 
-A simple `git push --force` is not allowed, `--force-with-lease` is more friendly 
-and thus allowed. See details in the Git documentation. 
+A simple `git push --force` is not allowed, `--force-with-lease` is more friendly
+and thus allowed. See details in the Git documentation.
 
-The rationale behind this policy is that we want a simple almost linear history, 
+The rationale behind this policy is that we want a simple almost linear history,
 where each merged PR create a sequence of merge with no parallel work. This history
-will not show how many active branches are available during development but the 
-sequence of incorporating changes to master. That is the important part and we 
-want to see which commit sequence lead to the specific feature. Merges destroy 
+will not show how many active branches are available during development but the
+sequence of incorporating changes to master. That is the important part and we
+want to see which commit sequence lead to the specific feature. Merges destroy
 this linearity. But beware, you can do nasty things with `git rebase`, therefore
-stick to the simple procedure explained above to not corrupt your repository. 
+stick to the simple procedure explained above to not corrupt your repository.
 
 ## License
 
