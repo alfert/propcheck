@@ -4,7 +4,7 @@ defmodule PropCheck.Mixfile do
 
   def project do
     [app: :propcheck,
-     version: "1.3.0",
+     version: "1.3.1-dev",
      elixir: "~> 1.7",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
