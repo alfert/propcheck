@@ -13,10 +13,14 @@ To use PropCheck with your project, add it as a dependency to `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:propcheck, "~> 1.1", only: [:test, :dev]}
+    {:propcheck, "~> 1.3", only: [:test, :dev]}
   ]
 end
 ```
+
+From PropcCheck 1.3.0 onwards, we require at least Elixir 1.7 since in Elixir 1.11 function `get_stracktrace()` is deprecated. However, we 
+only support OTP 22, since `:proper` does not yet support OTP 23 in a released version. Hopefully, this will change soon! Running under
+OTP 23 results in no stacktraces - which is not helpful for identifying bugs. 
 
 ## Changes
 

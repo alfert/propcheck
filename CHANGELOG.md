@@ -1,10 +1,12 @@
 # PropCheck Changelog
 
-## 1.2.3-Development
+## 1.3.0-Development
+* Upgrade to Elixir 1.7 as lowest Elixir version, since `get_stacktrace()` is deprecated in Elixir 1.11. Thanks to [@flowerett](https://github.com/flowerett)
+* `:iex` is now an extra-application. Thanks to [@ahamez](https://github.com/ahamez) 
 * Support for parallel testing of state machines started. Requires also PRs in the upstream 
   PropEr. An upgrade to (the future) PropEr 1.4 will result in better reports. 
 ## 1.2.2-Development
-* Fixes to statemachine reporter by [@aherranz](https://github.com/aherranz) and [@devonestes](https://github.com/devonestes) 
+* Fixes to statemachine reported by [@aherranz](https://github.com/aherranz) and [@devonestes](https://github.com/devonestes) 
 * Fixes to the Readme linking by [@oo6](https://github.com/oo6)
 
 ## 1.2.1
