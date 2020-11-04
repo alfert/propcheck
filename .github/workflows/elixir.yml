@@ -12,6 +12,9 @@ env:
 
 jobs:
   lint:
+    # WARNING:
+    # Changing the naming pattern requires changes in the branch protection 
+    # at GitHub, the name of jobs are referenced there!
     name: lint (Elixir ${{ matrix.elixir }} OTP ${{ matrix.otp }})
 
     runs-on: ubuntu-latest
@@ -43,6 +46,9 @@ jobs:
         run: mix lint
 
   test:
+    # WARNING:
+    # Changing the naming pattern requires changes in the branch protection 
+    # at GitHub, the name of jobs are referenced there!
     name: test (Elixir ${{ matrix.elixir }} OTP ${{ matrix.otp }})
 
     runs-on: ubuntu-latest
