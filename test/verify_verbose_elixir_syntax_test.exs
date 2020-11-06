@@ -30,8 +30,7 @@ defmodule VerifyVerboseElixirSyntaxTest do
   @tag :manual
   property "collect prints Elixir syntax" do
     forall _n <- nat() do
-      true
-      |> collect(%{test: __MODULE__})
+      collect(true, %{test: __MODULE__})
     end
   end
 
