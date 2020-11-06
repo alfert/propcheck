@@ -72,7 +72,7 @@ defmodule PropCheck.Mixfile do
       tests: ["test_ext", "test"],
       lint: [
         "format --check-formatted",
-        "deps.unlock --check-unused",
+        "deps.unlock --unused",
         "credo --strict",
         "hex.audit",
         "dialyzer"
