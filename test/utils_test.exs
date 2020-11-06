@@ -20,7 +20,6 @@ defmodule UtilsTest do
     Graph.new(type: :directed)
     |> Graph.add_vertices(Map.keys(adj_map))
     |> Graph.add_edges(adj_map_2_edges(adj_map))
-
   end
 
   def complex_wiki_graph do
@@ -61,7 +60,7 @@ defmodule UtilsTest do
       qfunc()
       |> Utils.unpin_vars()
       |> Macro.to_string()
+
     assert "foo(a + 1, bar(b, {dd, q}), c)" == unpinned
   end
-
 end

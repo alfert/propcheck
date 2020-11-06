@@ -103,24 +103,27 @@ defmodule PropCheck.Utils do
       :verbose -> [{:on_output, &PropCheck.Utils.elixirfy_output/2}, :verbose]
       opt -> opt
     end)
-    |> List.flatten
+    |> List.flatten()
   end
 
   def elixirfy_output('Stacktrace: ~p.~n', [stacktrace]) do
-    IO.puts "Stacktrace:"
-    IO.puts Exception.format_stacktrace stacktrace
+    IO.puts("Stacktrace:")
+    IO.puts(Exception.format_stacktrace(stacktrace))
     :ok
   end
+
   def elixirfy_output('An exception was raised:' ++ _, [kind, exception]) do
-    IO.puts "An exception was raised:"
-    IO.puts Exception.format kind, exception
+    IO.puts("An exception was raised:")
+    IO.puts(Exception.format(kind, exception))
     :ok
   end
+
   def elixirfy_output('A linked process died' ++ _, [{reason, stack}]) do
-    IO.puts "A linked process died with reason: an exception was raised:"
-    IO.puts Exception.format :error, reason, stack
+    IO.puts("A linked process died with reason: an exception was raised:")
+    IO.puts(Exception.format(:error, reason, stack))
     :ok
   end
+
   def elixirfy_output(fmt, data), do: do_elixirfy_output(fmt, data)
 
   defp do_elixirfy_output(fmt, data) do
@@ -129,17 +132,20 @@ defmodule PropCheck.Utils do
       |> :io_lib.scan_format(data)
       |> Enum.map(&parse_io_spec_format/1)
       |> :io_lib.unscan_format()
-    :io.format fmt, data
+
+    :io.format(fmt, data)
     :ok
   end
 
   defp parse_io_spec_format(spec = %{control_char: ?s}) do
     %{spec | args: [inspect(spec.args |> hd, limit: :infinity)]}
   end
+
   defp parse_io_spec_format(spec = %{control_char: c}) when c in [?w, ?p] do
     args = [inspect(spec.args |> hd, pretty: true, limit: :infinity)]
     %{spec | args: args, control_char: ?s}
   end
+
   defp parse_io_spec_format(char_or_spec), do: char_or_spec
 
   @spec toplevels(Graph.t()) :: {:ok, [atom()]} | {:error, String.t()}
@@ -157,13 +163,14 @@ defmodule PropCheck.Utils do
   defp toplevels(_, [], levels) do
     {:ok, levels}
   end
-  defp toplevels(graph, top_order_verts, levels) do
 
+  defp toplevels(graph, top_order_verts, levels) do
     {level, rest} =
       Enum.split_while(
         top_order_verts,
         &(Graph.in_degree(graph, &1) == 0)
       )
+
     reducted_graph = Graph.delete_vertices(graph, level)
     toplevels(reducted_graph, rest, [level | levels])
   end
@@ -179,13 +186,17 @@ defmodule PropCheck.Utils do
     case block do
       {:^, _, [{var, _, _} | _args]} ->
         pinned = {:^, var}
+
         case acc do
           [^var | rest] -> {block, [pinned | rest]}
           _ -> {block, [pinned | acc]}
         end
+
       {var, _, args} when not is_list(args) ->
         {block, [var | acc]}
-      _ -> {block, acc}
+
+      _ ->
+        {block, acc}
     end
   end
 
@@ -196,7 +207,7 @@ defmodule PropCheck.Utils do
         _ -> b
       end
     end
+
     Macro.prewalk(block, var_replacer)
   end
-
 end

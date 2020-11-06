@@ -3,24 +3,32 @@ defmodule PropCheck.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :propcheck,
-     version: "1.3.1-dev",
-     elixir: "~> 1.7",
-     elixirc_paths: elixirc_paths(Mix.env),
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     test_coverage: [tool: Coverex.Task, console_log: true],
-     package: package(),
-     name: "PropCheck - Property Testing",
-     source_url: "https://github.com/alfert/propcheck",
-     homepage_url: "https://github.com/alfert/propcheck",
-     docs: [main: "readme", extras: ["README.md", "CHANGELOG.md"], extra_section: "Overview"],
-     description: description(),
-     propcheck: [counter_examples: "_build/propcheck.ctx"],
-     aliases: aliases(),
-     preferred_cli_env: [tests: :test, test_ext: :test, dialyzer: :test, parallel_test: :test, test_parallel: :test],
-     deps: deps(),
-     dialyzer: dialyzer()]
+    [
+      app: :propcheck,
+      version: "1.3.1-dev",
+      elixir: "~> 1.7",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: Coverex.Task, console_log: true],
+      package: package(),
+      name: "PropCheck - Property Testing",
+      source_url: "https://github.com/alfert/propcheck",
+      homepage_url: "https://github.com/alfert/propcheck",
+      docs: [main: "readme", extras: ["README.md", "CHANGELOG.md"], extra_section: "Overview"],
+      description: description(),
+      propcheck: [counter_examples: "_build/propcheck.ctx"],
+      aliases: aliases(),
+      preferred_cli_env: [
+        tests: :test,
+        test_ext: :test,
+        dialyzer: :test,
+        parallel_test: :test,
+        test_parallel: :test
+      ],
+      deps: deps(),
+      dialyzer: dialyzer()
+    ]
   end
 
   # Hex Package description
@@ -33,9 +41,10 @@ defmodule PropCheck.Mixfile do
 
   # Hex Package definition
   defp package do
-    [maintainers: ["Klaus Alfert"],
-     licenses: ["GPL 3.0"],
-     links: %{"GitHub" => "https://github.com/alfert/propcheck"}
+    [
+      maintainers: ["Klaus Alfert"],
+      licenses: ["GPL 3.0"],
+      links: %{"GitHub" => "https://github.com/alfert/propcheck"}
     ]
   end
 
@@ -43,14 +52,16 @@ defmodule PropCheck.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :proper, :libgraph],
-     mod: {PropCheck.App, []},
-     extra_applications: [:iex]]
+    [
+      applications: [:logger, :proper, :libgraph],
+      mod: {PropCheck.App, []},
+      extra_applications: [:iex]
+    ]
   end
 
   # Specifies which paths to compile per environment
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   def aliases do
     [
@@ -60,6 +71,8 @@ defmodule PropCheck.Mixfile do
       test_parallel: ["test --include concurrency_test --only concurrency_test"],
       tests: ["test_ext", "test"],
       lint: [
+        "format --check-formatted",
+        "deps.unlock --check-unused",
         "credo --strict",
         "hex.audit",
         "dialyzer"

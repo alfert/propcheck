@@ -1,5 +1,4 @@
 defmodule PropCheck.CounterStrike do
-
   # A GenServer storing and retrieving counter examples. It helps to focus on
   # resolving failing properties with the same counterexamples until they are
   # resolved.
@@ -15,10 +14,13 @@ defmodule PropCheck.CounterStrike do
   use GenServer
   require Logger
 
-  defstruct [counter_examples: %{}, dets: nil]
+  defstruct counter_examples: %{}, dets: nil
 
   def start_link(filename \\ 'propcheck.dets', opts \\ [])
-  def start_link(filename, opts) when is_binary(filename), do: start_link(String.to_charlist(filename), opts)
+
+  def start_link(filename, opts) when is_binary(filename),
+    do: start_link(String.to_charlist(filename), opts)
+
   def start_link(filename, opts) when is_list(filename) do
     # Logger.info "Filename: #{filename}, options: #{inspect opts}"
     GenServer.start_link(__MODULE__, [filename], opts)
@@ -43,14 +45,14 @@ defmodule PropCheck.CounterStrike do
   only other properties have counter examples and `{:ok, counter_example}`
   if a counter example exists for the given property.
   """
-  @spec counter_example(GenServer.server, mfa) :: :none | :others | {:ok, any}
+  @spec counter_example(GenServer.server(), mfa) :: :none | :others | {:ok, any}
   def counter_example(pid \\ __MODULE__, mfa) do
     GenServer.call(pid, {:counter_example, mfa})
   end
 
   def init([filename]) do
-    dets_name = String.to_atom("#{inspect self()}")
-    {:ok, new_ces} = :dets.open_file(dets_name, [file: filename, auto_save: 500])
+    dets_name = String.to_atom("#{inspect(self())}")
+    {:ok, new_ces} = :dets.open_file(dets_name, file: filename, auto_save: 500)
     counter_examples = load_existing_counter_examples(%{}, new_ces)
     {:ok, %__MODULE__{counter_examples: counter_examples, dets: new_ces}}
   end
@@ -60,6 +62,7 @@ defmodule PropCheck.CounterStrike do
     :ok = :dets.sync(state.dets)
     {:reply, :ok, state}
   end
+
   def handle_call({:counter_example, mfa}, _from, state) do
     {:reply, check_counter_example(state.counter_examples, mfa), state}
   end
@@ -80,8 +83,14 @@ defmodule PropCheck.CounterStrike do
   # storing new counter examples.
   @spec load_existing_counter_examples(%{mfa => any}, :dets.tab_name()) :: %{mfa => any}
   defp load_existing_counter_examples(ce, dets) do
-    new_ce = :dets.foldl(fn {mfa, example}, ces ->
-      Map.put_new(ces, mfa, example) end, ce, dets)
+    new_ce =
+      :dets.foldl(
+        fn {mfa, example}, ces ->
+          Map.put_new(ces, mfa, example)
+        end,
+        ce,
+        dets
+      )
 
     :ok = :dets.delete_all_objects(dets)
     :ok = :dets.sync(dets)

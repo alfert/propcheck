@@ -10,6 +10,7 @@ defmodule PropCheck.App do
     import Supervisor.Spec, warn: false
 
     populate_application_env()
+
     children = [
       # Define workers and child supervisors to be supervised
       %{
@@ -29,20 +30,20 @@ defmodule PropCheck.App do
   end
 
   defp populate_application_env do
-    Application.put_env(:propcheck, :global_verbose,  global_verbose())
-    Application.put_env(:propcheck, :global_detect_exceptions,  global_detect_exceptions())
+    Application.put_env(:propcheck, :global_verbose, global_verbose())
+    Application.put_env(:propcheck, :global_detect_exceptions, global_detect_exceptions())
   end
 
   defp global_verbose do
-      "PROPCHECK_VERBOSE"
-      |> System.get_env()
-      |> env_to_terniary()
+    "PROPCHECK_VERBOSE"
+    |> System.get_env()
+    |> env_to_terniary()
   end
 
   defp global_detect_exceptions do
-      "PROPCHECK_DETECT_EXCEPTIONS"
-      |> System.get_env()
-      |> env_to_terniary()
+    "PROPCHECK_DETECT_EXCEPTIONS"
+    |> System.get_env()
+    |> env_to_terniary()
   end
 
   defp env_to_terniary("1"), do: true

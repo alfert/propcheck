@@ -110,17 +110,17 @@ defmodule PropCheck.FSM do
   @type mod_name :: atom
   @type state_name :: atom | tuple
   @type state_data :: any
-  @type symbolic_call :: PropCheck.StateM.symbolic_call
-  @type symbolic_var :: PropCheck.StateM.symbolic_var
-  @type fsm_state()    :: {state_name, state_data}
-  @type transition()   :: {state_name, symbolic_call}
-  @type history()      :: [{fsm_state, cmd_result}]
+  @type symbolic_call :: PropCheck.StateM.symbolic_call()
+  @type symbolic_var :: PropCheck.StateM.symbolic_var()
+  @type fsm_state() :: {state_name, state_data}
+  @type transition() :: {state_name, symbolic_call}
+  @type history() :: [{fsm_state, cmd_result}]
 
-  @type result :: :proper_statem.statem_result
+  @type result :: :proper_statem.statem_result()
   @type fsm_result :: result
   @type cmd_result :: any
-  @type command  :: {:set, symbolic_var, symbolic_call} | {:init, fsm_state()}
-  @type command_list:: [command]
+  @type command :: {:set, symbolic_var, symbolic_call} | {:init, fsm_state()}
+  @type command_list :: [command]
 
   @doc """
   Specifies the initial state of the finite state machine. As with
@@ -148,16 +148,25 @@ defmodule PropCheck.FSM do
   will not be able to detect which transition was chosen and an exception
   will be raised.
   """
-  @callback precondition(from :: state_name, target:: state_name,
-    state_data :: state_data, call :: symbolic_call) :: boolean
+  @callback precondition(
+              from :: state_name,
+              target :: state_name,
+              state_data :: state_data,
+              call :: symbolic_call
+            ) :: boolean
 
   @doc """
   Similar to `c:PropCheck.StateM.postcondition/3`. Specifies the
   postcondition that should hold about the result `res` of the evaluation
   of `call`.
   """
-  @callback postcondition(from :: state_name, target:: state_name,
-    state_data :: state_data, call :: symbolic_call, result :: result) :: boolean
+  @callback postcondition(
+              from :: state_name,
+              target :: state_name,
+              state_data :: state_data,
+              call :: symbolic_call,
+              result :: result
+            ) :: boolean
 
   @doc """
   Similar to `c:PropCheck.StateM.next_state/3`. Specifies how the
@@ -165,8 +174,13 @@ defmodule PropCheck.FSM do
   `state_data`. `res` refers to the result of `call` and can be either
   symbolic or dynamic.
   """
-  @callback next_state_data(from :: state_name, target:: state_name,
-    state_data :: state_data, result :: result, call :: symbolic_call) :: state_data
+  @callback next_state_data(
+              from :: state_name,
+              target :: state_name,
+              state_data :: state_data,
+              result :: result,
+              call :: symbolic_call
+            ) :: state_data
 
   @doc """
   This is an optional callback. When it is not defined (or not exported),
@@ -175,7 +189,7 @@ defmodule PropCheck.FSM do
   triggered by symbolic call `call`. In this case, each transition is chosen
   with probability proportional to the weight assigned.
   """
-  @callback weight(from::state_name, target::state_name, call::symbolic_call) :: integer
+  @callback weight(from :: state_name, target :: state_name, call :: symbolic_call) :: integer
   @optional_callbacks weight: 3
 
   @doc """
@@ -187,7 +201,7 @@ defmodule PropCheck.FSM do
   The initial state is computed by
   `{mod.initial_state/0, mod:initial_state_data/0}`.
   """
-  @spec commands(mod_name) :: PropCheck.type
+  @spec commands(mod_name) :: PropCheck.type()
   def commands(mod), do: :proper_fsm.commands(mod)
 
   @doc """
@@ -199,10 +213,10 @@ defmodule PropCheck.FSM do
   state every time the command sequence is run (i.e. during normal execution,
   while shrinking and when checking a counterexample).
   """
-  @spec commands(mod_name, fsm_state) :: PropCheck.type
+  @spec commands(mod_name, fsm_state) :: PropCheck.type()
   def commands(mod, initial_state), do: :proper_fsm.commands(mod, initial_state)
 
-  defdelegate more_commands(n, cmd_type),           to: PropCheck.StateM
+  defdelegate more_commands(n, cmd_type), to: PropCheck.StateM
 
   @doc """
   Evaluates a given symbolic command sequence `cmds` according to the
@@ -219,8 +233,8 @@ defmodule PropCheck.FSM do
   used for symbolic variable evaluation, exactly as described in
   `PropCheck.StateM.run_commands/3`.
   """
-  @spec run_commands(mod_name, command_list, :proper_symb.var_values) ::
-           {history, fsm_state, fsm_result}
+  @spec run_commands(mod_name, command_list, :proper_symb.var_values()) ::
+          {history, fsm_state, fsm_result}
   def run_commands(mod, cmds, env), do: :proper_fsm.run_commands(mod, cmds, env)
 
   @doc """

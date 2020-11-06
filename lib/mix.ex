@@ -6,8 +6,9 @@ defmodule PropCheck.Mix do
       Mix.Project.build_path()
       |> Path.dirname()
       |> Path.join("propcheck.ctex")
+
     Mix.Project.config()
-    |> Keyword.get(:propcheck, [counter_examples: default_path])
+    |> Keyword.get(:propcheck, counter_examples: default_path)
     |> Keyword.get(:counter_examples)
   end
 end
@@ -34,12 +35,13 @@ defmodule Mix.Tasks.Propcheck do
   alias Mix.Tasks.Help
 
   def run(_) do
-    Mix.shell.info("Available PropCheck tasks:\n")
+    Mix.shell().info("Available PropCheck tasks:\n")
     Help.run(["--search", "propcheck."])
   end
 
   defmodule Clean do
     use Mix.Task
+
     @moduledoc """
     Removes the counter example file of propcheck.
     """
@@ -54,6 +56,7 @@ defmodule Mix.Tasks.Propcheck do
 
   defmodule Inspect do
     use Mix.Task
+
     @moduledoc """
     Inspects all counter examples.
     """
@@ -63,16 +66,18 @@ defmodule Mix.Tasks.Propcheck do
     @doc false
     def run(_args) do
       filename = PropCheck.Mix.counter_example_file() |> String.to_charlist()
+
       case :dets.open_file(filename) do
         {:ok, ctx} ->
           fn {{m, f, _a}, counter_example}, counter ->
             prop = "#{m}.#{f}()"
-            Mix.Shell.IO.info "##{counter}: Property #{prop}: #{inspect counter_example}"
+            Mix.Shell.IO.info("##{counter}: Property #{prop}: #{inspect(counter_example)}")
             counter + 1
           end
           |> :dets.foldl(1, ctx)
 
-        _ -> Mix.Shell.IO.error("Could not open counter examples file #{filename}")
+        _ ->
+          Mix.Shell.IO.error("Could not open counter examples file #{filename}")
       end
     end
   end

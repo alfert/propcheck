@@ -3,7 +3,8 @@ defmodule VerifyExceptionDetectionTest do
   use ExUnit.Case
   use PropCheck
 
-  @moduletag will_fail: true, manual: true # must be run manually
+  # must be run manually
+  @moduletag will_fail: true, manual: true
 
   @tests [:failing_raise, :failing_throw, :failing_assert]
   @modes %{
@@ -20,7 +21,7 @@ defmodule VerifyExceptionDetectionTest do
 
   def failing_throw do
     forall _ <- nat() do
-      throw "throw-fail"
+      throw("throw-fail")
     end
   end
 
@@ -40,7 +41,7 @@ defmodule VerifyExceptionDetectionTest do
     end
   end
 
-  property "lengthy output?", [numtests: 10_000] do
+  property "lengthy output?", numtests: 10_000 do
     forall n <- integer(1, :inf) do
       if n > 500 && rem(n, 2) == 0 do
         raise "#{n}"
