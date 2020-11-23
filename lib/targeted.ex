@@ -149,7 +149,7 @@ defmodule PropCheck.TargetedPBT do
   """
   defmacro maximize(fitness) do
     quote do
-      :proper_target.update_target_uvs(unquote(fitness), :inf)
+      :proper_target.update_uv(unquote(fitness), :inf)
     end
   end
   @doc """
@@ -158,7 +158,7 @@ defmodule PropCheck.TargetedPBT do
   """
   defmacro minimize(fitness) do
     quote do
-      :proper_target.update_target_uvs(- unquote(fitness), :inf)
+      :proper_target.update_uv(- unquote(fitness), :inf)
     end
   end
 

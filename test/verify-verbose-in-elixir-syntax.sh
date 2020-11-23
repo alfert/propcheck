@@ -28,7 +28,7 @@ if ! echo "$elixir_syntax_output" | grep -qF "$expected"; then
 fi
 
 # collect prints Elixir syntax
-expected='100% %{test: VerifyVerboseElixirSyntaxTest}'
+expected='100.0% %{test: VerifyVerboseElixirSyntaxTest}'
 if ! echo "$elixir_syntax_output" | grep -qF "$expected"; then
     echo >&2 "Collected categories not found"
     echo >&2 "Output:"

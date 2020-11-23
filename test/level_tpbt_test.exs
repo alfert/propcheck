@@ -91,7 +91,7 @@ defmodule PropCheck.Test.LevelTest do
   #                {exited, _Pos} -> false;
   #                Pos ->
   #                  case length(Path) > 500 of
-  #                    true -> proper_sa:reset(), true;
+  #                    true -> proper_target:reset(), true;
   #                    _ ->
   #                      UV = distance(Pos, Exit),
   #                      ?MINIMIZE(UV),
@@ -113,10 +113,10 @@ defmodule PropCheck.Test.LevelTest do
 
     forall_targeted path <- path_gen() do
       case Level.follow_path(entrance, path, level) do
-        {:exited, _} -> false
+        {:exited, _pos} -> false
         pos ->
           if length(path) > 500 do
-            :proper_sa.reset()
+            :proper_target.reset()
             true
           else
             uv = distance(pos, exit_pos)
@@ -137,7 +137,7 @@ defmodule PropCheck.Test.LevelTest do
   #                      {exited, _Pos} -> false;
   #                      Pos ->
   #                        case length(Path) > 2000 of
-  #                          true -> proper_sa:reset(), true;
+  #                          true -> proper_target:reset(), true;
   #                          _ ->
   #                            UV = distance(Pos, Exit),
   #                            ?MINIMIZE(UV),
@@ -157,7 +157,7 @@ defmodule PropCheck.Test.LevelTest do
           if length(path) > 2_000 do
             # reset the search because we assume that the path is
             # too long and we are caught in a local minimum.
-            :proper_sa.reset()
+            :proper_target.reset()
             true
           else
             uv = distance(pos, exit_pos)
@@ -208,7 +208,7 @@ defmodule PropCheck.Test.LevelTest do
           if length(path) > 2_000 do
             # reset the search because we assume that the path is
             # too long and we are caught in a local minimum.
-            :proper_sa.reset()
+            :proper_target.reset()
             false
           else
             # measure the distance to exit and search for a new

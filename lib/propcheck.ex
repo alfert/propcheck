@@ -1064,7 +1064,7 @@ defmodule PropCheck do
     not the size of a test.
     """
     @spec numtests(pos_integer, outer_test) :: outer_test
-    def numtests(n, property), do: {:numtests, n, property}
+    def numtests(n, property), do: :proper.numtests(n, property)
 
     @doc """
     Specifies that we expect the property `property` to fail for some input.
@@ -1072,7 +1072,7 @@ defmodule PropCheck do
     The property will be considered failing if it passes all the tests.
     """
     @spec fails(outer_test) :: outer_test
-    def fails(property), do: {:fails, property}
+    def fails(property), do: :proper.fails(property)
 
     @doc """
     Specifies an output function `print` to be used by PropCheck for all output
@@ -1081,7 +1081,7 @@ defmodule PropCheck do
     This wrapper is equivalent to the `on_output` option.
     """
     @spec on_output(outer_test, output_fun) :: outer_test
-    def on_output(property, print), do: {:on_output, print, property}
+    def on_output(property, print), do: :proper.on_output(print, property)
 
     @doc """
     Specifies that test cases produced by this property should be
@@ -1121,7 +1121,7 @@ defmodule PropCheck do
     """
     @spec aggregate(test, stats_printer, sample) ::  test
     def aggregate(property, printer, sample), do:
-        {:sample, sample, printer, property}
+      :proper.aggregate(printer, sample, property)
 
     @doc """
     Same as `collect/2`, but can accept both a single category and a
@@ -1194,8 +1194,8 @@ defmodule PropCheck do
     If this property fails, each failing sub-property will be reported and saved
     inside the counterexample along with its tag.
     """
-    @spec conjunction([{atom, test}]) :: test()
-    def conjunction(sub_properties), do: {:conjunction, sub_properties}
+    @spec conjunction([{atom, test}]) :: test
+    def conjunction(sub_properties), do: :proper.conjunction(sub_properties)
 
     # Helper functions
 
