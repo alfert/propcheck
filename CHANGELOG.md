@@ -1,11 +1,14 @@
 # PropCheck Changelog
 
-## 1.3.0-Development
+## Current Development
+* Using OTP 23 with stacktrace by depending on `:proper` from `:master`. Thanks to [@flowerett](https://github.com/flowerett)
+* Readme and mix optimisation. Thanks to [@kianmeng](https://github.com/kianmeng)
+## 1.3.0
 * Upgrade to Elixir 1.7 as lowest Elixir version, since `get_stacktrace()` is deprecated in Elixir 1.11. Thanks to [@flowerett](https://github.com/flowerett)
 * `:iex` is now an extra-application. Thanks to [@ahamez](https://github.com/ahamez) 
 * Support for parallel testing of state machines started. Requires also PRs in the upstream 
   PropEr. An upgrade to (the future) PropEr 1.4 will result in better reports. 
-## 1.2.2-Development
+## 1.2.2
 * Fixes to statemachine reported by [@aherranz](https://github.com/aherranz) and [@devonestes](https://github.com/devonestes) 
 * Fixes to the Readme linking by [@oo6](https://github.com/oo6)
 

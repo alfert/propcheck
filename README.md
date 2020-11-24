@@ -3,9 +3,13 @@
 `PropCheck` is a testing library, that provides a wrapper around PropEr, an Erlang
 based property testing framework in the spirit of QuickCheck.
 
-[![Hex.pm version](https://img.shields.io/hexpm/v/propcheck.svg)](https://hex.pm/packages/propcheck)
-[![Gitter](https://badges.gitter.im/propcheck/community.svg)](https://gitter.im/propcheck/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 ![Elixir CI](https://github.com/alfert/propcheck/workflows/Elixir%20CI/badge.svg)
+[![Module Version](https://img.shields.io/hexpm/v/propcheck.svg)](https://hex.pm/packages/propcheck)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/propcheck/)
+[![Gitter](https://badges.gitter.im/propcheck/community.svg)](https://gitter.im/propcheck/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Total Download](https://img.shields.io/hexpm/dt/propcheck.svg)](https://hex.pm/packages/propcheck)
+[![License](https://img.shields.io/hexpm/l/propcheck.svg)](https://hex.pm/packages/propcheck)
+[![Last Updated](https://img.shields.io/github/last-commit/alfert/propcheck.svg)](https://github.com/alfert/propcheck/commits/master)
 
 ## Installation
 To use PropCheck with your project, add it as a dependency to `mix.exs`:
@@ -18,10 +22,23 @@ defp deps do
 end
 ```
 
-From PropcCheck 1.3.0 onwards, we require at least Elixir 1.7 since in Elixir 1.11 function `get_stracktrace()` is deprecated. However, we 
+From PropcCheck 1.3.0 onwards, we require at least Elixir 1.7 since in Elixir 1.11 function `get_stracktrace()` is deprecated. However, we
 only support OTP 22, since `:proper` does not yet support OTP 23 in a released version. Hopefully, this will change soon! Running under
-OTP 23 results in no stacktraces - which is not helpful for identifying bugs. 
+OTP 23 results in no stacktraces - which is not helpful for identifying bugs.
 
+### Still want to use Elixir 1.11 with OTP 23?
+The current master uses the `:proper` directly from the `master` branch, which enables stacktraces 
+again. However, this is not a fixed dependency, since the behaviour of `:proper` might change with 
+new commits! Use it at your own risk - stability of builds might be endangered!
+
+
+```elixir
+defp deps do
+  [
+    {:propcheck, "~> 1.3", github: "alfert/propcheck", only: [:dev, :test]}
+  ]
+end
+```
 ## Changes
 
 Relevant changes are documented in the [Changelog](changelog.html), on [GitHub
@@ -31,11 +48,11 @@ follow this link](CHANGELOG.md).
 PropCheck allows to define properties, which automatically executed via `ExUnit`
 when running `mix test`. You find relevant information here:
 
-* details about the `property` macro are found in `PropCheck.Properties`,
-* details about how to specify the property conditions are documented in
+* Details about the `property` macro are found in `PropCheck.Properties`,
+* Details about how to specify the property conditions are documented in
   `PropCheck`,
-* the basic data generators are found in `PropCheck.BasicTypes`,
-* for property testing of state-based systems take a loot at
+* The basic data generators are found in `PropCheck.BasicTypes`,
+* For property testing of state-based systems take a loot at
   `PropCheck.StateM.ModelDSL` for the new DSL (since PropCheck 1.1.0-rc1),
   which is a layer on top of `PropCheck.StateM`.
 * The new targeted property based testing approach (TBPT) employing an automated
