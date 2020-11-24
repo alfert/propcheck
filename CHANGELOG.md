@@ -1,5 +1,7 @@
 # PropCheck Changelog
 
+## Current Development
+* Using OTP 23 with stacktrace by depending on `:proper` from `:master`. Thanks to [@flowerett](https://github.com/flowerett)
 ## 1.3.0-Development
 * Upgrade to Elixir 1.7 as lowest Elixir version, since `get_stacktrace()` is deprecated in Elixir 1.11. Thanks to [@flowerett](https://github.com/flowerett)
 * `:iex` is now an extra-application. Thanks to [@ahamez](https://github.com/ahamez) 

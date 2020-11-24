@@ -22,6 +22,19 @@ From PropcCheck 1.3.0 onwards, we require at least Elixir 1.7 since in Elixir 1.
 only support OTP 22, since `:proper` does not yet support OTP 23 in a released version. Hopefully, this will change soon! Running under
 OTP 23 results in no stacktraces - which is not helpful for identifying bugs. 
 
+### Still want to use Elixir 1.11 with OTP 23?
+The current master uses the `:proper` directly from the `master` branch, which enables stacktraces 
+again. However, this is not a fixed dependency, since the behaviour of `:proper` might change with 
+new commits! Use it at your own risk - stability of builds might be endangered!
+
+
+```elixir
+defp deps do
+  [
+    {:propcheck, "~> 1.3", github: "alfert/propcheck", only: [:dev, :test]}
+  ]
+end
+```
 ## Changes
 
 Relevant changes are documented in the [Changelog](changelog.html), on [GitHub
