@@ -22,13 +22,13 @@ defp deps do
 end
 ```
 
-From PropcCheck 1.3.0 onwards, we require at least Elixir 1.7 since in Elixir 1.11 function `get_stracktrace()` is deprecated. However, we
+From PropCheck 1.3.0 onwards, we require at least Elixir 1.7 since in Elixir 1.11 function `get_stracktrace()` is deprecated. However, we
 only support OTP 22, since `:proper` does not yet support OTP 23 in a released version. Hopefully, this will change soon! Running under
 OTP 23 results in no stacktraces - which is not helpful for identifying bugs.
 
 ### Still want to use Elixir 1.11 with OTP 23?
-The current master uses the `:proper` directly from the `master` branch, which enables stacktraces 
-again. However, this is not a fixed dependency, since the behaviour of `:proper` might change with 
+The current master uses the `:proper` directly from the `master` branch, which enables stacktraces
+again. However, this is not a fixed dependency, since the behaviour of `:proper` might change with
 new commits! Use it at your own risk - stability of builds might be endangered!
 
 
@@ -214,7 +214,7 @@ in an invalid or at least questionable licensing which does not help anybody.
 
 From my understanding of open source licenses as a legal amateur, the situation is
 currently as follows: Since PropCheck is a testing framework, the
-system under test is not infected by the CopyLeft of GPL, since PropCheck is only
+system under test is not infected by the copyleft of GPL, since PropCheck is only
 a tool used temporarily during development of the system under test. At least,
 if you don't distribute your system together with the test code and the test libs
 as a binary. Another friendly approach is
