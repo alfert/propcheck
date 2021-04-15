@@ -36,7 +36,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-plts-
-      - uses: actions/setup-elixir@v1
+      - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
@@ -80,7 +80,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-
-      - uses: actions/setup-elixir@v1
+      - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
