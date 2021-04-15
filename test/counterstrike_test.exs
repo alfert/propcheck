@@ -5,7 +5,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
   """
   use ExUnit.Case, async: true
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
-  import PropCheck.TestHelpers, only: [debugln: 1]
+  import PropCheck.TestHelpers, only: [debugln: 1, config: 0]
   require Logger
 
   alias PropCheck.CounterStrike
@@ -15,7 +15,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
     filename = "counterstrike_test.#{System.unique_integer([:positive, :monotonic])}.dets"
     path = Path.join(Mix.Project.build_path(), filename)
     File.rm(path)
-    {:ok, pid} = CounterStrike.start_link(path)
+    {:ok, pid} = CounterStrike.start_link(path, [])
     # on_exit(fn() -> File.rm!(path) end)
     {:ok, %{pid: pid, path: path}}
   end
@@ -31,7 +31,7 @@ defmodule PropCheck.Test.CounterStrikeTest do
     CounterStrike.stop(org_pid)
     wait_for_stop(ref)
 
-    {:ok, pid} = CounterStrike.start_link(path)
+    {:ok, pid} = CounterStrike.start_link(path, [])
     assert :others == CounterStrike.counter_example(pid, {:foo, :bar, 1})
     assert {:ok, []} == CounterStrike.counter_example(pid, {:foo, :bar, 0})
     ref = Process.monitor(pid)

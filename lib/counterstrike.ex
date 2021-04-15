@@ -17,8 +17,18 @@ defmodule PropCheck.CounterStrike do
 
   defstruct [counter_examples: %{}, dets: nil]
 
-  def start_link(filename \\ 'propcheck.dets', opts \\ [])
-  def start_link(filename, opts) when is_binary(filename), do: start_link(String.to_charlist(filename), opts)
+  def start_link(opts) do
+    :propcheck
+    |> Application.get_env(:counter_example_file)
+    |> start_link(opts)
+  end
+
+  def start_link(filename, opts) when is_binary(filename) do
+    filename
+    |> String.to_charlist()
+    |> start_link(opts)
+  end
+
   def start_link(filename, opts) when is_list(filename) do
     # Logger.info "Filename: #{filename}, options: #{inspect opts}"
     GenServer.start_link(__MODULE__, [filename], opts)
