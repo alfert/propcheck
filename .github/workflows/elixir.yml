@@ -28,14 +28,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: |
-            deps
-            _build
-          key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-plts-
       - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{ matrix.otp }}
