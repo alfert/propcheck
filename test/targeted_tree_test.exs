@@ -40,7 +40,7 @@ defmodule PropCheck.Test.TargetTreeTest do
     end
   end
 
-  property "A left-heavy tree" do
+  property "A left-heavy tree", [search_steps: 600] do
     forall_targeted t <- tree() do
       weight = sides(t)
       {left, right} = weight
