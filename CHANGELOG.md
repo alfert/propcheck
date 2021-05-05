@@ -1,6 +1,9 @@
 # PropCheck Changelog
 
-## 1.3.0-Development
+## 1.3.1
+* Configuration of counter example files for umbrella project. Thanks to [https://github.com/evnu](https://github.com/evnu)
+* Readme and mix optimisation. Thanks to [@kianmeng](https://github.com/kianmeng)
+## 1.3.0
 * Upgrade to Elixir 1.7 as lowest Elixir version, since `get_stacktrace()` is deprecated in Elixir 1.11. Thanks to [@flowerett](https://github.com/flowerett)
 * `:iex` is now an extra-application. Thanks to [@ahamez](https://github.com/ahamez) 
 * Support for parallel testing of state machines started. Requires also PRs in the upstream 
