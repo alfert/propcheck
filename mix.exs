@@ -88,7 +88,9 @@ defmodule PropCheck.Mixfile do
 
   defp deps do
     [
-      {:proper, "~> 1.3", github: "proper-testing/proper"},
+      # This is the reference to proper on its github repo - instable.
+      # {:proper, "~> 1.3", github: "proper-testing/proper"},
+      {:proper, "~> 1.3"},
       {:libgraph, "~> 0.13"},
       {:coverex, "~> 1.4", only: :test},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
