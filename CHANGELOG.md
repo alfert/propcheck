@@ -2,6 +2,9 @@
 
 ## Current Development
 * Using OTP 23 with stacktrace by depending on `:proper` from `:master`. Thanks to [@flowerett](https://github.com/flowerett)
+
+## 1.3.1
+* Configuration of counter example files for umbrella project. Thanks to [https://github.com/evnu](https://github.com/evnu)
 * Readme and mix optimisation. Thanks to [@kianmeng](https://github.com/kianmeng)
 ## 1.3.0
 * Upgrade to Elixir 1.7 as lowest Elixir version, since `get_stacktrace()` is deprecated in Elixir 1.11. Thanks to [@flowerett](https://github.com/flowerett)
