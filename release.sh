@@ -28,9 +28,9 @@ tag_name=v$release_version
 script_name="`basename $0`"
 set +x
 
-git branch | grep '* master' > /dev/null
+git branch | grep '* release-branch-1.3.1' > /dev/null
 if [ 1 -eq $? ]; then
-	echo "ERROR: Not on branch master"
+	echo "ERROR: Not on branch release-branch-1.3.1"
 	exit 1
 fi
 
@@ -61,7 +61,8 @@ sed -i "" "s/\(old=\"\)$old_version\"/\\1$new\"/" $script_name
 git commit -m "bump version to $new_version" mix.exs
 
 # push to github
-git push origin master --tags
+# git push origin master --tags
+git push origin --tags
 
 # call for action
 echo "Release created. Please edit $script_name and mix.exs for the next version!"
