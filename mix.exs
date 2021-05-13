@@ -83,7 +83,7 @@ defmodule PropCheck.Mixfile do
       {:coverex, "~> 1.4", only: :test},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.21", only: :dev}
+      {:ex_doc, "~> 0.24", only: :dev}
     ]
   end
 
