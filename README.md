@@ -13,7 +13,7 @@ To use PropCheck with your project, add it as a dependency to `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:propcheck, "~> 1.3", only: [:test, :dev]}
+    {:propcheck, "~> 1.3.1-rc1", only: [:test, :dev]}
   ]
 end
 ```
