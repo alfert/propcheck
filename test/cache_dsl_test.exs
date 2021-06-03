@@ -25,6 +25,7 @@ defmodule PropCheck.Test.Cache.DSL do
       (result == :ok)
       # |> collect(length cmds)
       |> when_fail(print_report(r, cmds))
+
       # |> aggregate(command_names cmds)
       # |> collect(
       #   history
@@ -48,6 +49,7 @@ defmodule PropCheck.Test.Cache.DSL do
 
       (result == :ok)
       |> when_fail(print_report(r, cmds))
+
       # |> collect(length cmds)
       # |> aggregate(command_names cmds)
       # |> collect(
@@ -56,6 +58,7 @@ defmodule PropCheck.Test.Cache.DSL do
       #   |> Enum.map(fn model -> model.count end)
       #   |> Enum.max())
     end
+
     # |> fails
   end
 
@@ -63,7 +66,7 @@ defmodule PropCheck.Test.Cache.DSL do
   # Developing the model
 
   # the state for testing (= the model)
-  defstruct [max: @cache_size, entries: [], count: 0]
+  defstruct max: @cache_size, entries: [], count: 0
 
   # extract the list of state from the history
   def history_of_states(history) do
@@ -97,12 +100,15 @@ defmodule PropCheck.Test.Cache.DSL do
   code related to key reuse or matching, but without losing the ability
   to 'fuzz' the system.
   """
-  def key, do: oneof([
+  def key,
+    do:
+      oneof([
         integer(1, @cache_size),
         integer(),
         {:var, :just_a_var},
         {:var, :root_key}
       ])
+
   @doc "our values are integers"
   def val, do: integer()
 
@@ -124,14 +130,18 @@ defmodule PropCheck.Test.Cache.DSL do
 
   defcommand :find do
     def impl(key), do: Cache.find(key)
+
     def post(%__MODULE__{entries: l}, [key], res) do
-      ret_val = case List.keyfind(l, key, 0, false) do
-          false       -> res == {:error, :not_found}
+      ret_val =
+        case List.keyfind(l, key, 0, false) do
+          false -> res == {:error, :not_found}
           {^key, val} -> res == {:ok, val}
-      end
+        end
+
       if not ret_val do
         # Logger.error "Postcondition failed: find(#{inspect key}) resulted in #{inspect res})"
       end
+
       ret_val
     end
   end
@@ -142,14 +152,14 @@ defmodule PropCheck.Test.Cache.DSL do
     # what is the next state?
     def next(s = %__MODULE__{entries: l, count: n, max: m}, [k, v], _res) do
       case List.keyfind(l, k, 0, false) do
-          # When the cache is at capacity, the first element is dropped (tl(L))
-          # before adding the new one at the end
+        # When the cache is at capacity, the first element is dropped (tl(L))
+        # before adding the new one at the end
         false when n == m -> update_entries(s, tl(l) ++ [{k, v}])
-          # When the cache still has free place, the entry is added at the end,
-          # and the counter incremented
-        false when n < m  -> update_entries(s, l ++ [{k, v}])
-          # If the entry key is a duplicate, it replaces the old one without refreshing it
-        {k, _}            -> update_entries(s, List.keyreplace(l, k, 0, {k, v}))
+        # When the cache still has free place, the entry is added at the end,
+        # and the counter incremented
+        false when n < m -> update_entries(s, l ++ [{k, v}])
+        # If the entry key is a duplicate, it replaces the old one without refreshing it
+        {k, _} -> update_entries(s, List.keyreplace(l, k, 0, {k, v}))
       end
     end
   end
@@ -161,6 +171,7 @@ defmodule PropCheck.Test.Cache.DSL do
     def next(state, _args, _res) do
       update_entries(state, [])
     end
+
     # pre condition: do not call flush() twice
     def pre(%__MODULE__{count: c}, _args), do: c != 0
   end

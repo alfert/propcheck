@@ -22,14 +22,14 @@ defmodule PropCheck.BasicTypes do
   @type ext_float :: float | :inf
 
   @typedoc "The internal representation of a basic type in PropEr"
-  @type raw_type :: :proper_types.raw_type
+  @type raw_type :: :proper_types.raw_type()
 
   @typedoc "The internal representation of a type in PropEr"
-  @type type :: :proper_types.type
+  @type type :: :proper_types.type()
 
   @type frequency :: pos_integer
 
-  @type size :: PropCheck.size
+  @type size :: PropCheck.size()
   @type value :: any
 
   @doc """
@@ -229,7 +229,7 @@ defmodule PropCheck.BasicTypes do
   def neg_integer, do: integer(:inf, -1)
 
   @doc "A range is equivalent to integers"
-  @spec range(ext_int, ext_int) ::type
+  @spec range(ext_int, ext_int) :: type
   def range(low, high), do: integer(low, high)
 
   @doc "All floats, i.e. `float(:inf, :inf)`"
@@ -253,7 +253,7 @@ defmodule PropCheck.BasicTypes do
 
   @doc "Char values (16 bit for some reason), i.e. `integer(0, 0xffff)`"
   @spec char() :: type
-  def char, do: integer(0, 0xffff)
+  def char, do: integer(0, 0xFFFF)
 
   @doc """
   Bounded upper size utf8 binary, `codepoint length =< MaxCodePointSize`.
@@ -265,8 +265,7 @@ defmodule PropCheck.BasicTypes do
   If unbounded length is needed, use `:inf` as first argument.
   """
   @spec utf8(ext_non_neg_integer, 1..4) :: type
-  def utf8(n, max_codepoint_size), do:
-    :proper_unicode.utf8(n, max_codepoint_size)
+  def utf8(n, max_codepoint_size), do: :proper_unicode.utf8(n, max_codepoint_size)
 
   @doc "utf8-encoded unbounded size binary"
   @spec utf8() :: type
@@ -464,8 +463,7 @@ defmodule PropCheck.BasicTypes do
   generating instances of `type`.
   """
   @spec with_parameter(atom, value, raw_type) :: type
-  def with_parameter(parameter, value, type), do:
-      with_parameters([{parameter, value}], type)
+  def with_parameter(parameter, value, type), do: with_parameters([{parameter, value}], type)
 
   @doc """
   Similar to `with_parameter/3`, but accepts a list of
@@ -483,6 +481,7 @@ defmodule PropCheck.BasicTypes do
   """
   @spec parameter(atom) :: value
   def parameter(parameter), do: parameter(parameter, :undefined)
+
   @doc """
   Returns the value associated with `parameter`, or `default` in case
   `parameter` is not associated with any value.
@@ -492,5 +491,4 @@ defmodule PropCheck.BasicTypes do
   """
   @spec parameter(atom, value) :: value
   defdelegate parameter(parameter, default), to: :proper_types
-
 end

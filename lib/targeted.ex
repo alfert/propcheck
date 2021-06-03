@@ -113,8 +113,7 @@ defmodule PropCheck.TargetedPBT do
   """
   defmacro exists({:<-, _, [var, rawtype]}, do: prop_body) do
     quote do
-        :proper.exists(unquote(rawtype),
-            fn(unquote(var)) -> unquote(prop_body) end, false)
+      :proper.exists(unquote(rawtype), fn unquote(var) -> unquote(prop_body) end, false)
     end
   end
 
@@ -140,7 +139,7 @@ defmodule PropCheck.TargetedPBT do
   """
   defmacro forall_targeted({op, _, [var, rawtype]}, do: prop_body) when op in @in_ops do
     quote do
-      :proper.exists(unquote(rawtype), fn unquote(var) -> not (unquote(prop_body)) end, true)
+      :proper.exists(unquote(rawtype), fn unquote(var) -> not unquote(prop_body) end, true)
     end
   end
 
@@ -152,13 +151,14 @@ defmodule PropCheck.TargetedPBT do
       :proper_target.update_uv(unquote(fitness), :inf)
     end
   end
+
   @doc """
   This macro tells the search strategy to minimize the value `fitness` and
   is equivalent to `maximize(-fitness)`.
   """
   defmacro minimize(fitness) do
     quote do
-      :proper_target.update_uv(- unquote(fitness), :inf)
+      :proper_target.update_uv(-unquote(fitness), :inf)
     end
   end
 
@@ -195,7 +195,7 @@ defmodule PropCheck.TargetedPBT do
   defmacro target(tmap) do
     quote do
       tmap_val = unquote(tmap)
-      Logger.debug(fn -> "target: tmap = #{inspect tmap_val}" end)
+      Logger.debug(fn -> "target: tmap = #{inspect(tmap_val)}" end)
       :proper_target.targeted(make_ref(), tmap_val)
     end
   end
@@ -208,10 +208,13 @@ defmodule PropCheck.TargetedPBT do
   @doc false
   defmacro strategy(strat, prop) do
     quote do
-      PropCheck.property_setup(fn opts ->
-        :proper_target.use_strategy(unquote(strat), opts)
-        &(:proper_target.cleanup_strategy/0)
-      end, unquote(prop))
+      PropCheck.property_setup(
+        fn opts ->
+          :proper_target.use_strategy(unquote(strat), opts)
+          &:proper_target.cleanup_strategy/0
+        end,
+        unquote(prop)
+      )
     end
   end
 
@@ -221,13 +224,15 @@ defmodule PropCheck.TargetedPBT do
   @doc false
   defmacro forall_sa({:<-, _, [var, rawtype]}, do: prop_body) do
     quote do
-      strategy(:proper_sa,
+      strategy(
+        :proper_sa,
         forall unquote(var) <- unquote(rawtype) do
           unquote(prop_body)
-        end)
-        # :proper.forall(unquote(rawtype),
-        #   fn(unquote(var)) -> unquote(prop_body) end))
+        end
+      )
+
+      # :proper.forall(unquote(rawtype),
+      #   fn(unquote(var)) -> unquote(prop_body) end))
     end
   end
-
 end

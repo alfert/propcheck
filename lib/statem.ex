@@ -222,7 +222,7 @@ defmodule PropCheck.StateM do
   @typedoc """
   The outcome of the command sequence execution.
   """
-  @type result :: :proper_statem.statem_result
+  @type result :: :proper_statem.statem_result()
 
   @doc """
   Specifies the symbolic initial state of the state machine.
@@ -246,7 +246,7 @@ defmodule PropCheck.StateM do
   function will be repeatedly called to produce the next call to be
   included in the test case.
   """
-  @callback command(s :: symbolic_state) :: PropCheck.BasicTypes.type
+  @callback command(s :: symbolic_state) :: PropCheck.BasicTypes.type()
 
   @doc """
   Specifies the precondition that should hold so that `call` can be
@@ -275,8 +275,7 @@ defmodule PropCheck.StateM do
   This function is called during
   runtime, this is why the state is dynamic.
   """
-  @callback postcondition(s :: dynamic_state,
-    call:: symbolic_call, res :: term) :: boolean
+  @callback postcondition(s :: dynamic_state, call :: symbolic_call, res :: term) :: boolean
 
   @doc """
   Specifies the next state of the abstract state machine, given the
@@ -285,9 +284,8 @@ defmodule PropCheck.StateM do
   in order to update the model state, therefore the state `s` and the
   result `Res` can be either symbolic or dynamic.
   """
-  @callback next_state(s :: symbolic_state | dynamic_state,
-    res :: term, call :: symbolic_call) ::
-    symbolic_state | dynamic_state
+  @callback next_state(s :: symbolic_state | dynamic_state, res :: term, call :: symbolic_call) ::
+              symbolic_state | dynamic_state
 
   @doc """
   Extracts the names of the commands from a given command sequence, in
@@ -338,7 +336,7 @@ defmodule PropCheck.StateM do
     require PropCheck
     require PropCheck.BasicTypes
 
-    log_debug(fn -> "cmd_type = #{inspect cmd_type}" end)
+    log_debug(fn -> "cmd_type = #{inspect(cmd_type)}" end)
     PropCheck.sized(size, PropCheck.BasicTypes.resize(size * n, cmd_type))
   end
 
@@ -424,7 +422,7 @@ defmodule PropCheck.StateM do
   running concurrently. This is a feature of PropEr, which cannot easily changed.
 
   """
-  defdelegate run_parallel_commands(mod, testcase),  to: :proper_statem
+  defdelegate run_parallel_commands(mod, testcase), to: :proper_statem
 
   @doc """
   Similar to `run_parallel_commands/2`, but also accepts an

@@ -22,6 +22,7 @@ defmodule PropCheck.Test.LetAndShrinks do
   @tag will_fail: true
   property "a simple let shrinks", [scale_numtests(10)] do
     pred = fn k -> k < 700 end
+
     forall n <- kilo_numbers() do
       pred.(n)
     end
@@ -46,19 +47,21 @@ defmodule PropCheck.Test.LetAndShrinks do
     @tag will_fail: true
     property "a simple integer shrinks in SM DSL", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
-          r = run_commands(__MODULE__, cmds)
-          {history, state, result} = r
-          (result == :ok)
-          |> when_fail(
-              IO.puts """
-              History: #{inspect history, pretty: true}
-              State: #{inspect state, pretty: true}
-              Result: #{inspect result, pretty: true}
-              """)
-          # |> aggregate(command_names cmds)
+        r = run_commands(__MODULE__, cmds)
+        {history, state, result} = r
+
+        (result == :ok)
+        |> when_fail(
+          IO.puts("""
+          History: #{inspect(history, pretty: true)}
+          State: #{inspect(state, pretty: true)}
+          Result: #{inspect(result, pretty: true)}
+          """)
+        )
+
+        # |> aggregate(command_names cmds)
       end
     end
-
   end
 
   defmodule DSLLetTest do
@@ -70,9 +73,10 @@ defmodule PropCheck.Test.LetAndShrinks do
     def initial_state, do: %{}
 
     def command_gen(_) do
-      arg_generator = let num <- integer(1, 1000) do
-        num
-      end
+      arg_generator =
+        let num <- integer(1, 1000) do
+          num
+        end
 
       {:equal, [arg_generator]}
     end
@@ -88,17 +92,19 @@ defmodule PropCheck.Test.LetAndShrinks do
       forall cmds <- commands(__MODULE__) do
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
+
         (result == :ok)
         |> when_fail(
-          IO.puts """
-          History: #{inspect history, pretty: true}
-          State: #{inspect state, pretty: true}
-          Result: #{inspect result, pretty: true}
+          IO.puts("""
+          History: #{inspect(history, pretty: true)}
+          State: #{inspect(state, pretty: true)}
+          Result: #{inspect(result, pretty: true)}
           """)
-          # |> aggregate(command_names cmds)
+        )
+
+        # |> aggregate(command_names cmds)
       end
     end
-
   end
 
   defmodule LetStateMachineTest do
@@ -110,15 +116,17 @@ defmodule PropCheck.Test.LetAndShrinks do
     def initial_state, do: %{}
 
     def args do
-      let ([num <- integer(1, 1000)]) do
+      let [num <- integer(1, 1000)] do
         [num]
       end
     end
+
     def command(_state) do
       oneof([
         {:call, __MODULE__, :impl, args()}
       ])
     end
+
     def impl(_), do: :ok
     def postcondition(_state, {:call, _mod, _fun, [arg]}, :ok), do: arg != 800
     def next_state(model, _ret, _arg), do: model
@@ -127,18 +135,20 @@ defmodule PropCheck.Test.LetAndShrinks do
     @tag will_fail: true
     property "let shrinks in PropEr's native SM", [scale_numtests(10)] do
       forall cmds <- commands(__MODULE__) do
-          {history, state, result} = run_commands(__MODULE__, cmds)
-          (result == :ok)
-          |> when_fail(
-              IO.puts """
-              History: #{inspect history, pretty: true}
-              State: #{inspect state, pretty: true}
-              Result: #{inspect result, pretty: true}
-              """)
-          # |> aggregate(command_names cmds)
+        {history, state, result} = run_commands(__MODULE__, cmds)
+
+        (result == :ok)
+        |> when_fail(
+          IO.puts("""
+          History: #{inspect(history, pretty: true)}
+          State: #{inspect(state, pretty: true)}
+          Result: #{inspect(result, pretty: true)}
+          """)
+        )
+
+        # |> aggregate(command_names cmds)
       end
     end
-
   end
 
   defmodule DSLLetShrinkTest do
@@ -150,21 +160,23 @@ defmodule PropCheck.Test.LetAndShrinks do
     def initial_state, do: %{}
 
     def command_gen(_) do
-      arg_generator = let [num <- integer(1, 1000)] do
-        [num]
-      end
+      arg_generator =
+        let [num <- integer(1, 1000)] do
+          [num]
+        end
 
       {:equal, arg_generator}
     end
 
     defcommand :equal do
       def impl(_number), do: :ok
-      def args(_state) do
-        let  ([num <- integer(1, 1000)]) do
-           [num]
-        end
 
+      def args(_state) do
+        let [num <- integer(1, 1000)] do
+          [num]
+        end
       end
+
       def post(_state, [arg], :ok), do: arg != 800
       def next(model, [_arg], _ret), do: model
     end
@@ -174,17 +186,19 @@ defmodule PropCheck.Test.LetAndShrinks do
       forall cmds <- commands(__MODULE__) do
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
+
         (result == :ok)
         |> when_fail(
-          IO.puts """
-          History: #{inspect history, pretty: true}
-          State: #{inspect state, pretty: true}
-          Result: #{inspect result, pretty: true}
+          IO.puts("""
+          History: #{inspect(history, pretty: true)}
+          State: #{inspect(state, pretty: true)}
+          Result: #{inspect(result, pretty: true)}
           """)
+        )
+
         # |> aggregate(command_names cmds)
       end
     end
-
   end
 
   defmodule LetChainingTest do
@@ -196,6 +210,7 @@ defmodule PropCheck.Test.LetAndShrinks do
         let [m <- integer(^l, :inf), l <- integer(), h <- integer(^m, :inf)] do
           {l, m, h}
         end
+
       forall {l, m, h} <- nondec do
         l <= m and m <= h
       end
@@ -203,13 +218,16 @@ defmodule PropCheck.Test.LetAndShrinks do
 
     property "let with functions inside" do
       p2 = fn x -> x + 2 end
-      non_decreasing = let [
-        a <- integer(0, 1),
-        b <- integer(^a + 1, p2.(^a)),
-        c <- integer(^a, ^b)
-      ] do
-        {a, c, b}
-      end
+
+      non_decreasing =
+        let [
+          a <- integer(0, 1),
+          b <- integer(^a + 1, p2.(^a)),
+          c <- integer(^a, ^b)
+        ] do
+          {a, c, b}
+        end
+
       forall {a, b, c} <- non_decreasing do
         a <= b and b <= c
       end
@@ -218,27 +236,26 @@ defmodule PropCheck.Test.LetAndShrinks do
     property "mix of inner and external vars in one let" do
       a = 1
       b = 10
-      bunch_of_integers = let [
-        l <- integer(0, a),
-        m <- integer(^l, b),
-        r <- integer(a + 5, b + 5)
-      ] do
-        {l, m, r, a, b}
-      end
+
+      bunch_of_integers =
+        let [
+          l <- integer(0, a),
+          m <- integer(^l, b),
+          r <- integer(a + 5, b + 5)
+        ] do
+          {l, m, r, a, b}
+        end
+
       forall {aa, bb, cc, dd, ee} <- bunch_of_integers do
-        (
-          0 <= aa
-          and aa <= 1
-          and aa <= bb
-          and bb <= b
-          and 6 <= cc
-          and cc <= 15
-          and dd == 1
-          and ee == 10
-        )
+        0 <= aa and
+          aa <= 1 and
+          aa <= bb and
+          bb <= b and
+          6 <= cc and
+          cc <= 15 and
+          dd == 1 and
+          ee == 10
       end
     end
-
   end
-
 end

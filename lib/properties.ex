@@ -82,57 +82,67 @@ defmodule PropCheck.Properties do
 
   """
   defmacro property(name, opts \\ [], var \\ quote(do: _), do: p_block) do
-      block = quote do
+    block =
+      quote do
         unquote(p_block)
       end
-      var   = Macro.escape(var)
-      block = Macro.escape(block, unquote: true)
-      quote bind_quoted: [name: name, block: block, var: var, opts: opts] do
-          ExUnit.plural_rule("property", "properties")
-          %{module: module} = __ENV__
 
-          module_default_opts = Module.get_attribute(module, :propcheck_default_opts) || [:quiet]
+    var = Macro.escape(var)
+    block = Macro.escape(block, unquote: true)
 
-          # Get the attributes and allow using the Keyword module by filtering for tuple entries in the tags
-          moduletag = Module.get_attribute(module, :moduletag) |> List.flatten() |> Enum.filter(&is_tuple/1)
-          describetag = Module.get_attribute(module, :describetag) |> List.flatten() |> Enum.filter(&is_tuple/1)
-          tag = Module.get_attribute(module, :tag) |> List.flatten() |> Enum.filter(&is_tuple/1)
+    quote bind_quoted: [name: name, block: block, var: var, opts: opts] do
+      ExUnit.plural_rule("property", "properties")
+      %{module: module} = __ENV__
 
-          # intended precedence: tag > describetag > moduletag
-          store_counter_example =
-            moduletag
-            |> Keyword.merge(describetag)
-            |> Keyword.merge(tag)
-            |> Keyword.get(:store_counter_example, true)
+      module_default_opts = Module.get_attribute(module, :propcheck_default_opts) || [:quiet]
 
-          # @tag failing_prop: tag_property({module, prop_name, []})
-          tags = [[failing_prop: tag_property({module, name, []})]]
-          prop_name = ExUnit.Case.register_test(__ENV__, :property, name, tags)
-          def unquote(prop_name)(unquote(var)) do
-            {:ok, output_agent} = PropCheck.OutputAgent.start_link()
-            opts = [{:output_agent, output_agent} | unquote(opts)]
+      # Get the attributes and allow using the Keyword module by filtering for tuple entries in the tags
+      moduletag =
+        Module.get_attribute(module, :moduletag) |> List.flatten() |> Enum.filter(&is_tuple/1)
 
-            merged_opts =
-              opts
-              |> PropCheck.Properties.merge_opts(unquote(module_default_opts))
-              |> PropCheck.Utils.merge_global_opts()
-              |> PropCheck.Utils.put_opts()
+      describetag =
+        Module.get_attribute(module, :describetag) |> List.flatten() |> Enum.filter(&is_tuple/1)
 
-            p = unquote(block)
-            mfa = {unquote(module), unquote(prop_name), []}
+      tag = Module.get_attribute(module, :tag) |> List.flatten() |> Enum.filter(&is_tuple/1)
 
-            execute_property(p, mfa, merged_opts, unquote(store_counter_example))
-            :ok
-          end
+      # intended precedence: tag > describetag > moduletag
+      store_counter_example =
+        moduletag
+        |> Keyword.merge(describetag)
+        |> Keyword.merge(tag)
+        |> Keyword.get(:store_counter_example, true)
+
+      # @tag failing_prop: tag_property({module, prop_name, []})
+      tags = [[failing_prop: tag_property({module, name, []})]]
+      prop_name = ExUnit.Case.register_test(__ENV__, :property, name, tags)
+
+      def unquote(prop_name)(unquote(var)) do
+        {:ok, output_agent} = PropCheck.OutputAgent.start_link()
+        opts = [{:output_agent, output_agent} | unquote(opts)]
+
+        merged_opts =
+          opts
+          |> PropCheck.Properties.merge_opts(unquote(module_default_opts))
+          |> PropCheck.Utils.merge_global_opts()
+          |> PropCheck.Utils.put_opts()
+
+        p = unquote(block)
+        mfa = {unquote(module), unquote(prop_name), []}
+
+        execute_property(p, mfa, merged_opts, unquote(store_counter_example))
+        :ok
       end
+    end
   end
 
   @doc false
   def merge_opts(opts, module_default_opts) do
-    module_default_opts = case is_function(module_default_opts) do
-                            true -> module_default_opts.()
-                            false -> module_default_opts
-                          end
+    module_default_opts =
+      case is_function(module_default_opts) do
+        true -> module_default_opts.()
+        false -> module_default_opts
+      end
+
     case {is_list(opts), is_list(module_default_opts)} do
       {true, true} -> opts ++ module_default_opts
       {true, false} -> opts ++ [module_default_opts]
@@ -148,11 +158,14 @@ defmodule PropCheck.Properties do
   @spec tag_property(mfa) :: boolean
   def tag_property({m, f, a}) do
     mfa = {m, String.to_atom("property_#{f}"), a}
+
     case CounterStrike.counter_example(mfa) do
       {:ok, _} ->
         # Logger.debug "Found failing property #{inspect mfa}"
         true
-      _ -> false
+
+      _ ->
+        false
     end
   end
 
@@ -168,13 +181,16 @@ defmodule PropCheck.Properties do
     case CounterStrike.counter_example(name) do
       :none ->
         PropCheck.quickcheck(p, [:long_result] ++ proper_opts)
+
       :others ->
         # since the tag is set, we execute everything. You can limit
         # the amount of checks by using either --stale or --only failing_prop
         qc(p, proper_opts)
+
       {:ok, counter_example} ->
         # Logger.debug "Found counter example #{inspect counter_example}"
         result = PropCheck.check(p, counter_example, [:long_result] ++ proper_opts)
+
         case result do
           true -> qc(p, proper_opts)
           false -> {:rerun_failed, counter_example}
@@ -200,7 +216,8 @@ defmodule PropCheck.Properties do
 
   defp handle_check_results(true, args = %{should_fail: true}) do
     raise ExUnit.AssertionError,
-      message: "Property #{mfa_to_string(args.name)} should fail, but succeeded for all test data :-(",
+      message:
+        "Property #{mfa_to_string(args.name)} should fail, but succeeded for all test data :-(",
       expr: nil
   end
 
@@ -236,7 +253,8 @@ defmodule PropCheck.Properties do
       expr: nil
   end
 
-  defp handle_check_results({:rerun_failed, counter_example}, args = %{}) when is_list(counter_example) do
+  defp handle_check_results({:rerun_failed, counter_example}, args = %{})
+       when is_list(counter_example) do
     CounterStrike.add_counter_example(args.name, counter_example)
 
     raise ExUnit.AssertionError,
@@ -262,12 +280,15 @@ defmodule PropCheck.Properties do
 
   defp counter_example_inspect(counter_example) do
     alias PropCheck.StateM.Reporter
+
     case is_statem_commands(counter_example) do
       :data ->
         inspect(counter_example, pretty: true)
+
       :commands ->
         [cmds] = counter_example
         for cmd <- cmds, do: Reporter.pretty_print_counter_example_cmd(cmd)
+
       :parallel_commands ->
         [par_cmds] = counter_example
         for par_cmd <- par_cmds, do: Reporter.pretty_print_counter_example_parallel(par_cmd)
@@ -275,29 +296,36 @@ defmodule PropCheck.Properties do
   end
 
   defp is_statem_commands([counter_example]) when is_list(counter_example) do
-    is_command_list = counter_example
-    |> Enum.all?(fn term ->
-      match?({:init, _}, term) or
-      match?({:set, {:var, _}, {:call, mod, fun, args}}
-        when is_atom(mod) and is_atom(fun) and is_list(args),
-        term)
-    end)
+    is_command_list =
+      counter_example
+      |> Enum.all?(fn term ->
+        match?({:init, _}, term) or
+          match?(
+            {:set, {:var, _}, {:call, mod, fun, args}}
+            when is_atom(mod) and is_atom(fun) and is_list(args),
+            term
+          )
+      end)
+
     case is_command_list do
       true -> :commands
       false -> :data
     end
   end
+
   defp is_statem_commands([{seq_commands, _par_commands}]) do
     case is_statem_commands([seq_commands]) do
       :commands -> :parallel_commands
       _ -> :data
     end
   end
+
   defp is_statem_commands(_), do: :data
 
   # Add additional output to a message
   defp add_additional_output(message, opts) do
-    {:ok, additional_output} = opts |> PropCheck.Utils.output_agent() |> PropCheck.OutputAgent.close()
+    {:ok, additional_output} =
+      opts |> PropCheck.Utils.output_agent() |> PropCheck.OutputAgent.close()
 
     if additional_output != "" do
       """
@@ -317,7 +345,7 @@ defmodule PropCheck.Properties do
   def print_mod_as_erlang(mod) when is_atom(mod) do
     {_m, beam, _file} = :code.get_object_code(mod)
     {:ok, {_, [{:abstract_code, {_, ac}}]}} = :beam_lib.chunks(beam, [:abstract_code])
-    ac |> Enum.map(&:erl_pp.form/1) |> List.flatten |> IO.puts
+    ac |> Enum.map(&:erl_pp.form/1) |> List.flatten() |> IO.puts()
   end
 
   @doc """
@@ -335,6 +363,7 @@ defmodule PropCheck.Properties do
   defmacro property(message) do
     quote bind_quoted: [message: message] do
       prop_name = ExUnit.Case.register_test(__ENV__, :property, message, [:not_implemented])
+
       def unquote(prop_name)(_) do
         flunk("Not implemented")
       end

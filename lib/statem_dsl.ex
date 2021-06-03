@@ -1,5 +1,4 @@
 defmodule PropCheck.StateM.DSL do
-
   @moduledoc """
   _DEPRECATED_ : This module is deprecated, please use
   `PropCheck.Statem.ModelDSL` instead.
@@ -223,14 +222,19 @@ defmodule PropCheck.StateM.DSL do
   precondition, the command's return value of the failing postcondition,
   the exception values or `:ok` if everything is fine.
   """
-  @type result_t :: :ok | {:pre_condition, state_t} | {:post_condition, any} |
-    {:exception, any} | {:ok, any}
+  @type result_t ::
+          :ok
+          | {:pre_condition, state_t}
+          | {:post_condition, any}
+          | {:exception, any}
+          | {:ok, any}
   # the functional command generator type, which takes a state and creates
   # a data generator from it.
-  @typep gen_fun_t :: (state_t -> BasicTypes.type)
+  @typep gen_fun_t :: (state_t -> BasicTypes.type())
+  # |
   @typep cmd_t ::
-      {:args, module, String.t, atom, gen_fun_t} # |
-      # {:cmd, module, String.t, gen_fun_t}
+           {:args, module, String.t(), atom, gen_fun_t}
+  # {:cmd, module, String.t, gen_fun_t}
   @typep environment :: %{required(symbolic_var) => any}
 
   @typedoc """
@@ -239,17 +243,15 @@ defmodule PropCheck.StateM.DSL do
   vars to their actual values. Everything is fine, if `result` is `:ok`.
   """
   @type t :: %__MODULE__{
-    history: [history_event],
-    state: state_t,
-    result: result_t,
-    env: environment
-  }
-  defstruct [
-    history: [],
-    state: nil,
-    result: :ok,
-    env: %{}
-  ]
+          history: [history_event],
+          state: state_t,
+          result: result_t,
+          env: environment
+        }
+  defstruct history: [],
+            state: nil,
+            result: :ok,
+            env: %{}
 
   @doc """
   The initial state of the state machine is computed by this callback.
@@ -274,7 +276,7 @@ defmodule PropCheck.StateM.DSL do
   defmacro __using__(_options) do
     quote do
       import unquote(__MODULE__)
-      Module.register_attribute __MODULE__, :commands, accumulate: true
+      Module.register_attribute(__MODULE__, :commands, accumulate: true)
       @before_compile unquote(__MODULE__)
     end
   end
@@ -311,33 +313,41 @@ defmodule PropCheck.StateM.DSL do
 
   """
   defmacro defcommand(name, do: block) do
-    pre  = String.to_atom("#{name}_pre")
+    pre = String.to_atom("#{name}_pre")
     next = String.to_atom("#{name}_next")
     post = String.to_atom("#{name}_post")
     args = String.to_atom("#{name}_args")
+
     quote do
       def unquote(pre)(_state, _call), do: true
       def unquote(next)(state, _call, _result), do: state
       def unquote(post)(_state, _call, _res), do: true
       def unquote(args)(_state), do: []
-      defoverridable [{unquote(pre), 2}, {unquote(next), 3},
-        {unquote(post), 3}, {unquote(args), 1}]
+
+      defoverridable [
+        {unquote(pre), 2},
+        {unquote(next), 3},
+        {unquote(post), 3},
+        {unquote(args), 1}
+      ]
+
       @commands Atom.to_string(unquote(name))
       unquote(Macro.postwalk(block, &rename_def_in_command(&1, name)))
     end
   end
 
   defp rename_def_in_command({:def, c1, [{:impl, c2, impl_args}, impl_body]}, name) do
-      # Logger.error "Found impl with body #{inspect impl_body}"
+    # Logger.error "Found impl with body #{inspect impl_body}"
     {:def, c1, [{name, c2, impl_args}, impl_body]}
   end
+
   defp rename_def_in_command({:def, c1, [{suffix_name, c2, args}, body]}, name)
-    when suffix_name in @known_suffixes
-    do
-      new_name = String.to_atom("#{name}_#{suffix_name}")
-      # Logger.error "Found suffix: #{new_name}"
-      {:def, c1, [{new_name, c2, args}, body]}
-    end
+       when suffix_name in @known_suffixes do
+    new_name = String.to_atom("#{name}_#{suffix_name}")
+    # Logger.error "Found suffix: #{new_name}"
+    {:def, c1, [{new_name, c2, args}, body]}
+  end
+
   defp rename_def_in_command(ast, _name) do
     # Logger.warn "Found ast = #{inspect ast}"
     ast
@@ -359,27 +369,35 @@ defmodule PropCheck.StateM.DSL do
   @spec gen_commands_proper(module, [cmd_t]) :: BasicTypes.type()
   defp gen_commands_proper(mod, cmd_list) do
     let initial_state <- lazy(mod.initial_state()) do
-      such_that (cmds <-
-          (let list <- sized(size,
-            noshrink(gen_cmd_list(size, cmd_list, mod, initial_state, 1))) do
-              shrink_list(list)
-          end)), when: is_valid(mod, initial_state, cmds)
+      such_that cmds <-
+                  (let list <-
+                         sized(
+                           size,
+                           noshrink(gen_cmd_list(size, cmd_list, mod, initial_state, 1))
+                         ) do
+                     shrink_list(list)
+                   end),
+                when: is_valid(mod, initial_state, cmds)
     end
   end
 
   # Checks that the precondition holds, required for shrinking
-  @spec is_valid(module, state_t, [BasicTypes.type]) :: boolean
+  @spec is_valid(module, state_t, [BasicTypes.type()]) :: boolean
   defp is_valid(_mod, _initial_state, []), do: true
+
   defp is_valid(mod, initial_state, cmds) do
     # Logger.debug "is_valid: initial=#{inspect initial_state}"
     # Logger.debug "is valid: cmds=#{inspect cmds, pretty: true}"
     initial_state == mod.initial_state() and
-    is_valid(mod, initial_state, cmds, %{})
+      is_valid(mod, initial_state, cmds, %{})
   end
-  @spec is_valid(module, state_t, [BasicTypes.type], environment) :: boolean
+
+  @spec is_valid(module, state_t, [BasicTypes.type()], environment) :: boolean
   defp is_valid(_mod, _state, [], _env), do: true
+
   defp is_valid(m, state, [call | cmds], env) do
     {:set, var, c} = call
+
     if check_precondition(state, c) do
       replaced_call = replace_symb_vars(c, env)
       # {:call, mod, fun, args} = replaced_call
@@ -391,31 +409,34 @@ defmodule PropCheck.StateM.DSL do
   end
 
   # The internally used recursive generator for the command list
-  @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: BasicTypes.type
+  @spec gen_cmd_list(pos_integer, [cmd_t], module, state_t, pos_integer) :: BasicTypes.type()
   defp gen_cmd_list(0, _cmd_list, _mod, _state, _step_counter), do: exactly([])
+
   defp gen_cmd_list(size, cmd_list, mod, state, step_counter) do
     # Logger.debug "gen_cmd_list: cmd_list = #{inspect cmd_list}"
     cmds = create_cmds_with_args_in_state(cmd_list, mod, state)
 
     let call <-
-      (such_that c <- cmds, when: check_precondition(state, c))
-      do
-        gen_result = {:var, step_counter}
-        gen_state = call_next_state(state, call, gen_result)
-        let cmds <- gen_cmd_list(size - 1, cmd_list, mod, gen_state, step_counter + 1) do
-          [{:set, gen_result, call} | cmds]
-        end
+          such_that(c <- cmds, when: check_precondition(state, c)) do
+      gen_result = {:var, step_counter}
+      gen_state = call_next_state(state, call, gen_result)
+
+      let cmds <- gen_cmd_list(size - 1, cmd_list, mod, gen_state, step_counter + 1) do
+        [{:set, gen_result, call} | cmds]
       end
+    end
   end
 
   defp create_cmds_with_args_in_state(cmd_list, mod, state) do
     # filter the cmds according to the weights callback (or allow all)
-    valid_cmds = if :erlang.function_exported(mod, :weight, 1) do
-      filter_freq_cmds(cmd_list, state, mod)
-    else
-      # the default frequency is unweighted commands is 1
-      Enum.map(cmd_list, fn c -> {1, c} end)
-    end
+    valid_cmds =
+      if :erlang.function_exported(mod, :weight, 1) do
+        filter_freq_cmds(cmd_list, state, mod)
+      else
+        # the default frequency is unweighted commands is 1
+        Enum.map(cmd_list, fn c -> {1, c} end)
+      end
+
     # generate the arguments and put them into the frequency generator
     valid_cmds
     |> Enum.map(fn {freq, {:cmd, _mod, _f, arg_fun}} -> {freq, arg_fun.(state)} end)
@@ -434,8 +455,11 @@ defmodule PropCheck.StateM.DSL do
     expected = Atom.to_string(fun)
 
     case Enum.find(cmd_list, fn {:cmd, _m, f, _a} -> f == expected end) do
-      nil -> raise "Command `#{fun}` is included in `#{inspect(mod)}.weight/1` but is not defined in that module."
-      found -> {weight, found}
+      nil ->
+        raise "Command `#{fun}` is included in `#{inspect(mod)}.weight/1` but is not defined in that module."
+
+      found ->
+        {weight, found}
     end
   end
 
@@ -465,11 +489,11 @@ defmodule PropCheck.StateM.DSL do
   def run_commands(mod, commands) do
     # Logger.debug "Run commands: #{inspect commands, pretty: true}"
     initial_state = mod.initial_state()
+
     commands
     |> Enum.reduce(new_state(initial_state), fn
-
       # do nothing if a failure occurred
-      _cmd, acc = %__MODULE__{result: {r, _} } when r != :ok ->
+      _cmd, acc = %__MODULE__{result: {r, _}} when r != :ok ->
         # Logger.debug "Failed execution: r = #{inspect r}"
         acc
 
@@ -491,35 +515,43 @@ defmodule PropCheck.StateM.DSL do
     # Logger.debug "execute_cmd: state = #{inspect state}"
     replaced_call = replace_symb_vars(sym_c, prop_state.env)
     # Logger.debug "execute_cmd: replaced vars: #{inspect replaced_call}"
-    result = if check_precondition(state, replaced_call) do
-      try do
-        {:call, mod, fun, args} = replaced_call
-        result = apply(mod, fun, args)
-        if check_postcondition(state, replaced_call, result) do
-          {:ok, result}
-        else
-          {:post_condition, result}
+    result =
+      if check_precondition(state, replaced_call) do
+        try do
+          {:call, mod, fun, args} = replaced_call
+          result = apply(mod, fun, args)
+
+          if check_postcondition(state, replaced_call, result) do
+            {:ok, result}
+          else
+            {:post_condition, result}
+          end
+        rescue
+          exc ->
+            stacktrace = Exception.format_stacktrace(__STACKTRACE__)
+            log_error("Got exception: #{inspect(exc)}\nstacktrace: #{stacktrace}")
+            {:exception, {exc, stacktrace}}
+        catch
+          value -> {:exception, value}
+          kind, value -> {:exception, {kind, value}}
         end
-      rescue exc ->
-        stacktrace = Exception.format_stacktrace(__STACKTRACE__)
-        log_error "Got exception: #{inspect(exc)}\nstacktrace: #{stacktrace}"
-        {:exception, {exc, stacktrace}}
-      catch
-        value -> {:exception, value}
-        kind, value -> {:exception, {kind, value}}
+      else
+        {:pre_condition, state}
       end
-    else
-      {:pre_condition, state}
-    end
-    s = case result do
-      {:ok, r} ->
-        # Logger.debug "result is ok, calc next state from #{inspect state}"
-        # Logger.debug "replaced call is: #{inspect replaced_call}"
-        new_state = call_next_state(state, replaced_call, r)
-        # Logger.debug "new state is: #{inspect new_state}"
-        new_state
-      _ -> state
-    end
+
+    s =
+      case result do
+        {:ok, r} ->
+          # Logger.debug "result is ok, calc next state from #{inspect state}"
+          # Logger.debug "replaced call is: #{inspect replaced_call}"
+          new_state = call_next_state(state, replaced_call, r)
+          # Logger.debug "new state is: #{inspect new_state}"
+          new_state
+
+        _ ->
+          state
+      end
+
     {s, replaced_call, {v, result}}
   end
 
@@ -535,54 +567,68 @@ defmodule PropCheck.StateM.DSL do
     replaced_args = replace_symb_vars(args, env)
     {:call, replaced_m, replaced_f, replaced_args}
   end
+
   defp replace_symb_vars(args, env) when is_list(args) do
     Enum.map(args, &replace_symb_vars(&1, env))
   end
+
   defp replace_symb_vars(v = {:var, n}, env) when is_integer(n) do
     case Map.get(env, v) do
       nil ->
-        log_error "replace_symb_vars: unknown #{inspect v} in #{inspect env}"
+        log_error("replace_symb_vars: unknown #{inspect(v)} in #{inspect(env)}")
         v
-      value -> value
+
+      value ->
+        value
     end
   end
+
   defp replace_symb_vars(value, _env), do: value
 
   # updates the history and the environment
-  @spec update_history(history_event, %__MODULE__{}) ::  %__MODULE__{}
+  @spec update_history(history_event, %__MODULE__{}) :: %__MODULE__{}
   defp update_history(event = {s, _, {v, r}}, %__MODULE__{env: env, history: h}) do
-    result = case r do
-      {:ok, _} -> :ok
-      _ -> r
-    end
-    value = case r do
-      {:ok, val} -> val
-      _ -> r
-    end
-    new_h = %__MODULE__{state: s,
+    result =
+      case r do
+        {:ok, _} -> :ok
+        _ -> r
+      end
+
+    value =
+      case r do
+        {:ok, val} -> val
+        _ -> r
+      end
+
+    new_h = %__MODULE__{
+      state: s,
       result: result,
       history: [event | h],
-      env: Map.put(env, v, value)}
+      env: Map.put(env, v, value)
+    }
+
     # Logger.debug "Updated history: #{inspect h, pretty: true}"
     new_h
   end
 
   @spec call_next_state(state_t, symbolic_call, any) :: state_t
   defp call_next_state(state, {:call, mod, f, args}, result) do
-    next_fun = (Atom.to_string(f) <> "_next")
-      |> String.to_atom
+    next_fun =
+      (Atom.to_string(f) <> "_next")
+      |> String.to_atom()
+
     apply(mod, next_fun, [state, args, result])
   end
 
   @spec check_precondition(state_t, symbolic_call) :: boolean
   defp check_precondition(state, {:call, mod, f, args}) do
-    pre_fun = (Atom.to_string(f) <> "_pre") |> String.to_atom
+    pre_fun = (Atom.to_string(f) <> "_pre") |> String.to_atom()
     apply(mod, pre_fun, [state, args])
   end
 
   @spec check_postcondition(state_t, symbolic_call, any) :: any
-  defp check_postcondition(state,  {:call, mod, f, args}, result) do
-    post_fun = (Atom.to_string(f) <> "_post") |> String.to_atom
+  defp check_postcondition(state, {:call, mod, f, args}, result) do
+    post_fun = (Atom.to_string(f) <> "_post") |> String.to_atom()
     apply(mod, post_fun, [state, args, result])
   end
 
@@ -601,7 +647,7 @@ defmodule PropCheck.StateM.DSL do
 
   # Detects alls commands within `mod_bin_code`, i.e. all functions with the
   # same prefix and a suffix `_command` or `_args` and a prefix `_next`.
-  @spec command_list(module, binary) :: [{:cmd, module, String.t, (state_t -> symbolic_call)}]
+  @spec command_list(module, binary) :: [{:cmd, module, String.t(), (state_t -> symbolic_call)}]
   defp command_list(mod, "") do
     mod
     |> find_commands()
@@ -612,6 +658,7 @@ defmodule PropCheck.StateM.DSL do
         apply(mod, String.to_atom(cmd <> "_args"), [state])
         |> fixed_list()
       end
+
       args = gen_call(mod, String.to_atom(cmd), args_fun)
       {:cmd, mod, cmd, args}
     end)
@@ -620,11 +667,9 @@ defmodule PropCheck.StateM.DSL do
   # Generates a function, which expects a state to create the call tuple
   # with constants for module and function and an argument generator.
   defp gen_call(mod, fun, arg_fun) when is_atom(fun) and is_function(arg_fun, 1) do
-    fn state ->  {:call, mod, fun, arg_fun.(state)} end
+    fn state -> {:call, mod, fun, arg_fun.(state)} end
   end
 
-  @spec find_commands(binary|module) :: [{String.t, arity}]
-  defp find_commands(mod) when is_atom(mod), do:
-    mod.__all_commands__() |> Enum.map(& ({&1, 0}))
-
+  @spec find_commands(binary | module) :: [{String.t(), arity}]
+  defp find_commands(mod) when is_atom(mod), do: mod.__all_commands__() |> Enum.map(&{&1, 0})
 end

@@ -12,15 +12,14 @@ defmodule PropCheck.StackTypeTest do
 
   property "pop(push) = original" do
     forall [s, x] <- [stack(integer()), integer()] do
-      {_y, t} = s |> Stack.push(x) |> Stack.pop
+      {_y, t} = s |> Stack.push(x) |> Stack.pop()
       s == t
     end
   end
 
   property "push make a stack bigger" do
     forall [s, x] <- [stack(integer()), integer()] do
-      (Stack.size(s) + 1) == Stack.size(s |> Stack.push(x))
+      Stack.size(s) + 1 == Stack.size(s |> Stack.push(x))
     end
   end
-
 end

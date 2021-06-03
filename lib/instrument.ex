@@ -61,7 +61,8 @@ defmodule PropCheck.Instrument do
   @type erl_ast_atom_type :: {:atom, any, atom}
 
   @typedoc "The type for a remote call in Erlang Abstract Form"
-  @type erl_ast_remote_call :: {:call, any, {:remote, any, erl_ast_atom_type, erl_ast_atom_type()}, [any]}
+  @type erl_ast_remote_call ::
+          {:call, any, {:remote, any, erl_ast_atom_type, erl_ast_atom_type()}, [any]}
 
   @typedoc "Type type for a block of expression in Erlang Abstract Form"
   @type erl_ast_block :: {:block, any, [any]}
@@ -77,15 +78,16 @@ defmodule PropCheck.Instrument do
   for instrumentation. The default implementation is simply calling
   `instrumentable_function/2`.
   """
-  @callback is_instrumentable_function(mod ::erl_ast_atom_type, fun :: erl_ast_atom_type) :: boolean
+  @callback is_instrumentable_function(mod :: erl_ast_atom_type, fun :: erl_ast_atom_type) ::
+              boolean
 
   @doc """
   Instruments all modules of an entire OTP application.
   """
   @spec instrument_app(app :: atom, instrumenter :: module) :: :ok
   def instrument_app(app, instrumenter) do
-    case  Application.spec(app, :modules) do
-      mods when is_list(mods) -> Enum.each(mods, &(instrument_module(&1, instrumenter)))
+    case Application.spec(app, :modules) do
+      mods when is_list(mods) -> Enum.each(mods, &instrument_module(&1, instrumenter))
       nil -> :ok
     end
   end
@@ -98,16 +100,20 @@ defmodule PropCheck.Instrument do
   def instrument_module(mod, instrumenter) when is_atom(mod) and is_atom(instrumenter) do
     # 1. Get the forms of the mod
     {:ok, filename, forms} = get_forms_of_module(mod)
+
     case is_instrumented?(forms) do
       false ->
         # 2. instruments the forms of the mod
-        {:abstract_code, {:raw_abstract_v1, altered_forms}} = instrument_forms(instrumenter, forms)
+        {:abstract_code, {:raw_abstract_v1, altered_forms}} =
+          instrument_forms(instrumenter, forms)
+
         # 3. Compile them with :compile.forms
         instr_attribute = {:attribute, 1, :instrumented, PropCheck}
         instrumented_form = add_attribute([instr_attribute], altered_forms)
         compile_module(mod, filename, instrumented_form)
+
       attribute ->
-        Logger.error "Module #{inspect mod} is alread instrumented: #{inspect attribute}"
+        Logger.error("Module #{inspect(mod)} is alread instrumented: #{inspect(attribute)}")
     end
   end
 
@@ -116,7 +122,10 @@ defmodule PropCheck.Instrument do
   @doc false
   def add_attribute([], forms, []), do: Enum.reverse(forms)
   def add_attribute([], fs, [f | tail]), do: add_attribute([], [f | fs], tail)
-  def add_attribute(as, fs1, [{:attribute, _, _, _} = a | tail]), do: add_attribute(as, [a | fs1], tail)
+
+  def add_attribute(as, fs1, [{:attribute, _, _, _} = a | tail]),
+    do: add_attribute(as, [a | fs1], tail)
+
   def add_attribute([attr | as], fs1, tail), do: add_attribute(as, [attr | fs1], tail)
 
   @doc """
@@ -125,6 +134,7 @@ defmodule PropCheck.Instrument do
   """
   def get_forms_of_module(mod) when is_atom(mod) do
     {^mod, beam_code, filename} = :code.get_object_code(mod)
+
     case :beam_lib.chunks(beam_code, [:abstract_code]) do
       {:ok, {^mod, [forms]}} -> {:ok, filename, forms}
       error -> error
@@ -138,26 +148,33 @@ defmodule PropCheck.Instrument do
   def compile_module(mod, filename, _code = {:abstract_code, {:raw_abstract_v1, clauses}}) do
     compile_module(mod, filename, clauses)
   end
+
   def compile_module(mod, filename, clauses) when is_list(clauses) do
     options = [:binary, :debug_info, :return, :verbose]
+
     case :compile.noenv_forms(clauses, options) do
       {:ok, ^mod, bin_code, warnings} ->
-        _ignore = Logger.debug "Module #{inspect mod} is compiled"
-        _ignore = Logger.debug "Now loading the module"
+        _ignore = Logger.debug("Module #{inspect(mod)} is compiled")
+        _ignore = Logger.debug("Now loading the module")
         {:module, ^mod} = :code.load_binary(mod, filename, bin_code)
         {:ok, mod, bin_code, warnings}
-      error -> error
+
+      error ->
+        error
     end
   end
 
   @doc "Checks if the code is already instrumented. If not, returns `false` otherwise returns `true`"
-  def is_instrumented?(_module_form = {:abstract_code, {:raw_abstract_v1, clauses}}), do: is_instrumented?(clauses)
+  def is_instrumented?(_module_form = {:abstract_code, {:raw_abstract_v1, clauses}}),
+    do: is_instrumented?(clauses)
+
   def is_instrumented?(clauses) when is_list(clauses) do
     Enum.find(clauses, false, fn
       {:attribute, _line, :instrumented, _} -> true
       _ -> false
     end)
   end
+
   def is_instrumented?(mod) do
     mod.module_info(:attributes)
     |> Keyword.has_key?(:instrumented)
@@ -165,120 +182,185 @@ defmodule PropCheck.Instrument do
 
   # Helper function for passing the module through the mapping process
   defp map(enum, mod, fun) when is_function(fun, 2) do
-    Enum.map(enum, &(fun.(mod, &1)))
+    Enum.map(enum, &fun.(mod, &1))
   end
+
   # Helper function for mapping expressions
   defp map_expr(enum, mod), do: map(enum, mod, &instrument_expr/2)
 
   @doc false
   # "Instruments the forms of a module"
-  def instrument_forms(instrumenter, {:abstract_code, {:raw_abstract_v1, clauses}}) when is_list(clauses) do
+  def instrument_forms(instrumenter, {:abstract_code, {:raw_abstract_v1, clauses}})
+      when is_list(clauses) do
     instr_clauses = map(clauses, instrumenter, &instrument_mod_clause/2)
-    {:abstract_code,
-      {:raw_abstract_v1,
-        instr_clauses}}
+    {:abstract_code, {:raw_abstract_v1, instr_clauses}}
   end
 
-  @doc false # "Instruments the clauses of a module"
+  # "Instruments the clauses of a module"
+  @doc false
   def instrument_mod_clause(instrumenter, {:function, line, name, arg_count, body}) do
     instr_body = map(body, instrumenter, &instrument_body/2)
     {:function, line, name, arg_count, instr_body}
   end
+
   def instrument_mod_clause(_instrumenter, clause), do: clause
 
-  @doc false # "Instruments the each body (a `:clause`) of a function"
+  # "Instruments the each body (a `:clause`) of a function"
+  @doc false
   def instrument_body(instrumenter, {:clause, line, args, local_vars, exprs}) do
     instr_exprs = map_expr(exprs, instrumenter)
     {:clause, line, args, local_vars, instr_exprs}
   end
 
-  @doc false # "This is a big switch over all kinds of expressions for instrumenting them"
+  # "This is a big switch over all kinds of expressions for instrumenting them"
+  @doc false
   def instrument_expr(_instrumenter, a = {:atom, _, _}), do: a
+
   def instrument_expr(instrumenter, {:bc, line, expr, qs}) do
-    {:bc, line, instrument_expr(instrumenter, expr), map(qs, instrumenter, &instrument_qualifier/2)}
+    {:bc, line, instrument_expr(instrumenter, expr),
+     map(qs, instrumenter, &instrument_qualifier/2)}
   end
+
   def instrument_expr(instrumenter, {:bin, line, bin_elements}) do
     {:bin, line, map(bin_elements, instrumenter, &instrument_bin_element/2)}
   end
+
   def instrument_expr(instrumenter, {:block, line, exprs}) do
     {:block, line, map_expr(exprs, instrumenter)}
   end
+
   def instrument_expr(instrumenter, {:case, line, expr, clauses}) do
     instr_expr = instrument_expr(instrumenter, expr)
     {:case, line, instr_expr, map(clauses, instrumenter, &instrument_clause/2)}
   end
-  def instrument_expr(instrumenter, {:catch, line, expr}), do: {:catch, line, instrument_expr(instrumenter, expr)}
-  def instrument_expr(instrumenter, {:cons, line, e1, e2}), do: {:cons, line, instrument_expr(instrumenter, e1), instrument_expr(instrumenter, e2)}
+
+  def instrument_expr(instrumenter, {:catch, line, expr}),
+    do: {:catch, line, instrument_expr(instrumenter, expr)}
+
+  def instrument_expr(instrumenter, {:cons, line, e1, e2}),
+    do: {:cons, line, instrument_expr(instrumenter, e1), instrument_expr(instrumenter, e2)}
+
   def instrument_expr(instrumenter, {:fun, line, cs}) when is_list(cs) do
     {:fun, line, map(cs, instrumenter, &instrument_clause/2)}
   end
+
   def instrument_expr(_instrumenter, f = {:fun, _, _}), do: f
-  def instrument_expr(instrumenter, c = {:call, _l, {:remote, _m, _f}, _args}), do: instrument_function_call(instrumenter, c)
-  def instrument_expr(instrumenter, c = {:call, _l, _f, _args}), do: instrument_function_call(instrumenter, c)
-  def instrument_expr(instrumenter, {:if, line, cs}), do: {:if, line, map(cs, instrumenter, &instrument_clause/2)}
+
+  def instrument_expr(instrumenter, c = {:call, _l, {:remote, _m, _f}, _args}),
+    do: instrument_function_call(instrumenter, c)
+
+  def instrument_expr(instrumenter, c = {:call, _l, _f, _args}),
+    do: instrument_function_call(instrumenter, c)
+
+  def instrument_expr(instrumenter, {:if, line, cs}),
+    do: {:if, line, map(cs, instrumenter, &instrument_clause/2)}
+
   def instrument_expr(instrumenter, {:lc, line, e, qs}) do
     {:lc, line, instrument_expr(instrumenter, e), map(qs, instrumenter, &instrument_qualifier/2)}
   end
-  def instrument_expr(instrumenter, {:map, line, assocs}), do: {:map, line, map(assocs, instrumenter,  &instrument_assoc/2)}
+
+  def instrument_expr(instrumenter, {:map, line, assocs}),
+    do: {:map, line, map(assocs, instrumenter, &instrument_assoc/2)}
+
   def instrument_expr(instrumenter, {:map, line, expr, assocs}) do
-    {:map, line, instrument_expr(instrumenter, expr), map(assocs, instrumenter, &instrument_assoc/2)}
+    {:map, line, instrument_expr(instrumenter, expr),
+     map(assocs, instrumenter, &instrument_assoc/2)}
   end
+
   def instrument_expr(instrumenter, {:match, line, p, e}) do
     {:match, line, instrument_pattern(instrumenter, p), instrument_expr(instrumenter, e)}
   end
-  def instrument_expr(_instrumenter, {:nil, line}), do: {:nil, line}
-  def instrument_expr(instrumenter, {:op, line, op, e1}), do: {:op, line, op, instrument_expr(instrumenter, e1)}
-  def instrument_expr(instrumenter, {:op, line, op, e1, e2}), do:
-    {:op, line, op, instrument_expr(instrumenter, e1), instrument_expr(instrumenter, e2)}
-  def instrument_expr(instrumenter, r = {:receive, _line, _cs}), do: instrument_receive(instrumenter, r)
-  def instrument_expr(instrumenter, r = {:receive, _line, _cs, _e, _b}), do: instrument_receive(instrumenter, r)
-  def instrument_expr(instrumenter, {:record, line, name, fields}) do # record creation
+
+  def instrument_expr(_instrumenter, {nil, line}), do: {nil, line}
+
+  def instrument_expr(instrumenter, {:op, line, op, e1}),
+    do: {:op, line, op, instrument_expr(instrumenter, e1)}
+
+  def instrument_expr(instrumenter, {:op, line, op, e1, e2}),
+    do: {:op, line, op, instrument_expr(instrumenter, e1), instrument_expr(instrumenter, e2)}
+
+  def instrument_expr(instrumenter, r = {:receive, _line, _cs}),
+    do: instrument_receive(instrumenter, r)
+
+  def instrument_expr(instrumenter, r = {:receive, _line, _cs, _e, _b}),
+    do: instrument_receive(instrumenter, r)
+
+  # record creation
+  def instrument_expr(instrumenter, {:record, line, name, fields}) do
     {:record, line, name, map_expr(fields, instrumenter)}
   end
-  def instrument_expr(instrumenter, {:record, line, e, name, fields}) do # record update
+
+  # record update
+  def instrument_expr(instrumenter, {:record, line, e, name, fields}) do
     {:record, line, instrument_expr(instrumenter, e), name, map_expr(fields, instrumenter)}
   end
-  def instrument_expr(instrumenter, {:record_field, line, field, expr}), do: {:record, line, field, instrument_expr(instrumenter, expr)}
-  def instrument_expr(instrumenter, {:record_field, line, expr, name, field}), do:
-    {:record, line, instrument_expr(instrumenter, expr), name, field}
+
+  def instrument_expr(instrumenter, {:record_field, line, field, expr}),
+    do: {:record, line, field, instrument_expr(instrumenter, expr)}
+
+  def instrument_expr(instrumenter, {:record_field, line, expr, name, field}),
+    do: {:record, line, instrument_expr(instrumenter, expr), name, field}
+
   def instrument_expr(_instrumenter, r = {:record_index, _line, _name, _fields}), do: r
-  def instrument_expr(instrumenter, {:tuple, line, es}), do: {:tuple, line, map_expr(es, instrumenter)}
+
+  def instrument_expr(instrumenter, {:tuple, line, es}),
+    do: {:tuple, line, map_expr(es, instrumenter)}
+
   def instrument_expr(instrumenter, {:try, line, body, cases, catches, expr}) do
     i_body = map_expr(body, instrumenter)
     i_cases = map(cases, instrumenter, &instrument_clause/2)
     i_catches = map(catches, instrumenter, &instrument_clause/2)
     {:try, line, i_body, i_cases, i_catches, instrument_expr(instrumenter, expr)}
   end
-  def instrument_expr(_instrumenter, v = {:var, _l, _name}), do: v
-  def instrument_expr(_instrumenter, l = {literal, _line, _val}) when literal in [:atom, :integer, :float, :char, :string], do: l
 
-  @doc false # "Instrument a part of binary pattern definition"
+  def instrument_expr(_instrumenter, v = {:var, _l, _name}), do: v
+
+  def instrument_expr(_instrumenter, l = {literal, _line, _val})
+      when literal in [:atom, :integer, :float, :char, :string],
+      do: l
+
+  # "Instrument a part of binary pattern definition"
+  @doc false
   def instrument_bin_element(instrumenter, {:bin_element, line, expr, size, tsl}) do
     {:bin_element, line, instrument_expr(instrumenter, expr), size, tsl}
   end
 
-  @doc false # "Instrument case, catch, function clauses"
+  # "Instrument case, catch, function clauses"
+  @doc false
   def instrument_clause(instrumenter, {:clause, line, p, body}) do
     {:clause, line, instrument_pattern(instrumenter, p), map_expr(body, instrumenter)}
   end
+
   # def instrument_clause(instrumenter, {:clause, line, ps, body}) when is_list(ps) do
   #   {:clause, line, map_expr(ps, instrumenter), map_expr(body, instrumenter)}
   # end
-  def instrument_clause(instrumenter, {:clause, line, ps, [guards], body}) when is_list(ps) and is_list(guards) do
-    {:clause, line, map_expr(ps, instrumenter), [map_expr(guards, instrumenter)], map_expr(body, instrumenter)}
-  end
-  def instrument_clause(instrumenter, {:clause, line, ps, guards, body}) when is_list(ps) do
-    {:clause, line, map_expr(ps, instrumenter), map_expr(guards, instrumenter), map_expr(body, instrumenter)}
+  def instrument_clause(instrumenter, {:clause, line, ps, [guards], body})
+      when is_list(ps) and is_list(guards) do
+    {:clause, line, map_expr(ps, instrumenter), [map_expr(guards, instrumenter)],
+     map_expr(body, instrumenter)}
   end
 
-  @doc false # "Instrument qualifiers of list and bit comprehensions"
-  def instrument_qualifier(instrumenter, {:generate, line, p, e}), do: {:generate, line, instrument_pattern(instrumenter, p), instrument_expr(instrumenter, e)}
-  def instrument_qualifier(instrumenter, {:b_generate, line, p, e}), do: {:b_generate, line, instrument_pattern(instrumenter, p), instrument_expr(instrumenter, e)}
+  def instrument_clause(instrumenter, {:clause, line, ps, guards, body}) when is_list(ps) do
+    {:clause, line, map_expr(ps, instrumenter), map_expr(guards, instrumenter),
+     map_expr(body, instrumenter)}
+  end
+
+  # "Instrument qualifiers of list and bit comprehensions"
+  @doc false
+  def instrument_qualifier(instrumenter, {:generate, line, p, e}),
+    do: {:generate, line, instrument_pattern(instrumenter, p), instrument_expr(instrumenter, e)}
+
+  def instrument_qualifier(instrumenter, {:b_generate, line, p, e}),
+    do: {:b_generate, line, instrument_pattern(instrumenter, p), instrument_expr(instrumenter, e)}
+
   def instrument_qualifier(instrumenter, e), do: instrument_expr(instrumenter, e)
 
-  @doc false # "Instrument patterns, which are mostly expressions, except for variables/atoms"
+  # "Instrument patterns, which are mostly expressions, except for variables/atoms"
+  @doc false
   # def instrument_pattern(instrumenter, {x, p, s}), do: {x, instrument_expr(instrumenter, p), s}
-  def instrument_pattern(instrumenter, ps) when is_list(ps), do: map(ps, instrumenter, &instrument_pattern/2)
+  def instrument_pattern(instrumenter, ps) when is_list(ps),
+    do: map(ps, instrumenter, &instrument_pattern/2)
+
   def instrument_pattern(instrumenter, p), do: instrument_expr(instrumenter, p)
 
   @doc false
@@ -297,24 +379,31 @@ defmodule PropCheck.Instrument do
     module = instrument_expr(instrumenter, m)
     fun = instrument_expr(instrumenter, f)
     args = map_expr(as, instrumenter)
+
     case instrumenter.is_instrumentable_function(m, f) do
-      true -> instrumenter.handle_function_call({:call, line, {:remote, line2, module, fun}, args})
-      _ -> {:call, line, {:remote, line2, module, fun}, args}
+      true ->
+        instrumenter.handle_function_call({:call, line, {:remote, line2, module, fun}, args})
+
+      _ ->
+        {:call, line, {:remote, line2, module, fun}, args}
     end
   end
+
   def instrument_function_call(instrumenter, {:call, line, f, as}) do
     fun = instrument_expr(instrumenter, f)
     args = map_expr(as, instrumenter)
     {:call, line, fun, args}
   end
 
-  @doc false # "The receive might be handled differently, therefore it has its own function"
+  # "The receive might be handled differently, therefore it has its own function"
+  @doc false
   def instrument_receive(instrumenter, {:receive, line, cs}) do
     {:receive, line, map(cs, instrumenter, &instrument_clause/2)}
   end
-  def instrument_receive(instrumenter, {:receive, line, cs, e, b})  do
+
+  def instrument_receive(instrumenter, {:receive, line, cs, e, b}) do
     {:receive, line, map(cs, instrumenter, &instrument_clause/2),
-      instrument_expr(instrumenter, e), map_expr(b, instrumenter)}
+     instrument_expr(instrumenter, e), map_expr(b, instrumenter)}
   end
 
   @doc """
@@ -323,8 +412,8 @@ defmodule PropCheck.Instrument do
 
   All arugments and return values are in Erlang Astract Form.
   """
-  @spec prepend_call(to_be_wrapped_call :: erl_ast_remote_call, new_call :: erl_ast_remote_call)
-    :: erl_ast_block
+  @spec prepend_call(to_be_wrapped_call :: erl_ast_remote_call, new_call :: erl_ast_remote_call) ::
+          erl_ast_block
   def prepend_call(to_be_wrapped_call, new_call) do
     {:block, [generated: true], [new_call, to_be_wrapped_call]}
   end
@@ -334,13 +423,13 @@ defmodule PropCheck.Instrument do
   """
   @spec encode_call({m :: module(), f :: atom(), a :: list()}) :: erl_ast_remote_call
   def encode_call(_call = {m, f, a}) when is_atom(m) and is_atom(f) and is_list(a) do
-    line = 0 # [generated: true]
-    {:call, line,
-      {:remote, line,
-        {:atom, line, m},
-        {:atom, line, f}},
-      Enum.map(a, &encode_value/1)}
+    # [generated: true]
+    line = 0
+
+    {:call, line, {:remote, line, {:atom, line, m}, {:atom, line, f}},
+     Enum.map(a, &encode_value/1)}
   end
+
   @doc "Encodes a call to `m.f.(a)` as Erlang Abstract Form."
   @spec encode_call(m :: module(), f :: atom(), a :: list()) :: erl_ast_remote_call
   def encode_call(m, f, a) when is_atom(m) and is_atom(f) and is_list(a),
@@ -348,27 +437,35 @@ defmodule PropCheck.Instrument do
 
   @doc "Encodes a value as Erlang Astract Form."
   @spec encode_value(val :: any) :: :erl_parse.abstract_expr()
-  def encode_value(nil), do: {:nil, [generated: true]}
+  def encode_value(nil), do: {nil, [generated: true]}
   def encode_value(value) when is_atom(value), do: {:atom, [generated: true], value}
   def encode_value(value) when is_integer(value), do: {:integer, [generated: true], value}
   def encode_value(value) when is_float(value), do: {:float, [generated: true], value}
-  def encode_value(value) when is_binary(value), do:
-    {:bin, [generated: true],
-      [{:bin_element, [generated: true], {:string, [generated: true], String.to_charlist(value)},
-        :default, :default}]}
+
+  def encode_value(value) when is_binary(value),
+    do:
+      {:bin, [generated: true],
+       [
+         {:bin_element, [generated: true],
+          {:string, [generated: true], String.to_charlist(value)}, :default, :default}
+       ]}
+
   def encode_value([]), do: encode_value(nil)
+
   def encode_value(l) when is_list(l) do
     l
     |> Enum.reverse()
     |> Enum.reduce({nil, 0}, fn v, acc -> {:cons, 0, encode_value(v), acc} end)
   end
+
   def encode_value(t) when is_tuple(t) do
     {:tuple, [generated: true],
-      t
-      |> Tuple.to_list()
-      |> Enum.map(&encode_value/1)}
+     t
+     |> Tuple.to_list()
+     |> Enum.map(&encode_value/1)}
   end
-  def encode_value(_unknown), do: throw ArgumentError
+
+  def encode_value(_unknown), do: throw(ArgumentError)
 
   @doc "Encodes a call to `:erlang.yield()` as Erlang Astract Form."
   @spec call_yield() :: erl_ast_remote_call
@@ -385,13 +482,16 @@ defmodule PropCheck.Instrument do
   def print_fun(fun, mod \\ __MODULE__) do
     {:ok, _filename, forms} = get_forms_of_module(mod)
     {:abstract_code, {:raw_abstract_v1, clauses}} = forms
-    funs = Enum.filter(clauses, fn
-      {:function, _, ^fun, _, _} -> true
-      _ -> false
-    end)
+
+    funs =
+      Enum.filter(clauses, fn
+        {:function, _, ^fun, _, _} -> true
+        _ -> false
+      end)
+
     case funs do
       [f] -> :erl_pp.function(f) |> IO.puts()
-      [] -> IO.puts "Unknown function #{inspect fun}"
+      [] -> IO.puts("Unknown function #{inspect(fun)}")
     end
   end
 
@@ -400,7 +500,8 @@ defmodule PropCheck.Instrument do
   interesting with respect to concurrency. Examples are process handling, handling
   of shared state or sending and receiving messages.
   """
-  @spec instrumentable_function({:atom, any, mod :: module()}, {:atom, any, fun :: atom}) :: boolean()
+  @spec instrumentable_function({:atom, any, mod :: module()}, {:atom, any, fun :: atom}) ::
+          boolean()
   # Generate the matcher for interestng functions by a macro. All these functions
   # are concerned with process handling, sending or receiving messages and handling
   # of shared state (in particular for :ets, Registry and the process dictionary)
@@ -418,22 +519,18 @@ defmodule PropCheck.Instrument do
     ets: :match_object,
     ets: :member,
     ets: :new,
-
     gen_server: :start_link,
     gen_server: :start,
     gen_server: :call,
     gen_server: :cast,
     gen_server: :server,
     gen_server: :loop,
-
     supervisor: :start_link,
     supervisor: :start_child,
     supervisor: :which_children,
-
     timer: :sleep,
     timer: :apply_after,
     timer: :exit_after,
-
     erlang: :spawn,
     erlang: :spawn_link,
     erlang: :link,
@@ -444,30 +541,23 @@ defmodule PropCheck.Instrument do
     erlang: :demonitor,
     erlang: :monitor,
     erlang: :exit,
-
     gen_event: :start_link,
     gen_event: :send,
     gen_event: :add_handler,
     gen_event: :notify,
-
     gen_fsm: :start_link,
     gen_fsm: :send_event,
     gen_fsm: :send_all_state_event,
     gen_fsm: :sync_send_all_state_event,
-
     io: :format,
-
     file: :write_file,
-
     "Elixir.IO": :puts,
-
     "Elixir.GenServer": :start_link,
     "Elixir.GenServer": :start,
     "Elixir.GenServer": :call,
     "Elixir.GenServer": :cast,
     "Elixir.GenServer": :server,
     "Elixir.GenServer": :loop,
-
     "Elixir.Task": :start_link,
     "Elixir.Task": :start,
     "Elixir.Task": :call,
@@ -478,7 +568,6 @@ defmodule PropCheck.Instrument do
     "Elixir.Task": :async_stream,
     "Elixir.Task": :yield,
     "Elixir.Task": :yield_many,
-
     "Elixir.Supervisor": :start_link,
     "Elixir.Supervisor": :start_child,
     "Elixir.Supervisor": :restart_child,
@@ -487,7 +576,6 @@ defmodule PropCheck.Instrument do
     "Elixir.Supervisor": :delete_child,
     "Elixir.Supervisor": :terminate_child,
     "Elixir.Supervisor": :which_children,
-
     "Elixir.DynamicSupervisor": :start_link,
     "Elixir.DynamicSupervisor": :start_child,
     "Elixir.DynamicSupervisor": :stop,
@@ -495,7 +583,6 @@ defmodule PropCheck.Instrument do
     "Elixir.DynamicSupervisor": :delete_child,
     "Elixir.DynamicSupervisor": :terminate_child,
     "Elixir.DynamicSupervisor": :which_children,
-
     "Elixir.Agent": :start_link,
     "Elixir.Agent": :start,
     "Elixir.Agent": :cast,
@@ -503,14 +590,12 @@ defmodule PropCheck.Instrument do
     "Elixir.Agent": :get,
     "Elixir.Agent": :get_and_update,
     "Elixir.Agent": :update,
-
     "Elixir.Process": :delete_key,
     "Elixir.Process": :get,
     "Elixir.Process": :link,
     "Elixir.Process": :put,
     "Elixir.Process": :register,
     "Elixir.Process": :whereis,
-
     "Elixir.Registry": :start_link,
     "Elixir.Registry": :count_match,
     "Elixir.Registry": :count,
@@ -525,7 +610,6 @@ defmodule PropCheck.Instrument do
     "Elixir.Registry": :unregister_match,
     "Elixir.Registry": :unregister,
     "Elixir.Registry": :update_value,
-
     "Elixir.Task.Supervisor": :start_link,
     "Elixir.Task.Supervisor": :start_child,
     "Elixir.Task.Supervisor": :stop,
@@ -533,15 +617,19 @@ defmodule PropCheck.Instrument do
     "Elixir.Task.Supervisor": :async,
     "Elixir.Task.Supervisor": :async_nolink,
     "Elixir.Task.Supervisor": :async_stream,
-    "Elixir.Task.Supervisor": :async_stream_nolink,
+    "Elixir.Task.Supervisor": :async_stream_nolink
   ]
+
   for {mod, fun} <- all_instrumentable_functions do
     # IO.puts "generate fun for #{inspect mod}.#{inspect fun}()"
     # This is an unquote fragment, no need for quote do ... end, designed for generating functions
     def instrumentable_function({:atom, _, unquote(mod)}, {:atom, _, unquote(fun)}), do: true
   end
 
-  def instrumentable_function(_mod = {:atom, _, m}, _fun = {:atom, _, f}) when is_atom(m) and is_atom(f), do: false
+  def instrumentable_function(_mod = {:atom, _, m}, _fun = {:atom, _, f})
+      when is_atom(m) and is_atom(f),
+      do: false
+
   # def instrumentable_function(mod, fun), do: false
 
   # @doc """
