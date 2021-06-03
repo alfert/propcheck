@@ -90,18 +90,15 @@ defmodule PropCheck.CounterStrike do
   # storing new counter examples.
   @spec load_existing_counter_examples(%{mfa => any}, :dets.tab_name()) :: %{mfa => any}
   defp load_existing_counter_examples(ce, dets) do
-    new_ce =
-      :dets.foldl(
-        fn {mfa, example}, ces ->
-          Map.put_new(ces, mfa, example)
-        end,
-        ce,
-        dets
-      )
+    new_ce = :dets.foldl(&add_counterexample/2, ce, dets)
 
     :ok = :dets.delete_all_objects(dets)
     :ok = :dets.sync(dets)
     new_ce
+  end
+
+  defp add_counterexample({mfa, example}, ces) do
+    Map.put_new(ces, mfa, example)
   end
 
   def terminate(_reason, state) do
