@@ -27,8 +27,8 @@ defmodule PropCheck.TestHelpers do
       {:numtests, 30}
   """
   def scale_numtests(scale_factor) do
-     numtests = Keyword.get(config(), :numtests)
-     {:numtests, (scale_factor * numtests) |> round() |> max(1)}
+    numtests = Keyword.get(config(), :numtests)
+    {:numtests, (scale_factor * numtests) |> round() |> max(1)}
   end
 
   @doc """
@@ -55,7 +55,7 @@ defmodule PropCheck.TestHelpers do
 
   defp opt_num_value(name, val), do: {name, String.to_integer(val)}
 
-  defp push(cfg, env_var, default , opt_name, transform) do
+  defp push(cfg, env_var, default, opt_name, transform) do
     case System.get_env(env_var) do
       nil -> [transform.(opt_name, default) | cfg]
       val -> [transform.(opt_name, val) | cfg]
@@ -64,11 +64,10 @@ defmodule PropCheck.TestHelpers do
 
   defp maybe_push(cfg, env_var, opt_name, transform) do
     with val when val != nil <- System.get_env(env_var),
-         tval when tval != nil <- transform.(opt_name, val)
-      do
+         tval when tval != nil <- transform.(opt_name, val) do
       [tval | cfg]
-      else
-        _ -> cfg
+    else
+      _ -> cfg
     end
   end
 end

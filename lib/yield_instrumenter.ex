@@ -9,11 +9,10 @@ defmodule PropCheck.YieldInstrumenter do
   @behaviour Instrument
   @impl true
   def handle_function_call(call) do
-    _ignore = Logger.debug("handle_function: #{inspect call}")
+    _ignore = Logger.debug("handle_function: #{inspect(call)}")
     Instrument.prepend_call(call, Instrument.call_yield())
   end
 
   @impl true
   def is_instrumentable_function(mod, fun), do: Instrument.instrumentable_function(mod, fun)
-
 end

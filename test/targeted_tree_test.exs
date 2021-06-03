@@ -27,6 +27,7 @@ defmodule PropCheck.Test.TargetTreeTest do
     {rl, rr} = sides(right)
     {count_inner(left) + ll + lr, count_inner(right) + rl + rr}
   end
+
   def sides(_), do: {0, 0}
   def count_inner({:node, _, _, _}), do: 1
   def count_inner(_), do: 0
@@ -40,22 +41,24 @@ defmodule PropCheck.Test.TargetTreeTest do
     end
   end
 
-  property "A left-heavy tree", [search_steps: 600] do
+  property "A left-heavy tree", search_steps: 600 do
     forall_targeted t <- tree() do
       weight = sides(t)
       {left, right} = weight
-      debug(" #{inspect weight}")
+      debug(" #{inspect(weight)}")
       # ensure that the left tree is larger than the right one
       maximize(left - right)
-      assert true # this property holds always
+      # this property holds always
+      assert true
     end
   end
 
   property "A simple tree", [scale_numtests(10)] do
     forall t <- tree() do
       weight = sides(t)
-      debug(" #{inspect weight}")
-      true # this property holds always
+      debug(" #{inspect(weight)}")
+      # this property holds always
+      true
     end
   end
 
@@ -72,14 +75,15 @@ defmodule PropCheck.Test.TargetTreeTest do
     end
   end
 
-  property "A very left-heavy tree with neighborhood function"  do
+  property "A very left-heavy tree with neighborhood function" do
     forall_targeted t <- user_nf(tree(), next_tree()) do
       weight = sides(t)
       {left, right} = weight
-      debug(" #{inspect weight}")
+      debug(" #{inspect(weight)}")
       # ensure that the left tree is larger than the right one
       maximize(left - right)
-      true # this property holds always
+      # this property holds always
+      true
     end
   end
 
@@ -89,19 +93,21 @@ defmodule PropCheck.Test.TargetTreeTest do
 
   property "Tree search", [scale_search_steps(0.1)] do
     forall l <- list(integer()) do
-      not_exists t <- user_nf(
-          # trick: wrap the list value l into the let to construct the
-          # required generator for user_nf
-          (let x <- l, do: to_tree(x)),
-          next_tree()) do
+      not_exists t <-
+                   user_nf(
+                     # trick: wrap the list value l into the let to construct the
+                     # required generator for user_nf
+                     let(x <- l, do: to_tree(x)),
+                     next_tree()
+                   ) do
         weight = sides(t)
         {left, right} = weight
-        debug(" #{inspect weight}")
+        debug(" #{inspect(weight)}")
         # ensure that the left tree is larger than the right one
         maximize(left - right)
-        false # guarantees a full search for exists
+        # guarantees a full search for exists
+        false
       end
     end
   end
-
 end

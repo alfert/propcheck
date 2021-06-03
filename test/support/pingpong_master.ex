@@ -22,7 +22,7 @@ defmodule PropCheck.Test.PingPongMaster do
   # -------------------------------------------------------------------
 
   def start_link do
-    GenServer.start_link(__MODULE__, [], [name: __MODULE__])
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def stop do
@@ -38,9 +38,9 @@ defmodule PropCheck.Test.PingPongMaster do
   end
 
   def ping(from_name) do
-    #log_debug "Ping Pong Game for #{inspect from_name}"
+    # log_debug "Ping Pong Game for #{inspect from_name}"
     r = GenServer.call(__MODULE__, {:ping, from_name})
-    #log_debug "Ping Pong result: #{inspect r}"
+    # log_debug "Ping Pong result: #{inspect r}"
     r
   end
 
@@ -54,19 +54,23 @@ defmodule PropCheck.Test.PingPongMaster do
 
   @doc "Process loop for the ping pong player process"
   def ping_pong_player(name, counter \\ 1) do
-    #log_debug "Player #{inspect name} is waiting round #{counter}"
+    # log_debug "Player #{inspect name} is waiting round #{counter}"
     receive do
       :ping_pong ->
         # log_debug "Player #{inspect name} got a request for a ping-pong game"
         ping(name)
+
       {:tennis, from} ->
         send(from, :maybe_later)
+
       {:football, from} ->
         send(from, :no_way)
+
       msg ->
-        log_error "Player #{inspect name} got invalid message #{inspect msg}"
+        log_error("Player #{inspect(name)} got invalid message #{inspect(msg)}")
         exit(:kill)
     end
+
     # log_debug "Player #{inspect name} is recursive"
     ping_pong_player(name, counter + 1)
   end
@@ -87,18 +91,23 @@ defmodule PropCheck.Test.PingPongMaster do
       :ok ->
         receive do
           reply -> reply
-          after 500 -> "Football timeout!"
+        after
+          500 -> "Football timeout!"
         end
-      return -> return
+
+      return ->
+        return
     end
   end
 
   @doc "Start playing football"
   def play_football_eager(player) do
     send(player, {:football, self()})
+
     receive do
       reply -> reply
-    after 500 -> "Football timeout!"
+    after
+      500 -> "Football timeout!"
     end
   end
 
@@ -108,9 +117,12 @@ defmodule PropCheck.Test.PingPongMaster do
       :ok ->
         receive do
           reply -> reply
-          after 500 -> "Tennis timeout!"
+        after
+          500 -> "Tennis timeout!"
         end
-      return -> return
+
+      return ->
+        return
     end
   end
 
@@ -136,25 +148,30 @@ defmodule PropCheck.Test.PingPongMaster do
   def handle_call({:add_player, name}, _from, scores) do
     case Map.fetch(scores, name) do
       :error ->
-          pid = spawn(fn() -> ping_pong_player(name) end)
-          true = Process.register(pid, name)
-          {:reply, :ok, scores |> Map.put(name, 0)}
+        pid = spawn(fn -> ping_pong_player(name) end)
+        true = Process.register(pid, name)
+        {:reply, :ok, scores |> Map.put(name, 0)}
+
       {:ok, _} ->
-          log_debug(fn -> "add_player: player #{name} already exists!" end)
-          {:reply, :ok, scores}
+        log_debug(fn -> "add_player: player #{name} already exists!" end)
+        {:reply, :ok, scores}
     end
   end
+
   def handle_call({:remove_player, name}, _from, scores) do
     case Process.whereis(name) do
       nil ->
         log_debug(fn -> "Process #{name} is unknown / not running" end)
         :ok
+
       pid ->
         kill_process(pid)
     end
+
     # Process.whereis(name) |> Process.exit(:kill)
     {:reply, {:removed, name}, scores |> Map.delete(name)}
   end
+
   def handle_call({:ping, from_name}, _from, scores) do
     # log_debug "Master: Ping Pong Game for #{inspect from_name}"
     if scores |> Map.has_key?(from_name) do
@@ -163,6 +180,7 @@ defmodule PropCheck.Test.PingPongMaster do
       {:reply, {:removed, from_name}, scores}
     end
   end
+
   def handle_call({:get_score, name}, _from, scores) do
     {:reply, scores |> Map.fetch!(name), scores}
   end
@@ -171,8 +189,8 @@ defmodule PropCheck.Test.PingPongMaster do
   def terminate(_reason, scores) do
     # log_info "Terminate Master with scores #{inspect scores}"
     scores
-      |> Map.keys
-      |> Enum.each(&kill_process(&1))
+    |> Map.keys()
+    |> Enum.each(&kill_process(&1))
   end
 
   defp kill_process(pid) when is_pid(pid) do
@@ -184,8 +202,8 @@ defmodule PropCheck.Test.PingPongMaster do
       {:DOWN, ^ref, :process, _object, _reason} -> :ok
     end
   end
+
   defp kill_process(name) do
     kill_process(Process.whereis(name))
   end
-
 end

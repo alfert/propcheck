@@ -11,22 +11,23 @@ defmodule PropCheck.Test.MasterStateM do
   alias PropCheck.Test.PingPongMaster
   @moduletag capture_log: true
 
-  property "master works fine", [max_size: 100] do
+  property "master works fine", max_size: 100 do
     forall cmds <- more_commands(100, commands(__MODULE__)) do
       trap_exit do
         kill_all_player_processes()
         PingPongMaster.start_link()
         r = run_commands(__MODULE__, cmds)
         {history, state, result} = r
-        PingPongMaster.stop
+        PingPongMaster.stop()
 
         (result == :ok)
         |> when_fail(
-            IO.puts """
-            History: #{inspect history, pretty: true}
-            State: #{inspect state, pretty: true}
-            Result: #{inspect result, pretty: true}
-            """)
+          IO.puts("""
+          History: #{inspect(history, pretty: true)}
+          State: #{inspect(state, pretty: true)}
+          Result: #{inspect(result, pretty: true)}
+          """)
+        )
       end
     end
   end
@@ -34,12 +35,14 @@ defmodule PropCheck.Test.MasterStateM do
   # ensure all player processes are dead
   defp kill_all_player_processes do
     require Logger
-    Process.registered
+
+    Process.registered()
     |> Enum.filter(&(Atom.to_string(&1) |> String.starts_with?("player_")))
     |> Enum.each(fn name ->
       pid = Process.whereis(name)
       # nice idea from José Valim: Monitor the process ...
       ref = Process.monitor(name)
+
       if is_pid(pid) and Process.alive?(pid) do
         try do
           Process.exit(pid, :kill)
@@ -47,6 +50,7 @@ defmodule PropCheck.Test.MasterStateM do
           _what, _value -> Logger.debug(fn -> "Already killed process #{name}" end)
         end
       end
+
       # ... and wait for the DOWN message.
       receive do
         {:DOWN, ^ref, :process, _object, _reason} -> :ok
@@ -60,18 +64,19 @@ defmodule PropCheck.Test.MasterStateM do
   ##
   #####################################################
   @max_players 100
-  @players 1..@max_players |> Enum.map(&("player_#{&1}") |> String.to_atom)
+  @players 1..@max_players |> Enum.map(&("player_#{&1}" |> String.to_atom()))
 
-  def name, do: oneof @players
+  def name, do: oneof(@players)
 
   def command(players) do
-    if (Enum.count(players) > 0) do
-      player_list = players |> MapSet.to_list
+    if Enum.count(players) > 0 do
+      player_list = players |> MapSet.to_list()
+
       oneof([
         {:call, PingPongMaster, :add_player, [name()]},
         {:call, PingPongMaster, :remove_player, [oneof(player_list)]},
         {:call, PingPongMaster, :get_score, [oneof(player_list)]}
-        ])
+      ])
     else
       {:call, PingPongMaster, :add_player, [name()]}
     end
@@ -85,7 +90,7 @@ defmodule PropCheck.Test.MasterStateM do
   #####################################################
 
   @doc "initial model state of the state machine"
-  def initial_state, do: MapSet.new
+  def initial_state, do: MapSet.new()
 
   @doc """
   Update the model state after a successful call. The `state` parameter has
@@ -95,16 +100,19 @@ defmodule PropCheck.Test.MasterStateM do
   def next_state(state, _value, {:call, PingPongMaster, :add_player, [name]}) do
     MapSet.put(state, name)
   end
+
   def next_state(state, _value, {:call, PingPongMaster, :remove_player, [name]}) do
     MapSet.delete(state, name)
   end
+
   def next_state(state, _value, _call), do: state
 
   @doc "can the call in the current state be made?"
   def precondition(players, {:call, PingPongMaster, :remove_player, [name]}) do
     players |> MapSet.member?(name)
   end
-  def precondition(_state, _call),  do: true
+
+  def precondition(_state, _call), do: true
 
   @doc """
   Checks that the model state after the call is proper. The `state` is
@@ -113,11 +121,12 @@ defmodule PropCheck.Test.MasterStateM do
   """
   def postcondition(players, {:call, PingPongMaster, :remove_player, [name]}, _r = {:removed, n}) do
     # IO.puts "postcondition: remove player #{name} => #{inspect r} in state: #{inspect players}"
-    (name == n) and (players |> MapSet.member?(name))
+    name == n and players |> MapSet.member?(name)
   end
+
   def postcondition(_players, {:call, PingPongMaster, :get_score, [_name]}, score) do
     score == 0
   end
-  def postcondition(_state, _call, _result), do: true
 
+  def postcondition(_state, _call, _result), do: true
 end

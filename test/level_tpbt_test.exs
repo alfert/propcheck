@@ -21,12 +21,11 @@ defmodule PropCheck.Test.LevelTest do
 
   def path_gen_sa, do: %{first: path_gen(), next: path_next()}
 
-  @spec path_next() :: ([Level.step], any() -> PropCheck.BasicTypes.t)
+  @spec path_next() :: ([Level.step()], any() -> PropCheck.BasicTypes.t())
   def path_next do
     fn
-      (prev_path, _temperature) when is_list(prev_path) ->
-        let next_steps <- vector(20, step()), do:
-          prev_path ++ next_steps
+      prev_path, _temperature when is_list(prev_path) ->
+        let next_steps <- vector(20, step()), do: prev_path ++ next_steps
     end
   end
 
@@ -34,8 +33,7 @@ defmodule PropCheck.Test.LevelTest do
   # Properties
   #######################################################################
 
-  def distance({x1, y1}, {x2, y2}), do:
-    :math.sqrt(:math.pow(x1 - x2, 2) + :math.pow(y1 - y2, 2))
+  def distance({x1, y1}, {x2, y2}), do: :math.sqrt(:math.pow(x1 - x2, 2) + :math.pow(y1 - y2, 2))
 
   # def prop_exit(level_data) ->
   #   Level = build_level(level_data),
@@ -59,6 +57,7 @@ defmodule PropCheck.Test.LevelTest do
   def prop_exit(level_data) do
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
+
     forall path <- path_gen() do
       case Level.follow_path(entrance, path, level) do
         {:exited, _} -> false
@@ -70,7 +69,7 @@ defmodule PropCheck.Test.LevelTest do
   # This property fails, this means that in every situation a path was found
   # ==> see docs of `prop_exit/1`
   # this can fail on rare occasions
-  property "Default PBT Level 0", [numtests: 300] do
+  property "Default PBT Level 0", numtests: 300 do
     prop_exit(Level.level0())
     |> fails()
   end
@@ -105,7 +104,9 @@ defmodule PropCheck.Test.LevelTest do
   # When using a proper-derived generator, we might have to search longer to find
   # a successful path. Therefore, we increase the amount of search_steps. For more complex
   # situations, e.g. for level 2, the size of the generated paths may become larger.
-  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [scale_search_steps(20)] do
+  property "Target PBT Level 1 with forall_targeted and proper-derived nf", [
+    scale_search_steps(20)
+  ] do
     level_data = Level.level1()
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
@@ -113,7 +114,9 @@ defmodule PropCheck.Test.LevelTest do
 
     forall_targeted path <- path_gen() do
       case Level.follow_path(entrance, path, level) do
-        {:exited, _pos} -> false
+        {:exited, _pos} ->
+          false
+
         pos ->
           if length(path) > 500 do
             :proper_target.reset()
@@ -149,9 +152,11 @@ defmodule PropCheck.Test.LevelTest do
     level = Level.build_level(level_data)
     %{entrance: entrance} = level
     %{exit: exit_pos} = level
+
     forall_targeted path <- user_nf(path_gen(), path_next()) do
       case Level.follow_path(entrance, path, level) do
-        {:exited, _pos} -> false
+        {:exited, _pos} ->
+          false
 
         pos ->
           if length(path) > 2_000 do
@@ -175,6 +180,7 @@ defmodule PropCheck.Test.LevelTest do
   # the property fails.
   property "forall_targeted PBT Level 1" do
     level_data = Level.level1()
+
     prop_forall_targeted(level_data)
     |> fails()
   end
@@ -184,6 +190,7 @@ defmodule PropCheck.Test.LevelTest do
   @tag unstable_test: true
   property "forall_targeted PBT Level 2", [scale_search_steps(3)] do
     level_data = Level.level2()
+
     prop_forall_targeted(level_data)
     |> fails()
   end
@@ -201,7 +208,8 @@ defmodule PropCheck.Test.LevelTest do
       # take the random walk `path` and look where it ends
       case Level.follow_path(entrance, path, level) do
         # we found the exit. => Stop the search. In PBT terms, the path is counterexample.
-        {:exited, _pos} -> true
+        {:exited, _pos} ->
+          true
 
         # we are landed somewhere but did not find the exit.
         pos ->
@@ -220,5 +228,4 @@ defmodule PropCheck.Test.LevelTest do
       end
     end
   end
-
 end

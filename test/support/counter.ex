@@ -13,9 +13,9 @@ defmodule PropCheck.Test.Counter do
   @spec start_link() :: {:ok, pid}
   @spec start_link(atom) :: {:ok, pid}
   @spec start_link(reset_t, atom) :: {:ok, pid}
-  def start_link(reset \\ :infinity, name \\ __MODULE__) when is_atom(name) and
-    (reset == :infinity or is_integer(reset))
-  do
+  def start_link(reset \\ :infinity, name \\ __MODULE__)
+      when is_atom(name) and
+             (reset == :infinity or is_integer(reset)) do
     Agent.start_link(fn -> {-1, reset} end, name: name)
   end
 
@@ -47,6 +47,7 @@ defmodule PropCheck.Test.Counter do
       {count, :infinity} ->
         new_count = count + increment
         {new_count, {new_count, :infinity}}
+
       {count, reset} ->
         new_count = Integer.mod(count + increment, reset)
         {new_count, {new_count, reset}}

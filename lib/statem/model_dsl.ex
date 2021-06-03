@@ -233,7 +233,7 @@ defmodule PropCheck.StateM.ModelDSL do
   @typedoc """
   The outcome of the command sequence execution.
   """
-  @type result :: :proper_statem.statem_result
+  @type result :: :proper_statem.statem_result()
 
   @doc """
   Specifies the symbolic initial state of the state machine.
@@ -257,13 +257,13 @@ defmodule PropCheck.StateM.ModelDSL do
   function will be repeatedly called to produce the next call to be included in
   the test case.
   """
-  @callback command_gen(s :: symbolic_state) :: PropCheck.BasicTypes.type
+  @callback command_gen(s :: symbolic_state) :: PropCheck.BasicTypes.type()
 
   defmacro __using__(_options) do
     quote do
       @behaviour :proper_statem
       import unquote(__MODULE__)
-      Module.register_attribute __MODULE__, :commands, accumulate: true
+      Module.register_attribute(__MODULE__, :commands, accumulate: true)
       @before_compile unquote(__MODULE__)
     end
   end
@@ -277,7 +277,7 @@ defmodule PropCheck.StateM.ModelDSL do
       def_preconds(commands),
       def_postconds(commands),
       def_next_states(commands),
-      def_commands(),
+      def_commands()
     ]
   end
 
@@ -288,6 +288,7 @@ defmodule PropCheck.StateM.ModelDSL do
       @impl :proper_statem
       def command(state) do
         import PropCheck, only: [let: 2]
+
         let {cmd, args} <- command_gen(state) do
           {:call, __MODULE__, cmd, args}
         end
@@ -347,9 +348,10 @@ defmodule PropCheck.StateM.ModelDSL do
   evolve the model state.
   """
   defmacro defcommand(name, do: block) do
-    pre  = String.to_atom("#{name}_pre")
+    pre = String.to_atom("#{name}_pre")
     next = String.to_atom("#{name}_next")
     post = String.to_atom("#{name}_post")
+
     quote do
       def unquote(pre)(_state, _call), do: true
       def unquote(next)(state, _call, _result), do: state
@@ -364,11 +366,13 @@ defmodule PropCheck.StateM.ModelDSL do
   defp rename_def_in_command({:def, c1, [{:impl, c2, impl_args}, impl_body]}, name) do
     {:def, c1, [{name, c2, impl_args}, impl_body]}
   end
+
   defp rename_def_in_command({:def, c1, [{suffix_name, c2, args}, body]}, name)
-  when suffix_name in @known_suffixes do
+       when suffix_name in @known_suffixes do
     new_name = String.to_atom("#{name}_#{suffix_name}")
     {:def, c1, [{new_name, c2, args}, body]}
   end
+
   defp rename_def_in_command(ast, _name) do
     ast
   end
@@ -505,7 +509,7 @@ defmodule PropCheck.StateM.ModelDSL do
   commands the failure happens but simply shows the executed commands in both processes
   running concurrently. This is a feature of PropEr, which cannot easily changed.
   """
-  defdelegate run_parallel_commands(mod, testcase),  to: :proper_statem
+  defdelegate run_parallel_commands(mod, testcase), to: :proper_statem
 
   @doc """
   Similar to `run_parallel_commands/2`, but also accepts an

@@ -15,12 +15,12 @@ defmodule PropertiesTest do
     end
   end
 
-  property "default options are set", [max_size: 1] do
+  property "default options are set", max_size: 1 do
     opts = Process.get(:property_opts)
     assert {:max_size, 1} in opts
     assert {:numtests, 1} in opts
   end
 
   # This will be filtered with `--exclude not_implemented`.
-  property "not yet implemented"
+  property("not yet implemented")
 end
