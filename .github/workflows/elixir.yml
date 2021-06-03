@@ -13,7 +13,7 @@ env:
 jobs:
   lint:
     # WARNING:
-    # Changing the naming pattern requires changes in the branch protection 
+    # Changing the naming pattern requires changes in the branch protection
     # at GitHub, the name of jobs are referenced there!
     name: lint (Elixir ${{ matrix.elixir }} OTP ${{ matrix.otp }})
 
@@ -36,10 +36,12 @@ jobs:
         run: mix do deps.get, deps.compile
       - name: Run Lint
         run: mix lint
+      - name: Check formatting
+        run: mix format --check-formatted
 
   test:
     # WARNING:
-    # Changing the naming pattern requires changes in the branch protection 
+    # Changing the naming pattern requires changes in the branch protection
     # at GitHub, the name of jobs are referenced there!
     name: test (Elixir ${{ matrix.elixir }} OTP ${{ matrix.otp }})
 
