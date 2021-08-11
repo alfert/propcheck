@@ -10,6 +10,10 @@ defmodule PropCheck.Mix do
   def counter_example_file do
     get_in(Mix.Project.config(), [:propcheck, :counter_examples])
   end
+
+  def counter_example_file_or_default do
+    counter_example_file() || default_counter_examples_file()
+  end
 end
 
 defmodule Mix.Tasks.Propcheck do
@@ -49,7 +53,7 @@ defmodule Mix.Tasks.Propcheck do
 
     @doc false
     def run(_args) do
-      File.rm(PropCheck.Mix.counter_example_file())
+      PropCheck.Mix.counter_example_file_or_default() |> File.rm()
     end
   end
 

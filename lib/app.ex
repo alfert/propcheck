@@ -49,7 +49,7 @@ defmodule PropCheck.App do
 
   defp counter_example_file do
     case Application.get_env(:propcheck, :counter_examples) do
-      nil -> Mix.counter_example_file() || Mix.default_counter_examples_file()
+      nil -> Mix.counter_example_file_or_default()
       counter_example_file -> counter_example_file
     end
   end
