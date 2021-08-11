@@ -1,13 +1,20 @@
 defmodule PropCheck.Mix do
   @moduledoc false
 
-  def default_counter_examples_file do
+  def resolve_counter_examples_file do
+    case Application.get_env(:propcheck, :counter_examples) do
+      nil -> counter_example_file() || default_counter_examples_file()
+      counter_example_file -> counter_example_file
+    end
+  end
+
+  defp default_counter_examples_file do
     Mix.Project.build_path()
     |> Path.dirname()
     |> Path.join("propcheck.ctex")
   end
 
-  def counter_example_file do
+  defp counter_example_file do
     get_in(Mix.Project.config(), [:propcheck, :counter_examples])
   end
 end
@@ -49,7 +56,7 @@ defmodule Mix.Tasks.Propcheck do
 
     @doc false
     def run(_args) do
-      File.rm(PropCheck.Mix.counter_example_file())
+      PropCheck.Mix.resolve_counter_examples_file() |> File.rm()
     end
   end
 
@@ -64,7 +71,7 @@ defmodule Mix.Tasks.Propcheck do
 
     @doc false
     def run(_args) do
-      filename = PropCheck.Mix.counter_example_file() |> String.to_charlist()
+      filename = PropCheck.Mix.resolve_counter_examples_file() |> String.to_charlist()
 
       case :dets.open_file(filename) do
         {:ok, ctx} ->
