@@ -440,7 +440,13 @@ defmodule PropCheck do
         unquote(rawtype),
         fn unquote(var) ->
           try do
-            unquote(prop)
+            case unquote(prop) do
+              return when is_boolean(return) -> return
+              return when is_tuple(return) -> return
+              # Convert truthy value to boolean true and falsey value to boolean false
+              # This is necesary to accomodate
+              return -> !!return
+            end
           rescue
             e in ExUnit.AssertionError ->
               if verbose? do
