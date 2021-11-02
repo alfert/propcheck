@@ -295,6 +295,10 @@ defmodule PropCheck.Properties do
     end
   end
 
+  defp is_statem_commands([[]]) do
+    :data
+  end
+
   defp is_statem_commands([counter_example]) when is_list(counter_example) do
     is_command_list =
       counter_example
