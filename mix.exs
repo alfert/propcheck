@@ -3,7 +3,7 @@ defmodule PropCheck.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/alfert/propcheck"
-  @version "1.4.1"
+  @version "1.4.2-dev"
 
   def project do
     [
