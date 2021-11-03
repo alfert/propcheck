@@ -10,8 +10,8 @@
 # set -x
 
 # CONFIGURATION
-old="1.4.0"
-new="1.4.1"
+old="1.4.1"
+new="1.4.2"
 # do not set any variables beyond this line
 
 # check that old and new version differ
@@ -40,7 +40,8 @@ echo "New version         = $new_version"
 read -p "Check the variables. Press Ctrl-C for exit, return for continuing"
 
 # update version in mix.exs
-sed -i "" "s/\(@version \"\)$old_version\",/\\1$release_version\",/" mix.exs
+# sed -i "" "s/\(@version \"\)$old_version\",/\\1$release_version\",/" mix.exs
+sed -i "" "s/\(@version \"\)$old_version\"/\1$release_version\"/" mix.exs
 
 # add to git
 git commit -m "bump version to $release_version" mix.exs
@@ -53,7 +54,7 @@ echo "Publish to Hex.pm"
 mix hex.publish
 
 # update version in mix.exs
-sed -i "" "s/\(@version \"\)$release_version\",/\\1$new_version\",/" mix.exs
+sed -i "" "s/\(@version \"\)$release_version\"/\\1$new_version\"/" mix.exs
 # update in release.sh
 sed -i "" "s/\(old=\"\)$old_version\"/\\1$new\"/" $script_name
 
