@@ -1,7 +1,7 @@
 defmodule PropCheck.StateM.DSL do
   @moduledoc """
   _DEPRECATED_ : This module is deprecated, please use
-  `PropCheck.Statem.ModelDSL` instead.
+  `PropCheck.StateM.ModelDSL` instead.
 
   This module provides a shallow DSL (domain specific language) in Elixir
   for property based testing of stateful systems.
