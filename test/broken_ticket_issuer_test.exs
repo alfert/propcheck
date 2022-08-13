@@ -15,13 +15,13 @@ defmodule PropCheck.Test.BrokenTicketIssuerTest do
     end
   end
 
-  def inc() do
+  def inc do
     x = Agent.get(Counter, & &1)
     Agent.update(Counter, fn _ -> x + 1 end)
     x
   end
 
-  def initial_state() do
+  def initial_state do
     0
   end
 
