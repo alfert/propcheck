@@ -10,6 +10,8 @@ if [ $? -eq 0 ]; then
     exit 1
 fi
 
+mix test --include manual test/verify_counter_examples_test.exs
+
 # Verify that counterexamples for failing parallel tests are printed correctly
 out=$(mix test --include manual test/broken_ticket_issuer_test.exs --include will_fail:true)
 if [ $? -eq 0 ]; then
@@ -26,5 +28,3 @@ else
     exit 1
   fi
 fi
-
-mix test --include manual test/verify_counter_examples_test.exs
