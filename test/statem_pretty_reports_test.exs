@@ -686,6 +686,21 @@ defmodule PropCheck.Test.PrettyReports do
     end
   end
 
+  describe "parallel failures" do
+    test "empty parallel history" do
+      cmds = no_possible_interleaving_only_seq()
+
+      logs =
+        capture_io(fn ->
+          run_parallel_commands(__MODULE__, cmds) |> print_report(cmds)
+        end)
+
+      assert logs =~ "Sequential commands:"
+      assert logs =~ "var1"
+      assert logs =~ "Process 1:\n\n\nProcess 2:\n\n\n\n"
+    end
+  end
+
   #
   #
   # StateM implementation
@@ -821,6 +836,12 @@ defmodule PropCheck.Test.PrettyReports do
       {:set, {:var, 6}, {:call, __MODULE__, :noop, [4]}},
       {:set, {:var, 7}, {:call, __MODULE__, :noop, [5]}}
     ]
+
+  defp no_possible_interleaving_only_seq,
+    do:
+      {[
+         {:set, {:var, 1}, {:call, __MODULE__, :fail_postcond, []}}
+       ], [[], []]}
 
   defp strip_ansi_sequences(str) do
     r = ~r/\e\[.*?m/

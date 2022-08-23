@@ -290,8 +290,8 @@ defmodule PropCheck.Properties do
         for cmd <- cmds, do: Reporter.pretty_print_counter_example_cmd(cmd)
 
       :parallel_commands ->
-        [par_cmds] = counter_example
-        for par_cmd <- par_cmds, do: Reporter.pretty_print_counter_example_parallel(par_cmd)
+        [par_cmd] = counter_example
+        Reporter.pretty_print_counter_example_parallel(par_cmd)
     end
   end
 
@@ -320,6 +320,7 @@ defmodule PropCheck.Properties do
   defp is_statem_commands([{seq_commands, _par_commands}]) do
     case is_statem_commands([seq_commands]) do
       :commands -> :parallel_commands
+      :data -> :parallel_commands
       _ -> :data
     end
   end

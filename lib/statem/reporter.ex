@@ -158,6 +158,9 @@ defmodule PropCheck.StateM.Reporter do
           remove_cmd = fn {_cmd, return} -> {nil, return} end
           [Enum.map(h1, remove_cmd), Enum.map(h2, remove_cmd)]
 
+        {:ok, []} ->
+          [[], []]
+
         :error ->
           [[], []]
       end
