@@ -147,7 +147,7 @@ defmodule PropCheck.StateM.ModelDSL do
   The property to test the stateful system is more or less the same for all systems.
   We generate all commands via generator `commands/1`, which takes
   a module with callbacks as parameter. Inside the test, we first start
-  the SUT, execute the commands with `run_commands/1`, stopping the SUT
+  the SUT, execute the commands with `run_commands/2`, stopping the SUT
   and evaluating the result of the executions as a boolean expression.
   This boolean expression can be adorned with further functions and macros
   to analyze the generated commands (via `PropCheck.aggregate/2`) or to
@@ -157,7 +157,7 @@ defmodule PropCheck.StateM.ModelDSL do
       property "run the sequential cache", [:verbose] do
         forall cmds <- commands(__MODULE__) do
           Cache.start_link(@cache_size)
-          {_history, _state, result} = run_commands(cmds)
+          {_history, _state, result} = run_commands(__MODULE__, cmds)
           Cache.stop()
           (result == :ok)
         end
@@ -172,7 +172,7 @@ defmodule PropCheck.StateM.ModelDSL do
         property "run the sequential cache", [max_size: 250] do
         forall cmds <- commands(__MODULE__) do
           Cache.start_link(@cache_size)
-          {_history, _state, result} = run_commands(cmds)
+          {_history, _state, result} = run_commands(__MODULE__, cmds)
           Cache.stop()
           (result == :ok)
         end
