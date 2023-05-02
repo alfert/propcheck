@@ -50,21 +50,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - elixir: 1.7.4
-            otp: 21.3.8
-          - elixir: 1.8.1
-            otp: 21.3.8
-          - elixir: 1.9.4
-            otp: 21.3.8
-          - elixir: 1.10.4
-            otp: 22.3.4
-          - elixir: 1.11.1
-            otp: 22.3.4
-          - elixir: 1.11
-            otp: 23.3
-          - elixir: 1.11
-            otp: 24.0
+        otp: ['21.3', '22.3', '23.3', '24.0']
+        elixir: [ '1.7.4', '1.8.1', '1.9.4', '1.10.4', '1.11', '1.12', '1.13', '1.14' ]
+        # include:
+        #   - elixir: "1.7.4"
+        #     otp: "21.3.8"
+        #   - elixir: "1.8.1"
+        #     otp: "21.3.8"
+        #   - elixir: "1.9.4"
+        #     otp: "21.3.8"
+        #   - elixir: "1.10.4"
+        #     otp: "22.3.4"
+        #   - elixir: "1.11.1"
+        #     otp: "22.3.4"
+        #   - elixir: "1.11"
+        #     otp: "23.3"
+        #   - elixir: "1.11"
+        #     otp: "24.0"
 
     steps:
       - uses: actions/checkout@v2
