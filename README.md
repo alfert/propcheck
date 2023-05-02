@@ -22,21 +22,21 @@ defp deps do
 end
 ```
 
-From PropCheck 1.3.0 onwards, we require at least Elixir 1.7 since in Elixir 1.11 function `get_stracktrace()` is deprecated. 
+From PropCheck 1.3.0 onwards, we require at least Elixir 1.7 since in Elixir 1.11 function `get_stracktrace()` is deprecated.
 ## Changes
 
 Relevant changes are documented in the [Changelog](changelog.html), on [GitHub
 follow this link](CHANGELOG.md).
 
 ## Basic Usage and Build Configuration
-PropCheck allows to define properties, which automatically executed via `ExUnit`
+PropCheck allows to define properties, which are automatically executed via `ExUnit`
 when running `mix test`. You find relevant information here:
 
 * Details about the `property` macro are found in `PropCheck.Properties`,
 * Details about how to specify the property conditions are documented in
   `PropCheck`,
 * The basic data generators are found in `PropCheck.BasicTypes`,
-* For property testing of state-based systems take a loot at
+* For property testing of state-based systems, take a look at
   `PropCheck.StateM.ModelDSL` for the new DSL (since PropCheck 1.1.0-rc1),
   which is a layer on top of `PropCheck.StateM`.
 * The new targeted property based testing approach (TBPT) employing an automated
@@ -92,7 +92,7 @@ The guides for PropEr are an essential set of documents to make full use of `Pro
 Elixir versions of most of PropEr's tutorial material can be found in the
 [test folder on GitHub](https://github.com/alfert/propcheck/tree/master/test).
 
-Jesper Andersen and Robert Aloi blog about their thoughts and experience on
+Jesper Andersen and Robert Aloi blog about their thoughts and experiences on
 using QuickCheck which are (mostly) directly transferable to PropCheck (with
 the notable exception of concurrency and the new state machine DSL from
 QuickCheck with the possibility to add requirement tags):
