@@ -49,5 +49,4 @@ defmodule PropCheck.Test.BasicTypes do
     |> fails
   end
 
-
 end
