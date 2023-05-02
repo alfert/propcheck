@@ -23,4 +23,30 @@ defmodule PropCheck.Test.BasicTypes do
     end
     |> fails
   end
+
+  # Ensure that simple pos_integers() works - which it seems not to do: #211
+  property "let with pos_integer fails", [:verbose] do
+    our_list = let count <- pos_integer() do
+      (1..count) |> Enum.to_list()
+    end
+
+    forall l <- our_list do
+      (length(l) >= 1)
+      |> measure("PosInt List length", length l)
+      |> collect(length l)
+    end
+  end
+
+  property "boom" do
+    gen = let x <-  binary() do
+      {:ok, some_other} = produce(binary())
+      {x, some_other}
+    end
+
+    forall {x, y} <- gen do
+      x + y >= 0
+    end
+  end
+
+
 end
