@@ -37,7 +37,7 @@ defmodule PropCheck.Test.BasicTypes do
     end
   end
 
-  property "boom" do
+  property "boom since you should not use produce/1 in generators" do
     gen = let x <-  binary() do
       {:ok, some_other} = produce(binary())
       {x, some_other}
@@ -46,6 +46,7 @@ defmodule PropCheck.Test.BasicTypes do
     forall {x, y} <- gen do
       x + y >= 0
     end
+    |> fails
   end
 
 
