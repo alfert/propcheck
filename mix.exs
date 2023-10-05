@@ -91,11 +91,11 @@ defmodule PropCheck.Mixfile do
       # This is the reference to proper on its github repo - instable.
       # {:proper, "~> 1.3", github: "proper-testing/proper"},
       {:proper, "~> 1.4"},
-      {:libgraph, "~> 0.13"},
+      {:libgraph, "~> 0.16"},
       {:coverex, "~> 1.4", only: :test},
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.21", only: :dev}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.30", only: :dev}
     ]
   end
 
