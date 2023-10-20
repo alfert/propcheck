@@ -67,4 +67,4 @@ jobs:
       - name: Compile PropCheck
         run: mix compile --warnings-as-errors
       - name: Run Tests
-        run: PROPCHECK_DEBUG=1 PROPCHECK_VERBOSE=1 PROPCHECK_NUMTESTS=200 PROPCHECK_SEARCH_STEPS=1000 mix tests --cover --trace
+        run: PROPCHECK_NUMTESTS=200 PROPCHECK_SEARCH_STEPS=1000 mix tests --cover --trace
