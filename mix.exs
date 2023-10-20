@@ -29,12 +29,10 @@ defmodule PropCheck.Mixfile do
       preferred_cli_env: [
         tests: :test,
         test_ext: :test,
-        dialyzer: :test,
         parallel_test: :test,
         test_parallel: :test
       ],
-      deps: deps(),
-      dialyzer: dialyzer()
+      deps: deps()
     ]
   end
 
@@ -79,8 +77,7 @@ defmodule PropCheck.Mixfile do
       tests: ["test_ext", "test"],
       lint: [
         "credo --strict",
-        "hex.audit",
-        "dialyzer"
+        "hex.audit"
       ]
     ]
   end
@@ -91,26 +88,7 @@ defmodule PropCheck.Mixfile do
       {:libgraph, "~> 0.13"},
       {:coverex, "~> 1.4", only: :test},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.21", only: :dev}
-    ]
-  end
-
-  defp dialyzer do
-    [
-      plt_add_deps: :apps_direct,
-      plt_add_apps: ~w(
-        ex_unit
-        iex
-        mix
-        compiler
-      )a,
-      flags: ~w(
-        error_handling
-        race_conditions
-        unmatched_returns
-        underspecs
-      )a
     ]
   end
 

@@ -725,7 +725,8 @@ defmodule PropCheck do
         {:ok, levels} ->
           levels
 
-          # {:error, msg} -> raise msg  # Currently it make dialyzer unhappy mostly because of `Graph.topsort/1` spec.
+        {:error, msg} ->
+          raise msg
       end
 
     unpinned_raw_types = Enum.map(raw_types, &PropCheck.Utils.unpin_vars/1)
