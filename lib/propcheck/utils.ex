@@ -106,19 +106,19 @@ defmodule PropCheck.Utils do
     |> List.flatten()
   end
 
-  def elixirfy_output('Stacktrace: ~p.~n', [stacktrace]) do
+  def elixirfy_output(~c"Stacktrace: ~p.~n", [stacktrace]) do
     IO.puts("Stacktrace:")
     IO.puts(Exception.format_stacktrace(stacktrace))
     :ok
   end
 
-  def elixirfy_output('An exception was raised:' ++ _, [kind, exception]) do
+  def elixirfy_output(~c"An exception was raised:" ++ _, [kind, exception]) do
     IO.puts("An exception was raised:")
     IO.puts(Exception.format(kind, exception))
     :ok
   end
 
-  def elixirfy_output('A linked process died' ++ _, [{reason, stack}]) do
+  def elixirfy_output(~c"A linked process died" ++ _, [{reason, stack}]) do
     IO.puts("A linked process died with reason: an exception was raised:")
     IO.puts(Exception.format(:error, reason, stack))
     :ok

@@ -350,8 +350,7 @@ defmodule PropCheck.StateM.Reporter do
   defp do_indent(indent, str) do
     str
     |> String.split("\n")
-    |> Enum.map(&"#{indent}#{&1}")
-    |> Enum.join("\n")
+    |> Enum.map_join("\n", &"#{indent}#{&1}")
   end
 
   def pretty_cmds_name(cmds, opts) do
@@ -368,17 +367,19 @@ defmodule PropCheck.StateM.Reporter do
     args =
       args
       |> Enum.with_index()
-      |> Enum.map(fn
-        {{:var, m}, _} ->
-          symb_var(m)
+      |> Enum.map_join(
+        ", ",
+        fn
+          {{:var, m}, _} ->
+            symb_var(m)
 
-        {arg, i} ->
-          case Keyword.get(opts, :cmd_args, true) do
-            true -> inspectx(arg, opts)
-            false -> "arg#{n}_#{i + 1}"
-          end
-      end)
-      |> Enum.join(", ")
+          {arg, i} ->
+            case Keyword.get(opts, :cmd_args, true) do
+              true -> inspectx(arg, opts)
+              false -> "arg#{n}_#{i + 1}"
+            end
+        end
+      )
 
     "#{symb_var(n)} = #{inspect(mod)}.#{fun}(#{args})"
   end

@@ -35,13 +35,13 @@ defmodule PropCheck.Result do
   def handle_call({:message, fmt, args}, _from, state) do
     state =
       cond do
-        :lists.prefix('Error', fmt) ->
+        :lists.prefix(~c"Error", fmt) ->
           %__MODULE__{state | errors: [{state.current, {fmt, args}} | state.errors]}
 
-        :lists.prefix('Failed', fmt) ->
+        :lists.prefix(~c"Failed", fmt) ->
           %__MODULE__{state | errors: [{state.current, {fmt, args}} | state.errors]}
 
-        :lists.prefix('Testing', fmt) ->
+        :lists.prefix(~c"Testing", fmt) ->
           %__MODULE__{state | tests: [args | state.tests], current: args}
       end
 
