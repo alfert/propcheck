@@ -15,23 +15,18 @@ jobs:
     # WARNING:
     # Changing the naming pattern requires changes in the branch protection
     # at GitHub, the name of jobs are referenced there!
-    name: lint (Elixir ${{ matrix.elixir }} OTP ${{ matrix.otp }})
-
-    runs-on: ubuntu-latest
-
+    name: lint (Elixir ${{ matrix.pair.elixir }} OTP ${{ matrix.pair.otp }})
+    runs-on: ubuntu-22.04
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - elixir: 1.9.4
-            otp: 22.3.4
-
+        pair:
+          - { erlang: "26", elixir: "1.15", latest: true }
     steps:
-      - uses: actions/checkout@v2
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: ${{ matrix.otp }}
-          elixir-version: ${{ matrix.elixir }}
+          otp-version: "26"
+          elixir-version: "1.15"
+      - uses: actions/checkout@v3
       - name: Install Dependencies
         run: mix do deps.get, deps.compile
       - name: Run Lint
@@ -43,32 +38,18 @@ jobs:
     # WARNING:
     # Changing the naming pattern requires changes in the branch protection
     # at GitHub, the name of jobs are referenced there!
-    name: test (Elixir ${{ matrix.elixir }} OTP ${{ matrix.otp }})
-
-    runs-on: ubuntu-latest
-
+    name: test (Elixir ${{ matrix.pair.elixir }} OTP ${{ matrix.pair.erlang }})
+    runs-on: ubuntu-22.04
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - elixir: 1.7.4
-            otp: 21.3.8
-          - elixir: 1.8.1
-            otp: 21.3.8
-          - elixir: 1.9.4
-            otp: 21.3.8
-          - elixir: 1.10.4
-            otp: 22.3.4
-          - elixir: 1.11.1
-            otp: 22.3.4
-          - elixir: 1.11
-            otp: 23.3
-          - elixir: 1.11
-            otp: 24.0
-
+        pair:
+          - { erlang: "26", elixir: "1.15", latest: true }
+          - { erlang: "26", elixir: "1.14" }
+          - { erlang: "25", elixir: "1.14" }
+          - { erlang: "24", elixir: "1.13" }
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: |
             deps
@@ -76,10 +57,11 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-
-      - uses: erlef/setup-beam@v1
+      - name: Install Erlang/Elixir
+        uses: erlef/setup-beam@v1
         with:
-          otp-version: ${{ matrix.otp }}
-          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{matrix.pair.erlang}}
+          elixir-version: ${{matrix.pair.elixir}}
       - name: Install Dependencies
         run: mix do deps.get, deps.compile
       - name: Compile PropCheck
