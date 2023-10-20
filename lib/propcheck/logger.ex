@@ -3,7 +3,7 @@ defmodule PropCheck.Logger do
 
   @moduledoc false
 
-  @levels ~w(debug info warn error)a
+  @levels ~w(debug info warning error)a
 
   for level <- @levels, fun = :"log_#{level}" do
     def unquote(fun)(arg) do
