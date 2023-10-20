@@ -72,9 +72,7 @@ defmodule PropCheck.Test.PrettyReports do
 
     test "has listed commands only up to the crash ", c do
       commands_num =
-        c.lines
-        |> Enum.filter(&Regex.match?(~r/var\d+ = /, &1))
-        |> Enum.count()
+        Enum.count(c.lines, &Regex.match?(~r/var\d+ = /, &1))
 
       assert commands_num == 5
     end
@@ -189,9 +187,7 @@ defmodule PropCheck.Test.PrettyReports do
 
     test "has listed commands only up to the crash ", c do
       commands_num =
-        c.lines
-        |> Enum.filter(&Regex.match?(~r/var\d+ = /, &1))
-        |> Enum.count()
+        Enum.count(c.lines, &Regex.match?(~r/var\d+ = /, &1))
 
       assert commands_num == 5
     end
@@ -290,9 +286,7 @@ defmodule PropCheck.Test.PrettyReports do
 
     test "has listed commands only up to the crash ", c do
       commands_num =
-        c.lines
-        |> Enum.filter(&Regex.match?(~r/var\d+ = /, &1))
-        |> Enum.count()
+        Enum.count(c.lines, &Regex.match?(~r/var\d+ = /, &1))
 
       assert commands_num == 5
     end
@@ -409,9 +403,7 @@ defmodule PropCheck.Test.PrettyReports do
 
     test "has listed commands only up to the crash ", c do
       commands_num =
-        c.lines
-        |> Enum.filter(&Regex.match?(~r/var\d+ = /, &1))
-        |> Enum.count()
+        Enum.count(c.lines, &Regex.match?(~r/var\d+ = /, &1))
 
       assert commands_num == 5
     end
@@ -512,9 +504,7 @@ defmodule PropCheck.Test.PrettyReports do
 
     test "has listed commands only up to the crash ", c do
       commands_num =
-        c.lines
-        |> Enum.filter(&Regex.match?(~r/var\d+ = /, &1))
-        |> Enum.count()
+        Enum.count(c.lines, &Regex.match?(~r/var\d+ = /, &1))
 
       assert commands_num == 5
     end

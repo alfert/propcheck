@@ -83,12 +83,12 @@ defmodule PropCheck.Test.CounterStrikeTest do
     # subsequent runs.
 
     assert_raise ExUnit.AssertionError, ~r/cant_generate/, fn ->
-      apply(Helper, :"property cant_generate", [[]])
+      Helper."property cant_generate"([])
     end
 
     # Run a second time to ensure that no counterexample was stored.
     assert_raise ExUnit.AssertionError, ~r/cant_generate/, fn ->
-      apply(Helper, :"property cant_generate", [[]])
+      Helper."property cant_generate"([])
     end
   end
 end

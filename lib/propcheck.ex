@@ -1134,7 +1134,7 @@ defmodule PropCheck do
   each `collect` wrapper are printed separately.
   """
   @spec collect(test, any) :: test
-  def collect(property, category), do: collect(property, with_title(''), category)
+  def collect(property, category), do: collect(property, with_title(~c""), category)
 
   @doc """
   Same as `collect/2`, but also accepts a fun `printer` to be used
@@ -1149,7 +1149,7 @@ defmodule PropCheck do
   """
   @spec aggregate(test, sample) :: test
   def aggregate(property, sample) do
-    aggregate(property, with_title(''), sample)
+    aggregate(property, with_title(~c""), sample)
   end
 
   @doc """
