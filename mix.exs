@@ -13,6 +13,7 @@ defmodule PropCheck.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env()),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
+      test_coverage: [threshold: 0.58],
       package: package(),
       name: "PropCheck",
       homepage_url: @source_url,
