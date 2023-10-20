@@ -29,7 +29,7 @@ defmodule PropCheck.Mixfile do
       aliases: aliases(),
       preferred_cli_env: [
         tests: :test,
-        test_ext: :test,
+        external_tests: :test,
         parallel_test: :test,
         test_parallel: :test
       ],
@@ -72,10 +72,10 @@ defmodule PropCheck.Mixfile do
   def aliases do
     [
       clean: ["clean", "propcheck.clean"],
-      test_ext: &external_tests/1,
+      external_tests: &external_tests/1,
       parallel_test: ["test --include concurrency_test --only concurrency_test"],
       test_parallel: ["test --include concurrency_test --only concurrency_test"],
-      tests: ["test_ext", "test"],
+      tests: [&loglevel/1, "external_tests", "test"],
       lint: [
         "credo --strict",
         "hex.audit"
@@ -90,6 +90,11 @@ defmodule PropCheck.Mixfile do
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.21", only: :dev}
     ]
+  end
+
+  defp loglevel(_args) do
+    log_level = System.get_env("LOG_LEVEL", "info") |> String.to_atom()
+    Logger.configure(level: log_level)
   end
 
   defp external_tests(_args) do
