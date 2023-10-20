@@ -86,7 +86,6 @@ defmodule PropCheck.Mixfile do
     [
       {:proper, github: "proper-testing/proper", ref: "a5ae5669f01143b0828fc21667d4f5e344aa760b"},
       {:libgraph, "~> 0.13"},
-      {:coverex, "~> 1.4", only: :test},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.21", only: :dev}
     ]
