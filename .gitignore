@@ -7,3 +7,4 @@ erl_crash.dump
 counterexamples.dets
 /.elixir_ls
 .tool-versions
+.vscode/settings.json
