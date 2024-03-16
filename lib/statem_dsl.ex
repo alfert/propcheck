@@ -11,11 +11,11 @@ defmodule PropCheck.StateM.DSL do
   based testing. Instead of testing operations and their effects on the
   data structure directly, we construct a model of the system and generate a sequence
   of commands operating on both, the model and the system. Then we check that
-  after each command step, the system has evolved accordingly to the model.
+  after each command step, the system has evolved according to the model.
   This is the same idea which is used in model checking and is sometimes called
   a bisimulation.
 
-  After defining a model, we have two phases during executing the property.
+  After defining a model, we have two phases during property execution.
   In phase 1, the generators create a list of
   (symbolic) commands including their parameters to be run against the system under test
   (SUT). A state machine guides the generation of commands.
@@ -28,7 +28,7 @@ defmodule PropCheck.StateM.DSL do
   This approach works exactly the same as with `PropCheck.StateM` and
   `PropCheck.FSM`. The main difference is the API, grouping pre- and postconditions,
   state transitions, and argument generators around the commands of the SUT. This
-  leads towards more logical locality compared to the former implementations.
+  leads towards a more logical locality compared to the former implementations.
   QuickCheck EQC has a similar approach for structuring their modern state machines.
 
   ## The DSL
