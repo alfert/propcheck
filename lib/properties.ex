@@ -114,7 +114,16 @@ defmodule PropCheck.Properties do
 
       # @tag failing_prop: tag_property({module, prop_name, []})
       tags = [[failing_prop: tag_property({module, name, []})]]
-      prop_name = ExUnit.Case.register_test(__ENV__, :property, name, tags)
+
+      prop_name =
+        ExUnit.Case.register_test(
+          __ENV__.module,
+          __ENV__.file,
+          __ENV__.line,
+          :property,
+          name,
+          tags
+        )
 
       def unquote(prop_name)(unquote(var)) do
         {:ok, output_agent} = PropCheck.OutputAgent.start_link()
@@ -367,7 +376,15 @@ defmodule PropCheck.Properties do
   """
   defmacro property(message) do
     quote bind_quoted: [message: message] do
-      prop_name = ExUnit.Case.register_test(__ENV__, :property, message, [:not_implemented])
+      prop_name =
+        ExUnit.Case.register_test(
+          __ENV__.module,
+          __ENV__.file,
+          __ENV__.line,
+          :property,
+          message,
+          [:not_implemented]
+        )
 
       def unquote(prop_name)(_) do
         flunk("Not implemented")
