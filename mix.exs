@@ -3,7 +3,7 @@ defmodule PropCheck.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/alfert/propcheck"
-  @version "1.4.3-dev"
+  @version "1.4.2-dev"
 
   def project do
     [
@@ -84,7 +84,7 @@ defmodule PropCheck.Mixfile do
 
   defp deps do
     [
-      {:proper, github: "proper-testing/proper", ref: "a5ae5669f01143b0828fc21667d4f5e344aa760b"},
+      {:proper, "~> 1.4"},
       {:libgraph, "~> 0.13"},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.21", only: :dev}
