@@ -87,7 +87,7 @@ defmodule PropCheck.Mixfile do
       {:proper, "~> 1.5"},
       {:libgraph, "~> 0.13"},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.21", only: :dev}
+      {:ex_doc, "~> 0.37", only: :dev}
     ]
   end
 
