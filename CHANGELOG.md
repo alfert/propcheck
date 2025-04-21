@@ -2,6 +2,14 @@
 
 ## Current Development
 
+* Documentation and tiny fixes
+
+## 1.5.0
+
+* Support for PropEr 1.5
+* Support for Elixir 1.18 and Erlang 27
+* Documentation fixes
+
 ## 1.4.2
 
 * Eliminate warnings on dependencies. Thanks to <https://github.com/iToXiQ>
