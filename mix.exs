@@ -49,7 +49,7 @@ defmodule PropCheck.Mixfile do
   defp package do
     [
       maintainers: ["Klaus Alfert", "evnu"],
-      licenses: ["GPL 3.0"],
+      licenses: ["GPL-3.0-or-later"],
       links: %{"GitHub" => @source_url}
     ]
   end
