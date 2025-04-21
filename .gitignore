@@ -8,3 +8,5 @@ counterexamples.dets
 /.elixir_ls
 .tool-versions
 .vscode/settings.json
+.clj-kondo/
+.lsp/

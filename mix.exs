@@ -48,7 +48,7 @@ defmodule PropCheck.Mixfile do
   # Hex Package definition
   defp package do
     [
-      maintainers: ["Klaus Alfert"],
+      maintainers: ["Klaus Alfert", "evnu"],
       licenses: ["GPL 3.0"],
       links: %{"GitHub" => @source_url}
     ]
