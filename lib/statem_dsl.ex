@@ -260,7 +260,7 @@ defmodule PropCheck.StateM.DSL do
 
   @doc """
   _DEPRECATED_ : This module is deprecated, please use
-  `PropCheck.Statem.ModelDSL` instead.
+  `PropCheck.StateM.ModelDSL` instead.
 
   The optional weights for the command generation. It takes the current
   model state and returns a map of command/weight pairs. Commands,
@@ -291,7 +291,7 @@ defmodule PropCheck.StateM.DSL do
   @deprecated "This module is deprecated, use `PropCheck.StateM.ModelDSL` instead!"
   @doc """
   _DEPRECATED_ : This module is deprecated, please use
-  `PropCheck.Statem.ModelDSL` instead.
+  `PropCheck.StateM.ModelDSL` instead.
 
   Defines a new command of the model.
 
