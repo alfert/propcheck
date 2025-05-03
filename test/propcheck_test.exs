@@ -77,6 +77,36 @@ defmodule PropcheckTest do
              end) =~ "Expected truthy, got false"
     end
 
+    test "can use truthy assertion in forall" do
+      # Assert atom value
+      assert quickcheck(
+               forall x <- :ok do
+                 assert x
+               end
+             )
+
+      # Assert map value
+      assert quickcheck(
+               forall x <- %{a: 1} do
+                 assert x
+               end
+             )
+
+      # Assert list value
+      assert quickcheck(
+               forall x <- [1, 2] do
+                 assert x
+               end
+             )
+
+      # Assert map value pattern matching
+      assert quickcheck(
+               forall x <- %{a: 1, b: 2} do
+                 assert %{a: 1} = x
+               end
+             )
+    end
+
     property "can use let-like assignment in forall" do
       forall [
         m <- integer(),
