@@ -115,18 +115,18 @@ defmodule PropCheck.Test.PingPongStateM do
   the value of before the call, `value` is the return value of the `call`, such
   that the new state can depend on the old state and the returned value.
   """
-  def next_state(s, _value, {:call, PingPongMaster, :add_player, [name]}) do
+  def next_state(%__MODULE__{} = s, _value, {:call, PingPongMaster, :add_player, [name]}) do
     case s.players |> Enum.member?(name) do
       false -> %__MODULE__{s | players: [name | s.players], scores: s.scores |> Map.put(name, 0)}
       true -> s
     end
   end
 
-  def next_state(s, _value, {:call, PingPongMaster, :remove_player, [name]}) do
+  def next_state(%__MODULE__{} = s, _value, {:call, PingPongMaster, :remove_player, [name]}) do
     %__MODULE__{s | players: s.players |> List.delete(name), scores: s.scores |> Map.delete(name)}
   end
 
-  def next_state(s, _value, {:call, PingPongMaster, :play_ping_pong, [name]}) do
+  def next_state(%__MODULE__{} = s, _value, {:call, PingPongMaster, :play_ping_pong, [name]}) do
     %__MODULE__{s | scores: s.scores |> Map.update!(name, &(&1 + 1))}
   end
 

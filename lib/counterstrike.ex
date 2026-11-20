@@ -12,7 +12,6 @@ defmodule PropCheck.CounterStrike do
   @moduledoc false
 
   use GenServer
-  require Logger
 
   defstruct counter_examples: %{}, dets: nil
 

@@ -7,8 +7,6 @@ defmodule PropCheck.Test.TargetPathTest do
   use ExUnit.Case, async: true
   import PropCheck.TestHelpers, except: [config: 0]
 
-  require Logger
-
   def path, do: list(oneof([:left, :right, :up, :down]))
 
   def move(:left, {x, y}), do: {x - 1, y}

@@ -334,7 +334,6 @@ defmodule PropCheck.StateM do
   def more_commands(n, cmd_type) do
     import PropCheck.Logger, only: [log_debug: 1]
     require PropCheck
-    require PropCheck.BasicTypes
 
     log_debug(fn -> "cmd_type = #{inspect(cmd_type)}" end)
     PropCheck.sized(size, PropCheck.BasicTypes.resize(size * n, cmd_type))

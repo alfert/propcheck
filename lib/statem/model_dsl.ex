@@ -423,7 +423,6 @@ defmodule PropCheck.StateM.ModelDSL do
   """
   def more_commands(n, cmd_type) do
     require PropCheck
-    require PropCheck.BasicTypes
 
     PropCheck.sized(size, PropCheck.BasicTypes.resize(size * n, cmd_type))
   end

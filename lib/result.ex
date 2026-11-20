@@ -32,7 +32,7 @@ defmodule PropCheck.Result do
   end
 
   @spec handle_call({:message, any, any}, {pid, any}, t) :: {:reply, :ok, t}
-  def handle_call({:message, fmt, args}, _from, state) do
+  def handle_call({:message, fmt, args}, _from, %__MODULE__{} = state) do
     state =
       cond do
         :lists.prefix(~c"Error", fmt) ->

@@ -12,8 +12,6 @@ defmodule PropCheck.Test.Cache.DSL.Parallel do
   alias PropCheck.Test.Cache
   alias PropCheck.YieldInstrumenter
 
-  require Logger
-
   @cache_size 10
 
   setup_all do
