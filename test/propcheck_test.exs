@@ -6,7 +6,6 @@ defmodule PropcheckTest do
   use PropCheck, default_opts: &PropCheck.TestHelpers.config/0
 
   import ExUnit.CaptureIO
-  require Logger
 
   doctest(PropCheck)
   doctest(PropCheck.StateM)

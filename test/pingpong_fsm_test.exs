@@ -106,7 +106,13 @@ defmodule PropCheck.Test.PingPongFSM do
   def postcondition(_from, _target, _state, {:call, _m, _f, _a}, _res), do: false
 
   # state data is updates for adding, removing, playing.
-  def next_state_data(_from, :player_state, state, _res, {:call, _m, :add_player, [p]}) do
+  def next_state_data(
+        _from,
+        :player_state,
+        %__MODULE__{} = state,
+        _res,
+        {:call, _m, :add_player, [p]}
+      ) do
     if Enum.member?(state.players, p) do
       state
     else
@@ -114,7 +120,13 @@ defmodule PropCheck.Test.PingPongFSM do
     end
   end
 
-  def next_state_data(:player_state, _target, state, _res, {:call, _, :remove_player, [p]}) do
+  def next_state_data(
+        :player_state,
+        _target,
+        %__MODULE__{} = state,
+        _res,
+        {:call, _, :remove_player, [p]}
+      ) do
     if Enum.member?(state.players, p) do
       %__MODULE__{
         state
@@ -126,7 +138,13 @@ defmodule PropCheck.Test.PingPongFSM do
     end
   end
 
-  def next_state_data(:player_state, _target, state, _res, {:call, _, :play_ping_pong, [p]}) do
+  def next_state_data(
+        :player_state,
+        _target,
+        %__MODULE__{} = state,
+        _res,
+        {:call, _, :play_ping_pong, [p]}
+      ) do
     if Enum.member?(state.players, p) do
       %__MODULE__{state | scores: Map.update!(state.scores, p, fn v -> v + 1 end)}
     else

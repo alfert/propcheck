@@ -6,8 +6,6 @@ defmodule PropCheck.Test.PrettyReportsDSL do
   use PropCheck.StateM.ModelDSL
   use ExUnit.Case
 
-  require Logger
-
   import ExUnit.CaptureIO
 
   describe "print out on command crash" do

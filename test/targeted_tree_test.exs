@@ -7,8 +7,6 @@ defmodule PropCheck.Test.TargetTreeTest do
   use ExUnit.Case, async: true
   import PropCheck.TestHelpers, except: [config: 0]
 
-  require Logger
-
   @doc "Make a tree from a list"
   def to_tree(l), do: Enum.reduce(l, :undefined, &insert/2)
 

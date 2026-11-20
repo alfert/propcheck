@@ -6,8 +6,6 @@ defmodule PropCheck.Test.LevelTest do
   use ExUnit.Case, async: true
   import PropCheck.TestHelpers, except: [config: 0]
 
-  require Logger
-
   alias PropCheck.Test.Level
   # alias PropCheck.TargetedPBT
 

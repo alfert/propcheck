@@ -27,13 +27,18 @@ defmodule PropCheck.Mixfile do
       description: description(),
       propcheck: [counter_examples: "_build/propcheck.ctx"],
       aliases: aliases(),
-      preferred_cli_env: [
+      deps: deps()
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
         tests: :test,
         external_tests: :test,
         parallel_test: :test,
         test_parallel: :test
-      ],
-      deps: deps()
+      ]
     ]
   end
 
